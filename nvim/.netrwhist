@@ -1,0 +1,11 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =9
+let g:netrw_dirhist_1='/mnt/DATOS/hab/twoller/twoller-janus/config/aws'
+let g:netrw_dirhist_2='/mnt/DATOS/hab/twoller/twoller-zeus'
+let g:netrw_dirhist_3='/mnt/DATOS/hab/twoller/twoller-zeus/src'
+let g:netrw_dirhist_4='/mnt/DATOS/hab/twoller/twoller-zeus/src/graphql'
+let g:netrw_dirhist_5='/mnt/DATOS/hab/twoller/twoller-zeus'
+let g:netrw_dirhist_6='/mnt/DATOS/hab/twoller/twoller-zeus/src'
+let g:netrw_dirhist_7='/mnt/DATOS/hab/twoller/twoller-zeus/src/api'
+let g:netrw_dirhist_8='/mnt/DATOS/hab/twoller/twoller-zeus/src/api/Offer'
+let g:netrw_dirhist_9='/mnt/DATOS/hab/twoller/twoller-zeus/src/api/MatchUser'
