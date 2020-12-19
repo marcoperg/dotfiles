@@ -12,6 +12,10 @@ CASE_SENSITIVE="true"
 
 # ENABLE_CORRECTION="true"
 
+# https://github.com/nvbn/thefuck
+# pip3 install thefuck
+eval $(thefuck --alias)
+
 plugins=(
     git
     zsh-navigation-tools
@@ -20,23 +24,23 @@ plugins=(
 source $ZSH/oh-my-zsh.sh
 
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+# alias zshconfig="mate /home/hipnius/.zshrc"
+# alias ohmyzsh="mate /home/hipnius/.oh-my-zsh"
 
-source ~/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /home/hipnius/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f /home/hipnius/.fzf.zsh ] && source ~/.fzf.zsh
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('~/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/home/hipnius/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "~/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "~/anaconda3/etc/profile.d/conda.sh"
+    if [ -f "/home/hipnius/anaconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/hipnius/anaconda3/etc/profile.d/conda.sh"
     else
-        export PATH="~/anaconda3/bin:$PATH"
+        export PATH="/home/hipnius/anaconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup
