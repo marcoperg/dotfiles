@@ -47,4 +47,6 @@ unset __conda_setup
 # pip3 install thefuck
 eval $(thefuck --alias)
 
-export LD_LIBRARY_PATH=/usr/local/cuda-10.1/lib64:/usr/local/TensorRT-6.0.1.5/lib:/usr/local/cuda-10.1/extras/CUPTI/lib64
+export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64:/usr/local/TensorRT-6.0.1.5/lib:/usr/local/cuda-11.2/extras/CUPTI/lib64
+export PATH=$PATH:/usr/local/go/bin
+fpath+=${ZDOTDIR:-~}/.zsh_functions
