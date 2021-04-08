@@ -50,3 +50,8 @@ eval $(thefuck --alias)
 export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64:/usr/local/TensorRT-6.0.1.5/lib:/usr/local/cuda-11.2/extras/CUPTI/lib64
 export PATH=$PATH:/usr/local/go/bin
 fpath+=${ZDOTDIR:-~}/.zsh_functions
+
+# Autostart tmux
+if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+    tmux attach -t default || tmux new -s default
+fi

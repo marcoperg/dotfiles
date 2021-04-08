@@ -1,9 +1,9 @@
-[submodule "nvim/bundle/Vundle.vim"]
-	path = nvim/bundle/Vundle.vim
+[submodule "dotfiles/nvim/bundle/Vundle.vim"]
+	path = dotfiles/nvim/bundle/Vundle.vim
 	url = https://github.com/VundleVim/Vundle.vim
-[submodule "nvim/pack/tpope/start/commentary"]
-	path = nvim/pack/tpope/start/commentary
+[submodule "dotfiles/nvim/pack/tpope/start/commentary"]
+	path = dotfiles/nvim/pack/tpope/start/commentary
 	url = https://github.com/tpope/vim-commentary
-[submodule "nvim/pack/tpope/start/surround"]
-	path = nvim/pack/tpope/start/surround
+[submodule "dotfiles/nvim/pack/tpope/start/surround"]
+	path = dotfiles/nvim/pack/tpope/start/surround
 	url = https://github.com/tpope/vim-surround
