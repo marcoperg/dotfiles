@@ -9,6 +9,7 @@ set rtp+=~/.config/nvim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'christoomey/vim-system-copy'
 Plugin 'sheerun/vim-polyglot'
+Plugin 'tomlion/vim-solidity'
 call vundle#end()
 
 " Installed plugins:
