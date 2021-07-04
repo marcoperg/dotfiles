@@ -31,7 +31,7 @@ backup_dotfile() {
 }
 
 symlink_dotfile() {
-	if [[ $DOTFILEDIR/$1 == *"nvim"* ]]; then
+	if [[ $DOTFILEDIR/$1 == *"nvim"* ]] | [[ $DOTFILEDIR/$1 == *"i3"* ]]; then
 		ln -s $DOTFILEDIR/$1 $HOMEDIR/.config/$1
 	else
 		ln -s $DOTFILEDIR/$1 $HOMEDIR/$1
