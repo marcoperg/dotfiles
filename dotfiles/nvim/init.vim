@@ -10,11 +10,13 @@ call vundle#begin()
 Plugin 'christoomey/vim-system-copy'
 Plugin 'sheerun/vim-polyglot'
 Plugin 'tomlion/vim-solidity'
+Plugin 'mxw/vim-jsx'
+Plugin 'hail2u/vim-css3-syntax'
 call vundle#end()
 
 " Spell check
 set spelllang=es,en
-set spell
+" set spell
 
 " Installed plugins:
 "

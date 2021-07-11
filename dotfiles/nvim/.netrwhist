@@ -1,4 +1,5 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =2
+let g:netrw_dirhist_cnt =3
 let g:netrw_dirhist_1='/home/hipnius/work/proyectos/experiencias/repo/repositories/experience_Repositories'
 let g:netrw_dirhist_2='/home/hipnius/work/proyectos/experiencias/repo/repositories/experience_city_Repositories'
+let g:netrw_dirhist_3='/home/hipnius/work/jobs-front/utils'
