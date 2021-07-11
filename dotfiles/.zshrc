@@ -53,6 +53,6 @@ export PATH=$PATH:/usr/local/go/bin
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
 # Autostart tmux
-if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
-    tmux attach -t default || tmux new -s default
-fi
+# if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+#     tmux attach -t default || tmux new -s default
+# fi
