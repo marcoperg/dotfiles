@@ -155,7 +155,7 @@ bindsym $mod+m move workspace to output right
 bindsym $mod+n move workspace to output left
 
 # i3lock
-bindsym $mod+Shift+x exec i3lock --color=1d1f21
+bindsym $mod+Shift+x exec i3lock --color=1d1f21 & systemctl suspend
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
@@ -196,3 +196,6 @@ bindsym $mod+r mode "resize"
 bar {
         status_command i3status
 }
+
+# Caroline's default video settings
+exec xrandr --output DVI-D-1 --auto --output DP-1 --left-of DVI-D-0 --auto --output HDMI-0 --right-of DVI-D-0 --auto --rotate left
