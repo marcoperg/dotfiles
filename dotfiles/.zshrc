@@ -1,3 +1,5 @@
+export VISUAL=nvim
+export EDITOR="$VISUAL"
 export ZSH=$HOME/.oh-my-zsh
 
 ZSH_THEME="bira"
@@ -29,7 +31,7 @@ source $HOME/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('$HOME/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$($HOME'/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
@@ -40,16 +42,12 @@ else
     fi
 fi
 unset __conda_setup
-conda activate base
 # <<< conda initialize <<<
 
 
 # https://github.com/nvbn/thefuck
 # pip3 install thefuck
 eval $(thefuck --alias)
-
-export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64:/usr/local/TensorRT-6.0.1.5/lib:/usr/local/cuda-11.2/extras/CUPTI/lib64
-export PATH=$PATH:/usr/local/go/bin
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
 # Autostart tmux
