@@ -1,6 +1,8 @@
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 export ZSH=$HOME/.oh-my-zsh
+# Ensure xterm on ssh
+alias ssh="TERM=xterm-256color ssh"
 
 ZSH_THEME="bira"
 POWERLEVEL9K_MODE="nerdfont-complete"
