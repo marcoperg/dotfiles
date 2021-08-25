@@ -4,6 +4,9 @@ export ZSH=$HOME/.oh-my-zsh
 # Ensure xterm on ssh
 alias ssh="TERM=xterm-256color ssh"
 
+# usermount alias
+alias usermount="mount -o gid=$USER,fmask=113,dmask=002"
+
 ZSH_THEME="bira"
 POWERLEVEL9K_MODE="nerdfont-complete"
 
