@@ -205,4 +205,4 @@ bar {
 exec xrandr --output DVI-D-1 --auto --output DP-1 --left-of DVI-D-0 --auto --output HDMI-0 --right-of DVI-D-0 --auto --rotate left
 
 exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=secrets
-
+exec setxkbmap -option compose:caps
