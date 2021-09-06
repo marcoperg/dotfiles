@@ -157,6 +157,7 @@ bindsym $mod+n move workspace to output left
 
 # i3lock
 bindsym $mod+Shift+x exec i3lock --color=1d1f21 & systemctl suspend
+bindsym $mod+x exec i3lock --color=1d1f21
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
