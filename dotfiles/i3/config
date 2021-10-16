@@ -158,6 +158,9 @@ bindsym $mod+n move workspace to output left
 # i3lock
 bindsym $mod+Shift+x exec i3lock --color=1d1f21 & systemctl suspend
 
+# browser
+bindsym $mod+Shift+b exec google-chrome-stable
+
 # reload the configuration file
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
