@@ -157,6 +157,7 @@ bindsym $mod+n move workspace to output left
 
 # i3lock
 bindsym $mod+Shift+x exec i3lock --color=1d1f21 & systemctl suspend
+bindsym $mod+x exec i3lock --color=1d1f21
 
 # browser
 bindsym $mod+Shift+b exec google-chrome-stable
@@ -208,4 +209,4 @@ bar {
 exec xrandr --output DVI-D-1 --auto --output DP-1 --left-of DVI-D-0 --auto --output HDMI-0 --right-of DVI-D-0 --auto --rotate left
 
 exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=secrets
-
+exec setxkbmap -option compose:caps
