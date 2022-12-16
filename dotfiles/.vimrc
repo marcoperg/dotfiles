@@ -13,4 +13,4 @@ set spelllang=es,en
 set showcmd
 set bg=dark
 autocmd FileType haskell setlocal expandtab
-autocmd FileType python setlocal expandtab
+" autocmd FileType python setlocal expandtab
