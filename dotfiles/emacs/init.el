@@ -80,22 +80,11 @@
              TeX-command-list)))
 
 
-;; PDF
-(pdf-tools-install)
-(add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
-(setq-default display-line-numbers-type 'relative)
-
-(customize-set-variable 'tramp-default-method "ssh")
-
-(with-eval-after-load 'doc-view
-  (define-key doc-view-mode-map (kbd "C-c p") 'doc-view-fit-page-to-window))
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(initial-buffer-choice t)
  '(package-selected-packages
    '(auctex evil evil-collection eww-lnum haskell-mode languagetool
 	    org-roam org-side-tree pdf-tools undo-fu
@@ -106,6 +95,18 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(setq initial-buffer-choice (lambda () (dired "~/docs/")))
+
+;; PDF
+(pdf-tools-install)
+(add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+(setq-default display-line-numbers-type 'relative)
+
+(customize-set-variable 'tramp-default-method "ssh")
+
+(with-eval-after-load 'doc-view
+  (define-key doc-view-mode-map (kbd "C-c p") 'doc-view-fit-page-to-window))
 
 (defun my/pdf-view-disable-cursor ()
   "Disable the cursor in pdf-view-mode, even with evil-mode."
