@@ -52,25 +52,27 @@ flycheck_*.el
 /network-security.data
 
 # Package files
-elpa/
+dotfiles/emacs/elpa/
 
 # Auto-save and backup
-auto-save-list/
+dotfiles/emacs/auto-save-list/
 *~
+dotfiles/emacs/backups/
 
 # Eshell and TRAMP state
-eshell/
-tramp/
+dotfiles/emacs/eshell/
+dotfiles/emacs/tramp/
 
 # Bookmarks and transient data
-bookmarks/
-transient/
+dotfiles/emacs/bookmarks/
+dotfiles/emacs/transient/
+dotfiles/emacs/projects
 
 # Org-roam database
 org-roam.db
 
 # URL cache
-url/
+dotfiles/emacs/url/
 
 # Compiled files
 *.elc
