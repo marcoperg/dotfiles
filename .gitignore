@@ -51,6 +51,30 @@ flycheck_*.el
 # network security
 /network-security.data
 
+# Package files
+elpa/
+
+# Auto-save and backup
+auto-save-list/
+*~
+
+# Eshell and TRAMP state
+eshell/
+tramp/
+
+# Bookmarks and transient data
+bookmarks/
+transient/
+
+# Org-roam database
+org-roam.db
+
+# URL cache
+url/
+
+# Compiled files
+*.elc
+
 
 ### macOS ###
 # General
