@@ -9,12 +9,13 @@
 (add-to-list 'exec-path "/opt/homebrew/bin")
 
 (global-display-line-numbers-mode)
+(setq-default display-line-numbers-type 'relative)
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 
 
 ; Open files
-(defun open-marked-file ()
+(defun my/open-marked-file ()
   "Open the file whose path is currently marked (selected) in the buffer."
   (interactive)
   (if (use-region-p)
@@ -25,7 +26,7 @@
           (message "File does not exist: %s" filename)))
     (message "No region selected")))
 
-(global-set-key (kbd "C-c o") #'open-marked-file)
+(global-set-key (kbd "C-c o") #'my/open-marked-file)
 
 
 ;; TeX (https://chatgpt.com/share/682a517f-6cb8-8002-be7a-a0d9f44ae0fe)
@@ -86,8 +87,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(auctex evil evil-collection eww-lnum haskell-mode languagetool
-	    org-roam org-side-tree pdf-tools undo-fu
+   '(auctex evil evil-collection eww-lnum haskell-mode languagetool magit
+	    markdown-mode org-roam org-side-tree pdf-tools undo-fu
 	    visual-fill-column)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -101,7 +102,6 @@
 ;; PDF
 (pdf-tools-install)
 (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
-(setq-default display-line-numbers-type 'relative)
 
 (customize-set-variable 'tramp-default-method "ssh")
 
@@ -297,11 +297,6 @@
           ;; Delete .tex file
           (when (file-exists-p tex-file)
             (delete-file tex-file))
-          ;; Open PDF unless already open
-	  (let ((buf (get-file-buffer target-file)))
-            (if buf
-                (display-buffer buf '(display-buffer-pop-up-window))
-              (find-file-other-window target-file)))
           (message "PDF exported to: %s" target-file))))))
 
 (define-key org-mode-map (kbd "C-c C-v") #'my/org-export-to-pdf-in-dotpdfs)
@@ -382,10 +377,13 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
     (find-file week-file)))
 
 (with-eval-after-load 'dired
-  (define-key dired-mode-map (kbd "C-c w") #'open-or-create-current-weekly-note))
-
-(with-eval-after-load 'dired
+  (define-key dired-mode-map (kbd "C-c w") #'open-or-create-current-weekly-note)
   (define-key dired-mode-map (kbd "C-c c") #'org-capture))
+
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c w") #'open-or-create-current-weekly-note)
+  (define-key org-mode-map (kbd "C-c c") #'org-capture))
+
 
 
 ; LPTP
@@ -412,11 +410,6 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 ; CIAO
 
-; @begin(46524728)@ - Do not edit these lines - added automatically!
-(if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el")
-  (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el"))
-; @end(46524727)@ - End of automatically added lines.
-
 (if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_lptp/etc/ciao-lptp.el")
   (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_lptp/etc/ciao-lptp.el"))
 
@@ -424,3 +417,5 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el")
   (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el"))
 ; @end(53614285)@ - End of automatically added lines.
+
+(global-display-line-numbers-mode)
