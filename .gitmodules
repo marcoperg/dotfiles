@@ -7,3 +7,6 @@
 [submodule "dotfiles/nvim/pack/tpope/start/surround"]
 	path = dotfiles/nvim/pack/tpope/start/surround
 	url = https://github.com/tpope/vim-surround
+[submodule "dotfiles/emacs/lean4-mode"]
+	path = dotfiles/emacs/lean4-mode
+	url = https://github.com/leanprover-community/lean4-mode
