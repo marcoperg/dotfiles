@@ -3,9 +3,9 @@
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
 (("org-capture-last-stored"
- (filename . "~/fun/ontology/math/Functional Analysis/Uniform boundedness principle.org")
- (front-context-string . "\n\n\n* Particular ")
- (rear-context-string . "Y)} < \\infty.$$\n")
- (position . 494)
- (last-modified 26929 41029 150139 0))
+ (filename . "~/fun/ontology/math/Functional Analysis/Important theorems/Open mapping principle.org")
+ (front-context-string)
+ (rear-context-string . "pping principle\n")
+ (position . 100)
+ (last-modified 26941 44035 999325 0))
 )

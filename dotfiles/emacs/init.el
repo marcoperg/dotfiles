@@ -86,10 +86,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(initial-buffer-choice t)
  '(package-selected-packages
    '(auctex evil evil-collection eww-lnum haskell-mode languagetool magit
 	    markdown-mode org-roam org-side-tree pdf-tools undo-fu
-	    visual-fill-column)))
+	    visual-fill-column lsp-mode dash)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -97,7 +98,9 @@
  ;; If there is more than one, they won't work right.
  )
 
-(setq initial-buffer-choice (lambda () (dired "~/docs/")))
+; (setq initial-buffer-choice (lambda () (dired "~/docs/")))
+(when (string= system-type "darwin")
+  (setq dired-use-ls-dired nil))
 
 ;; PDF
 (pdf-tools-install)
@@ -403,10 +406,25 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
         languagetool-server-command "/opt/homebrew/Cellar/languagetool/6.6/libexec/languagetool-server.jar")
 
 
-; Format of langauges
+; LANGUAGES
+
+; Javascript
 (add-hook 'js-mode-hook
           (lambda ()
             (setq js-indent-level 2)))
+
+; Arabic
+(set-fontset-font t 'arabic "Noto Naskh Arabic")
+(setq bidi-paragraph-direction nil)
+(add-hook 'org-mode-hook
+  (lambda ()
+    (set-face-attribute 'org-table nil :inherit 'fixed-pitch)))
+
+; Lean
+(add-to-list 'load-path "~/.emacs.d/lean4-mode")
+(require 'lean4-mode)
+(add-hook 'lean-mode-hook 'lean-toggle-show-goal)
+
 
 ; CIAO
 
