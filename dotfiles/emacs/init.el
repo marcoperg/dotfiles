@@ -1,5 +1,6 @@
 (load-theme 'modus-vivendi)
 (global-visual-line-mode t)
+(global-auto-revert-mode t)
 
 ; Prefer vert split
 (setq split-height-threshold nil)  ; disable horizontal splitting
