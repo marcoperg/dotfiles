@@ -72,15 +72,13 @@
 
 (setq-default TeX-master #'my-TeX-master-from-documentclass)
 
-
 (setq TeX-command-default "LatexMk")
 (add-hook 'LaTeX-mode-hook
           (lambda ()
             (push
-             '("LatexMk" "latexmk -pdf -synctex=1 %s" TeX-run-TeX nil t
-               :help "Run LatexMk")
+             ;'("LatexMk" "latexmk -pdf -synctex=1 %s" TeX-run-TeX nil t :help "Run LatexMk")
+	     '("LatexMk" "latexmk -lualatex -synctex=1 %s" TeX-run-TeX nil t :help "Run LatexMk")
              TeX-command-list)))
-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -89,9 +87,10 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(auctex evil evil-collection eww-lnum haskell-mode languagetool magit
-	    markdown-mode org-roam org-side-tree pdf-tools undo-fu
-	    visual-fill-column lsp-mode dash)))
+   '(auctex dash evil evil-collection eww-lnum haskell-mode languagetool
+	    lsp-mode magit markdown-mode org-roam org-side-tree
+	    pdf-tools undo-fu visual-fill-column))
+ '(warning-suppress-log-types '((lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -102,6 +101,7 @@
 ; (setq initial-buffer-choice (lambda () (dired "~/docs/")))
 (when (string= system-type "darwin")
   (setq dired-use-ls-dired nil))
+
 
 ;; PDF
 (pdf-tools-install)
@@ -408,6 +408,13 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 
 ; LANGUAGES
+
+; ispell
+(with-eval-after-load 'ispell
+  (setq ispell-program-name "hunspell")
+  (setq ispell-dictionary "en_US,es_ES")
+  (ispell-set-spellchecker-params)
+  (ispell-hunspell-add-multi-dic "en_US,es_ES"))
 
 ; Javascript
 (add-hook 'js-mode-hook
