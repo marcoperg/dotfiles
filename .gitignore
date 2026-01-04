@@ -29,6 +29,9 @@ tramp
 # reftex files
 *.rel
 
+# Lean lsp things
+.lsp-session-v*
+
 # AUCTeX auto folder
 /auto/
 
