@@ -29,6 +29,12 @@
 
 (global-set-key (kbd "C-c o") #'my/open-marked-file)
 
+;; Dim other buffers
+;; See: https://github.com/mina86/auto-dim-other-buffers.el/blob/master/README.md
+(add-hook 'after-init-hook (lambda ()
+ (when (fboundp 'auto-dim-other-buffers-mode)
+   (auto-dim-other-buffers-mode t))))
+;; Also, customize
 
 ;; TeX (https://chatgpt.com/share/682a517f-6cb8-8002-be7a-a0d9f44ae0fe)
 (setq TeX-view-evince-keep-focus nil) ;; or whichever viewer you use
@@ -72,13 +78,27 @@
 
 (setq-default TeX-master #'my-TeX-master-from-documentclass)
 
-(setq TeX-command-default "LatexMk")
-(add-hook 'LaTeX-mode-hook
-          (lambda ()
-            (push
-             ;'("LatexMk" "latexmk -pdf -synctex=1 %s" TeX-run-TeX nil t :help "Run LatexMk")
-	     '("LatexMk" "latexmk -lualatex -synctex=1 %s" TeX-run-TeX nil t :help "Run LatexMk")
-             TeX-command-list)))
+(with-eval-after-load 'tex
+  ;; 1. Define the LatexMk command
+  (add-to-list 'TeX-command-list
+               '("LatexMk" 
+                 "latexmk -pdf -interaction=nonstopmode %t" 
+                 TeX-run-TeX 
+                 nil 
+                 t 
+                 :help "Run LatexMk") 
+               t)
+  
+  ;; ;; 2. FORCE LatexMk as the default
+  ;; ;;    AUCTeX normally tries to guess the next command. 
+  ;; ;;    This hook forces it to "LatexMk" every time.
+  ;; (add-hook 'TeX-mode-hook
+  ;;           (lambda () (setq TeX-command-default "LatexMk")))
+  
+  ;; ;; 3. Ensure this applies to derived modes (LaTeX-mode) as well
+  ;; (add-hook 'LaTeX-mode-hook
+  ;;           (lambda () (setq TeX-command-default "LatexMk"))))
+)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -87,9 +107,10 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(auctex dash evil evil-collection eww-lnum haskell-mode languagetool
-	    lsp-mode magit markdown-mode org-roam org-side-tree
-	    pdf-tools undo-fu visual-fill-column))
+   '(auctex auto-dim-other-buffers dash evil evil-collection eww-lnum
+	    haskell-mode languagetool lsp-mode magit markdown-mode
+	    org-roam org-side-tree pdf-tools undo-fu
+	    visual-fill-column))
  '(warning-suppress-log-types '((lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -140,7 +161,7 @@
 
 ; beamer mode
 
-(defun pdf-presentation-mode ()
+(defun my/pdf-presentation-mode ()
   "Open PDF in presentation mode: fullscreen, no mode-line or minibuffer."
   (interactive)
   (delete-other-windows)
@@ -150,7 +171,7 @@
   (setq mode-line-format nil)
   (redraw-display))
 
-(defun pdf-presentation-in-new-frame (file)
+(defun my/pdf-presentation-in-new-frame (file)
   "Open PDF FILE in a new fullscreen frame for presentation."
   (interactive "fPDF file: ")
   (let ((frame (make-frame '((name . "Presentation")
@@ -431,8 +452,8 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 ; Lean
 (add-to-list 'load-path "~/.emacs.d/lean4-mode")
 (require 'lean4-mode)
+(require 'lean4-input)
 (add-hook 'lean-mode-hook 'lean-toggle-show-goal)
-
 
 ; CIAO
 
@@ -445,3 +466,5 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 ; @end(53614285)@ - End of automatically added lines.
 
 (global-display-line-numbers-mode)
+
+
