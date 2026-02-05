@@ -82,7 +82,7 @@
   ;; 1. Define the LatexMk command
   (add-to-list 'TeX-command-list
                '("LatexMk" 
-                 "latexmk -pdf -interaction=nonstopmode %t" 
+                 "latexmk -lualatex -interaction=nonstopmode %t"
                  TeX-run-TeX 
                  nil 
                  t 
