@@ -455,6 +455,13 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (require 'lean4-input)
 (add-hook 'lean-mode-hook 'lean-toggle-show-goal)
 
+; Agda
+(load-file (let ((coding-system-for-read 'utf-8))
+                (shell-command-to-string "agda --emacs-mode locate")))
+(require 'agda-input)
+(add-hook 'LaTeX-mode-hook
+          (lambda () (set-input-method "Agda")))
+
 ; CIAO
 
 (if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_lptp/etc/ciao-lptp.el")
