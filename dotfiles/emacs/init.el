@@ -27,7 +27,7 @@
           (message "File does not exist: %s" filename)))
     (message "No region selected")))
 
-(global-set-key (kbd "C-c o") #'my/open-marked-file)
+(global-set-key (kbd "C-c C-o") #'my/open-marked-file)
 
 ;; Dim other buffers
 ;; See: https://github.com/mina86/auto-dim-other-buffers.el/blob/master/README.md
@@ -409,6 +409,20 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
   (define-key org-mode-map (kbd "C-c w") #'open-or-create-current-weekly-note)
   (define-key org-mode-map (kbd "C-c c") #'org-capture))
 
+; Dired Mode
+(defun my/dired-open-in-file-manager ()
+  "Open current directory in OS file manager."
+  (interactive)
+  (let ((dir (dired-current-directory)))
+    (cond
+     ((eq system-type 'darwin)
+      (start-process "file-manager" nil "open" dir))
+     ((eq system-type 'gnu/linux)
+      (start-process "file-manager" nil "xdg-open" dir))
+     (t (message "Unsupported system type")))))
+
+(with-eval-after-load 'dired
+  (define-key dired-mode-map (kbd "C-c o") #'my/dired-open-in-file-manager))
 
 
 ; LPTP
