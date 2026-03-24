@@ -14,6 +14,7 @@
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 
+(setq epa-pinentry-mode 'loopback)
 
 ; Open files
 (defun my/open-marked-file ()
@@ -408,6 +409,66 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c w") #'open-or-create-current-weekly-note)
   (define-key org-mode-map (kbd "C-c c") #'org-capture))
+
+; MAIL
+;; Add mu4e to your load path
+(add-to-list 'load-path "/opt/homebrew/share/emacs/site-lisp/mu/mu4e")
+(require 'mu4e)
+
+;; Base configuration
+(setq mu4e-maildir "~/Mail")
+(setq mu4e-get-mail-command "mbsync -a")
+(setq mu4e-update-interval (* 10 60)) ;; Sync every 10 minutes
+
+(setq message-send-mail-function 'smtpmail-send-it)
+
+(setq mu4e-contexts
+  (list
+   ;; Personal Account Context
+   (make-mu4e-context
+    :name "UPM"
+    :match-func (lambda (msg)
+                  (when msg (string-prefix-p "/UPM" (mu4e-message-field msg :maildir))))
+    :vars '((user-mail-address      . "marco.perez@alumnos.upm.es")
+            (user-full-name         . "Marco Pérez González")
+	    (mu4e-sent-folder       . "/UPM/Sent")
+            (mu4e-drafts-folder     . "/UPM/Drafts")
+            (mu4e-trash-folder      . "/UPM/Trash")
+            (smtpmail-smtp-server   . "smtp.upm.es")
+            (smtpmail-smtp-service  . 587)
+            (smtpmail-stream-type   . starttls)))
+
+   ;; Work Account Context
+   (make-mu4e-context
+    :name "IMDEA"
+    :match-func (lambda (msg)
+                  (when msg (string-prefix-p "/IMDEA" (mu4e-message-field msg :maildir))))
+    :vars '((user-mail-address      . "marco.perez@imdea.org")
+            (user-full-name         . "Marco Pérez González")
+	    (mu4e-sent-folder       . "/IMDEA/Sent")
+	    (mu4e-drafts-folder     . "/IMDEA/Drafts")
+            (mu4e-trash-folder      . "/IMDEA/Trash")
+            (smtpmail-smtp-server   . "mail.imdea.org")
+            (smtpmail-smtp-service  . 587)
+            (smtpmail-stream-type   . starttls)))))
+
+(setq auth-sources '("~/.authinfo.gpg"))
+
+
+;; Emacs will automatically look in ~/.authinfo.gpg for the SMTP passwords
+(setq message-send-mail-function 'smtpmail-send-it)
+;; Sending mail via SMTP
+(setq message-send-mail-function 'smtpmail-send-it
+      smtpmail-smtp-server "smtp.email.com"
+      smtpmail-smtp-service 587
+      smtpmail-stream-type 'starttls)
+
+;; Context Policies (Optional but recommended)
+;; 'pick-first' forces mu4e to default to UPM if no context matches
+(setq mu4e-context-policy 'pick-first) 
+;; 'ask' forces mu4e to prompt you for which account to use when writing a *new* email
+(setq mu4e-compose-context-policy 'ask) 
+
 
 ; Dired Mode
 (defun my/dired-open-in-file-manager ()
