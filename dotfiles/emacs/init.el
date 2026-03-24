@@ -109,7 +109,7 @@
  '(package-selected-packages
    '(auctex auto-dim-other-buffers dash evil evil-collection eww-lnum
 	    haskell-mode languagetool lsp-mode magit markdown-mode
-	    org-roam org-side-tree pdf-tools undo-fu
+	    org-roam org-side-tree outshine pdf-tools undo-fu
 	    visual-fill-column))
  '(warning-suppress-log-types '((lsp-mode))))
 (custom-set-faces
