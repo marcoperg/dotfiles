@@ -1,0 +1,46 @@
+# --- Account 1: UPM ---
+IMAPAccount upm
+Host correo.alumnos.upm.es
+User marco.perez
+PassCmd "gpg --no-tty -qd ~/.authinfo.gpg | awk '/machine correo.alumnos.upm.es/ {print $6; exit}' | tr -d '\"'"
+TLSType IMAPS
+
+IMAPStore upm-remote
+Account upm
+
+MaildirStore upm-local
+Path ~/Mail/UPM/
+Inbox ~/Mail/UPM/Inbox
+SubFolders Verbatim
+
+Channel upm
+Far :upm-remote:
+Near :upm-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+
+# --- Account 2: IMDEA ---
+IMAPAccount imdea
+Host mail.imdea.org
+User marco.perez@imdea.org
+PassCmd "gpg --no-tty -qd ~/.authinfo.gpg | awk '/machine mail.imdea.org/ {print $6; exit}' | tr -d '\"'"
+TLSType IMAPS
+
+IMAPStore imdea-remote
+Account imdea
+
+MaildirStore imdea-local
+Path ~/Mail/IMDEA/
+Inbox ~/Mail/IMDEA/Inbox
+SubFolders Verbatim
+
+Channel imdea
+Far :imdea-remote:
+Near :imdea-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+
