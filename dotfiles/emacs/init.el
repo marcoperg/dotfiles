@@ -419,6 +419,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (setq mu4e-maildir "~/Mail")
 (setq mu4e-get-mail-command "mbsync -a")
 (setq mu4e-update-interval (* 10 60)) ;; Sync every 10 minutes
+(setq mu4e-change-filenames-when-moving t)
 
 (setq message-send-mail-function 'smtpmail-send-it)
 
@@ -434,6 +435,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 	    (mu4e-sent-folder       . "/UPM/Sent")
             (mu4e-drafts-folder     . "/UPM/Drafts")
             (mu4e-trash-folder      . "/UPM/Trash")
+	    (mu4e-refile-folder     . "/UPM/Archive")
             (smtpmail-smtp-server   . "smtp.upm.es")
             (smtpmail-smtp-service  . 587)
             (smtpmail-stream-type   . starttls)))
@@ -448,6 +450,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 	    (mu4e-sent-folder       . "/IMDEA/Sent")
 	    (mu4e-drafts-folder     . "/IMDEA/Drafts")
             (mu4e-trash-folder      . "/IMDEA/Trash")
+	    (mu4e-refile-folder     . "/IMDEA/Archive")
             (smtpmail-smtp-server   . "mail.imdea.org")
             (smtpmail-smtp-service  . 587)
             (smtpmail-stream-type   . starttls)))))
