@@ -110,7 +110,7 @@
  '(package-selected-packages
    '(auctex auto-dim-other-buffers dash evil evil-collection eww-lnum
 	    haskell-mode languagetool lsp-mode magit markdown-mode
-	    org-roam org-side-tree outshine pdf-tools undo-fu
+	    org-roam org-side-tree outshine pdf-tools telega undo-fu
 	    visual-fill-column))
  '(warning-suppress-log-types '((lsp-mode))))
 (custom-set-faces
@@ -471,6 +471,9 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (setq mu4e-context-policy 'pick-first) 
 ;; 'ask' forces mu4e to prompt you for which account to use when writing a *new* email
 (setq mu4e-compose-context-policy 'ask) 
+
+; Telega
+(setq telega-server-libs-prefix "/opt/homebrew/Cellar/tdlib/HEAD-0ae923c")
 
 
 ; Dired Mode
