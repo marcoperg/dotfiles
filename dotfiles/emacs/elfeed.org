@@ -1,0 +1,9 @@
+* Imported Feeds            :elfeed:
+** AI
+*** [[https://karpathy.github.io/feed.xml][Andrej Karpathy blog]]
+** Math
+*** [[https://math.andrej.com/feed.xml][Andrej Bauer blog]]
+*** [[https://bartoszmilewski.com/feed][Bartosz Milewski's Programming Cafe]]
+*** [[https://golem.ph.utexas.edu/category/atom10.xml][The n-Category Café]]
+*** [[https://lawrencecpaulson.github.io/feed.xml][Lawrence C. Paulson blog]]
+** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]]

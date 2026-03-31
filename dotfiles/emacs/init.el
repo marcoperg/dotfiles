@@ -44,10 +44,10 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(auctex auto-dim-other-buffers dash elfeed evil evil-collection
-	    eww-lnum haskell-mode languagetool lsp-mode magit
-	    markdown-mode org-roam org-side-tree outshine pdf-tools
-	    telega undo-fu visual-fill-column))
+   '(auctex auto-dim-other-buffers dash elfeed elfeed-org evil
+	    evil-collection eww-lnum haskell-mode languagetool
+	    lsp-mode magit markdown-mode org-roam org-side-tree
+	    outshine pdf-tools telega undo-fu visual-fill-column))
  '(warning-suppress-log-types '((lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -61,6 +61,10 @@
   (setq dired-use-ls-dired nil))
 
 
+; === RSS FEED ===
+(setq rmh-elfeed-org-files
+      (list (expand-file-name "elfeed.org" user-emacs-directory)))
+(elfeed-org)
 
 ; === TeX MODE ===
 ;; TeX (https://chatgpt.com/share/682a517f-6cb8-8002-be7a-a0d9f44ae0fe)
