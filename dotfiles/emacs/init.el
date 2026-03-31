@@ -2,7 +2,8 @@
 (global-visual-line-mode t)
 (global-auto-revert-mode t)
 
-; Prefer vert split
+; === SOME GLOBAL PREFERENCES ===
+;; Prefer vert split
 (setq split-height-threshold nil)  ; disable horizontal splitting
 (setq split-width-threshold 0)     ; always prefer vertical splits
 
@@ -16,7 +17,7 @@
 
 (setq epa-pinentry-mode 'loopback)
 
-; Open files
+;; Open files
 (defun my/open-marked-file ()
   "Open the file whose path is currently marked (selected) in the buffer."
   (interactive)
@@ -35,8 +36,33 @@
 (add-hook 'after-init-hook (lambda ()
  (when (fboundp 'auto-dim-other-buffers-mode)
    (auto-dim-other-buffers-mode t))))
-;; Also, customize
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(initial-buffer-choice t)
+ '(package-selected-packages
+   '(auctex auto-dim-other-buffers dash elfeed evil evil-collection
+	    eww-lnum haskell-mode languagetool lsp-mode magit
+	    markdown-mode org-roam org-side-tree outshine pdf-tools
+	    telega undo-fu visual-fill-column))
+ '(warning-suppress-log-types '((lsp-mode))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+; (setq initial-buffer-choice (lambda () (dired "~/docs/")))
+(when (string= system-type "darwin")
+  (setq dired-use-ls-dired nil))
+
+
+
+; === TeX MODE ===
 ;; TeX (https://chatgpt.com/share/682a517f-6cb8-8002-be7a-a0d9f44ae0fe)
 (setq TeX-view-evince-keep-focus nil) ;; or whichever viewer you use
 ;(setq TeX-view-program-selection
@@ -101,31 +127,7 @@
   ;;           (lambda () (setq TeX-command-default "LatexMk"))))
 )
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(initial-buffer-choice t)
- '(package-selected-packages
-   '(auctex auto-dim-other-buffers dash evil evil-collection eww-lnum
-	    haskell-mode languagetool lsp-mode magit markdown-mode
-	    org-roam org-side-tree outshine pdf-tools telega undo-fu
-	    visual-fill-column))
- '(warning-suppress-log-types '((lsp-mode))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-; (setq initial-buffer-choice (lambda () (dired "~/docs/")))
-(when (string= system-type "darwin")
-  (setq dired-use-ls-dired nil))
-
-
-;; PDF
+; === PDF READER ===
 (pdf-tools-install)
 (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 
@@ -251,7 +253,7 @@
 	 (get-buffer-process (current-buffer))
 	 string))))
 
-; Org mode
+; === ORG MODE ===
 (setq visual-fill-column-width 100) ; Change to desired max width
 (setq visual-fill-column-center-text t)
 (defun my/org-maybe-disable-line-numbers ()
@@ -410,7 +412,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
   (define-key org-mode-map (kbd "C-c w") #'open-or-create-current-weekly-note)
   (define-key org-mode-map (kbd "C-c c") #'org-capture))
 
-; MAIL
+; === MAIL ===
 ;; Add mu4e to your load path
 (add-to-list 'load-path "/opt/homebrew/share/emacs/site-lisp/mu/mu4e")
 (require 'mu4e)
@@ -472,11 +474,10 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 ;; 'ask' forces mu4e to prompt you for which account to use when writing a *new* email
 (setq mu4e-compose-context-policy 'ask) 
 
-; Telega
+; Telega package
 (setq telega-server-libs-prefix "/opt/homebrew/Cellar/tdlib/HEAD-0ae923c")
 
-
-; Dired Mode
+; === DIRED MODE ===
 (defun my/dired-open-in-file-manager ()
   "Open current directory in OS file manager."
   (interactive)
@@ -491,7 +492,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (with-eval-after-load 'dired
   (define-key dired-mode-map (kbd "C-c o") #'my/dired-open-in-file-manager))
 
-
+; === WRITTING TOOLS ===
 ; LPTP
 (autoload 'lptp-mode "/Users/meu/fun/lptp/etc/lptp-mode" 
     "Major mode for editing formal proofs" t)
@@ -500,16 +501,6 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (transient-mark-mode 1)
 (add-hook 'lptp-mode #'display-line-numbers-mode)
 
-
-
-; Language Tool
-(setq languagetool-java-arguments '("-Dfile.encoding=UTF-8")
-        languagetool-console-command "/opt/homebrew/Cellar/languagetool/6.6/libexec/languagetool-commandline.jar"
-
-        languagetool-server-command "/opt/homebrew/Cellar/languagetool/6.6/libexec/languagetool-server.jar")
-
-
-; LANGUAGES
 
 ; ispell
 (with-eval-after-load 'ispell
@@ -554,5 +545,3 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 ; @end(53614285)@ - End of automatically added lines.
 
 (global-display-line-numbers-mode)
-
-
