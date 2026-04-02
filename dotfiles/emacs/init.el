@@ -44,11 +44,11 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(auctex auto-dim-other-buffers dash elfeed elfeed-org evil
-	    evil-collection eww-lnum haskell-mode languagetool
+   '(auctex auto-dim-other-buffers dash elfeed elfeed-org elfeed-webkit
+	    evil evil-collection eww-lnum haskell-mode languagetool
 	    lsp-mode magit markdown-mode org-roam org-side-tree
 	    outshine pdf-tools telega undo-fu visual-fill-column))
- '(warning-suppress-log-types '((lsp-mode))))
+ '(warning-suppress-log-types '((native-compiler) (lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -423,12 +423,12 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 ;; Base configuration
 (setq mu4e-maildir "~/Mail")
+;; Getting mail
 (setq mu4e-get-mail-command "mbsync -a")
 (setq mu4e-update-interval (* 10 60)) ;; Sync every 10 minutes
 (setq mu4e-change-filenames-when-moving t)
 
-(setq message-send-mail-function 'smtpmail-send-it)
-
+;; Contexts
 (setq mu4e-contexts
   (list
    ;; Personal Account Context
@@ -461,22 +461,24 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
             (smtpmail-smtp-service  . 587)
             (smtpmail-stream-type   . starttls)))))
 
+(setq mu4e-context-policy 'pick-first)
+(setq mu4e-compose-context-policy 'ask)
+
+;; Sending
 (setq auth-sources '("~/.authinfo.gpg"))
 
+;;; With smtpmail cmd (now commented)
+;; (setq message-send-mail-function 'smtpmail-send-it)
+;; (setq message-send-mail-function 'smtpmail-send-it)
+;; (setq message-send-mail-function 'smtpmail-send-it
+;;       smtpmail-smtp-server "smtp.email.com"
+;;       smtpmail-smtp-service 587
+;;       smtpmail-stream-type 'starttls)
 
-;; Emacs will automatically look in ~/.authinfo.gpg for the SMTP passwords
-(setq message-send-mail-function 'smtpmail-send-it)
-;; Sending mail via SMTP
-(setq message-send-mail-function 'smtpmail-send-it
-      smtpmail-smtp-server "smtp.email.com"
-      smtpmail-smtp-service 587
-      smtpmail-stream-type 'starttls)
-
-;; Context Policies (Optional but recommended)
-;; 'pick-first' forces mu4e to default to UPM if no context matches
-(setq mu4e-context-policy 'pick-first) 
-;; 'ask' forces mu4e to prompt you for which account to use when writing a *new* email
-(setq mu4e-compose-context-policy 'ask) 
+;;; With msmtp
+(setq message-send-mail-function 'message-send-mail-with-sendmail
+      sendmail-program "msmtp"
+      sendmail-extra-arguments '("--read-envelope-from"))
 
 ; Telega package
 (setq telega-server-libs-prefix "/opt/homebrew/Cellar/tdlib/HEAD-0ae923c")
@@ -517,6 +519,12 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (add-hook 'js-mode-hook
           (lambda ()
             (setq js-indent-level 2)))
+
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+
+(add-hook 'typescript-ts-mode-hook #'eglot-ensure)
+(add-hook 'tsx-ts-mode-hook #'eglot-ensure)
 
 ; Arabic
 (set-fontset-font t 'arabic "Noto Naskh Arabic")

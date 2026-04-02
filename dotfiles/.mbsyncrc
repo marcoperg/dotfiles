@@ -44,3 +44,10 @@ Create Both
 Expunge Both
 SyncState *
 
+# --- Account 3: UDC ---
+# IMAPAccount udc
+# Host outlook.office365.com
+# CertificateFile /etc/ssl/certs/ca-certificates.crt
+# User m.padron@udc.es
+# PassCmd "pizauth show udc"
+# AuthMechs XOAUTH2
