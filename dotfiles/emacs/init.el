@@ -480,6 +480,10 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
       sendmail-program "msmtp"
       sendmail-extra-arguments '("--read-envelope-from"))
 
+(add-hook 'mu4e-compose-mode-hook
+          (lambda ()
+            (set-input-method "spanish-prefix")))
+
 ; Telega package
 (setq telega-server-libs-prefix "/opt/homebrew/Cellar/tdlib/HEAD-0ae923c")
 
