@@ -428,6 +428,18 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (setq mu4e-update-interval (* 10 60)) ;; Sync every 10 minutes
 (setq mu4e-change-filenames-when-moving t)
 
+(setq mu4e-bookmarks
+      '((:name "Unread messages"
+         :query "flag:unread AND NOT flag:trashed"
+         :key ?u)
+        (:name "Today's messages"
+         :query "date:today..now AND NOT flag:trashed"
+         :key ?t)
+        (:name "Last 7 days"
+         :query "date:7d..now AND NOT flag:trashed"
+         :hide-unread t
+         :key ?w)))
+
 ;; Contexts
 (setq mu4e-contexts
   (list
@@ -455,7 +467,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
             (user-full-name         . "Marco Pérez González")
 	    (mu4e-sent-folder       . "/IMDEA/Sent")
 	    (mu4e-drafts-folder     . "/IMDEA/Drafts")
-            (mu4e-trash-folder      . "/IMDEA/Trash")
+            (mu4e-trash-folder      . "/IMDEA/Deleted Messages")
 	    (mu4e-refile-folder     . "/IMDEA/Archive")
             (smtpmail-smtp-server   . "mail.imdea.org")
             (smtpmail-smtp-service  . 587)
