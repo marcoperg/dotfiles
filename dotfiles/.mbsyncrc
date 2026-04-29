@@ -19,6 +19,7 @@ Near :upm-local:
 Patterns *
 Create Both
 Expunge Both
+Sync All
 SyncState *
 
 # --- Account 2: IMDEA ---

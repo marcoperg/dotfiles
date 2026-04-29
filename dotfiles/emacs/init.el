@@ -45,9 +45,10 @@
  '(initial-buffer-choice t)
  '(package-selected-packages
    '(auctex auto-dim-other-buffers dash elfeed elfeed-org elfeed-webkit
-	    evil evil-collection eww-lnum haskell-mode languagetool
-	    lsp-mode magit markdown-mode org-roam org-side-tree
-	    outshine pdf-tools telega undo-fu visual-fill-column))
+	    evil evil-collection eww-lnum gptel haskell-mode
+	    languagetool lsp-mode magit markdown-mode org-roam
+	    org-side-tree outshine pdf-tools telega undo-fu
+	    visual-fill-column vterm))
  '(warning-suppress-log-types '((native-compiler) (lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -430,15 +431,15 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 (setq mu4e-bookmarks
       '((:name "Unread messages"
-         :query "flag:unread AND NOT flag:trashed"
-         :key ?u)
+               :query "flag:unread AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages"
+               :key ?u)
         (:name "Today's messages"
-         :query "date:today..now AND NOT flag:trashed"
-         :key ?t)
-        (:name "Last 7 days"
-         :query "date:7d..now AND NOT flag:trashed"
-         :hide-unread t
-         :key ?w)))
+               :query "date:today..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages"
+               :key ?t)
+	(:name "Last 7 days"
+	       :query "date:7d..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages"
+	       :hide-unread t
+	       :key ?w)))
 
 ;; Contexts
 (setq mu4e-contexts
@@ -523,6 +524,12 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (transient-mark-mode 1)
 (add-hook 'lptp-mode #'display-line-numbers-mode)
 
+;gptel
+(setq gptel-backend
+      (gptel-make-anthropic "Claude"
+        :stream t
+        :key #'gptel-api-key-from-auth-source))
+(setq gptel-model 'claude-sonnet-4-6)
 
 ; ispell
 (with-eval-after-load 'ispell
