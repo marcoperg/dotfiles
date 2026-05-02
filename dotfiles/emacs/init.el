@@ -43,12 +43,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
- '(package-selected-packages
-   '(auctex auto-dim-other-buffers dash elfeed elfeed-org elfeed-webkit
-	    evil evil-collection eww-lnum gptel haskell-mode
-	    languagetool lsp-mode magit markdown-mode org-roam
-	    org-side-tree outshine pdf-tools telega undo-fu
-	    visual-fill-column vterm))
+ '(package-selected-packages nil)
+ '(package-vc-selected-packages
+   '((claude-code-ide :url
+		      "https://github.com/manzaltu/claude-code-ide.el")))
  '(warning-suppress-log-types '((native-compiler) (lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -524,12 +522,30 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (transient-mark-mode 1)
 (add-hook 'lptp-mode #'display-line-numbers-mode)
 
-;gptel
-(setq gptel-backend
-      (gptel-make-anthropic "Claude"
-        :stream t
-        :key #'gptel-api-key-from-auth-source))
-(setq gptel-model 'claude-sonnet-4-6)
+; Claude code ide
+(use-package claude-code-ide
+  :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+  :bind ("C-c C-'" . claude-code-ide-menu)
+  :config
+  (claude-code-ide-emacs-tools-setup)) ; expose xref, treesit, imenu, etc.
+(use-package claude-code-ide
+  :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+  :config
+  (claude-code-ide-emacs-tools-setup)
+  ;; Force Emacs state (pass-through) in Claude terminal buffers
+  (evil-set-initial-state 'claude-code-ide-mode 'emacs)
+  ;; Optionally: get back to normal state with C-z as usual
+  :bind ("C-c C-'" . claude-code-ide-menu))
+(with-eval-after-load 'vterm
+  (evil-set-initial-state 'vterm-mode 'emacs))
+
+(defun project-root-override (dir)
+  (let ((root (locate-dominating-file dir ".project.el"))
+        (backend (ignore-errors (vc-responsible-backend dir))))
+    (when root (list 'vc backend root))))
+
+(add-hook 'project-find-functions #'project-root-override)
+
 
 ; ispell
 (with-eval-after-load 'ispell
