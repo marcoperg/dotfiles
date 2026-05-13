@@ -545,7 +545,11 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
     (when root (list 'vc backend root))))
 
 (add-hook 'project-find-functions #'project-root-override)
-
+(setq claude-code-ide-prevent-reflow-glitch t)
+(setq claude-code-ide-vterm-anti-flicker t)
+(setq claude-code-ide-vterm-render-delay 0.01) ; increase from default 0.005s
+(setq claude-code-ide-terminal-initialization-delay 0.15)  ; bump from 0.1
+(setq claude-code-ide-cli-extra-flags "--plugin-dir ~/fun/ciao-verify")
 
 ; ispell
 (with-eval-after-load 'ispell
