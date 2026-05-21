@@ -429,13 +429,13 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 (setq mu4e-bookmarks
       '((:name "Unread messages"
-               :query "flag:unread AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages"
+               :query "flag:unread AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
                :key ?u)
         (:name "Today's messages"
-               :query "date:today..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages"
+               :query "date:today..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
                :key ?t)
 	(:name "Last 7 days"
-	       :query "date:7d..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages"
+	       :query "date:7d..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
 	       :hide-unread t
 	       :key ?w)))
 
