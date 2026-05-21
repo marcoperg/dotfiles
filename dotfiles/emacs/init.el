@@ -502,15 +502,16 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (defun my/dired-open-in-file-manager ()
   "Open current directory in OS file manager."
   (interactive)
-  (let ((dir (dired-current-directory)))
+  (let ((dir (expand-file-name (dired-current-directory))))
     (cond
      ((eq system-type 'darwin)
-      (start-process "file-manager" nil "open" dir))
+      (call-process "open" nil 0 nil dir))  ; 0 = don't wait, detached
      ((eq system-type 'gnu/linux)
-      (start-process "file-manager" nil "xdg-open" dir))
+      (call-process "xdg-open" nil 0 nil dir))
      (t (message "Unsupported system type")))))
 
 (with-eval-after-load 'dired
+  (setq dired-mouse-drag-files nil)  ; prevent crash on macOS
   (define-key dired-mode-map (kbd "C-c o") #'my/dired-open-in-file-manager))
 
 ; === WRITTING TOOLS ===
