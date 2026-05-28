@@ -514,6 +514,9 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
   (setq dired-mouse-drag-files nil)  ; prevent crash on macOS
   (define-key dired-mode-map (kbd "C-c o") #'my/dired-open-in-file-manager))
 
+(setq dired-mouse-drag-files nil)
+(setopt dired-mouse-drag-files nil)
+
 ; === WRITTING TOOLS ===
 ; LPTP
 (autoload 'lptp-mode "/Users/meu/fun/lptp/etc/lptp-mode" 
