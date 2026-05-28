@@ -426,6 +426,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (setq mu4e-get-mail-command "mbsync -a")
 (setq mu4e-update-interval (* 10 60)) ;; Sync every 10 minutes
 (setq mu4e-change-filenames-when-moving t)
+(setq mu4e-headers-date-format "%Y/%m/%d")
 
 (setq mu4e-bookmarks
       '((:name "Unread messages"
