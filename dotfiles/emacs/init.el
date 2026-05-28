@@ -437,7 +437,10 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 	(:name "Last 7 days"
 	       :query "date:7d..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Deleted\ Messages AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
 	       :hide-unread t
-	       :key ?w)))
+	       :key ?w))
+      (:name "Inbox"
+	       :query "(maildir:/UPM/Inbox OR maildir:/IMDEA/Inbox) AND NOT flag:trashed"
+               :key ?i))
 
 ;; Contexts
 (setq mu4e-contexts
