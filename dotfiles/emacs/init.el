@@ -260,9 +260,9 @@
 (setq visual-fill-column-width 100) ; Change to desired max width
 (setq visual-fill-column-center-text t)
 (defun my/org-maybe-disable-line-numbers ()
-  "Disable line numbers if the current file is in an 'ontology' folder."
+  "Disable line numbers if the current file is in an 'episteme' folder."
   (when (and buffer-file-name
-             (string-match-p "/ontology/" (file-truename buffer-file-name)))
+             (string-match-p "/episteme/" (file-truename buffer-file-name)))
     (display-line-numbers-mode 0)
     (visual-line-mode 1)
     (visual-fill-column-mode 1)))
@@ -271,7 +271,7 @@
 
 
 
-(setq org-roam-directory (file-truename "~/fun/ontology"))
+(setq org-roam-directory (file-truename "~/knowledge/episteme"))
 
 (org-roam-db-autosync-mode)
 (use-package org-roam
