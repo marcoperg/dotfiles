@@ -43,7 +43,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
- '(package-selected-packages nil)
+ '(package-selected-packages '(claude-code-ide))
  '(package-vc-selected-packages
    '((claude-code-ide :url
 		      "https://github.com/manzaltu/claude-code-ide.el")))
@@ -257,6 +257,7 @@
 	 string))))
 
 ; === ORG MODE ===
+(setq org-return-follows-link t)
 (setq visual-fill-column-width 100) ; Change to desired max width
 (setq visual-fill-column-center-text t)
 (defun my/org-maybe-disable-line-numbers ()
@@ -366,8 +367,8 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 (defun create-weekly-note-from-template ()
   "Create a weekly Org note using a template from a folder."
-  (let* ((template-file "~/docs/planning/weekly-template.org")
-         (week-file (format "~/docs/planning//weeks/week-%s-%s.org"
+  (let* ((template-file "~/knowledge/praxis/planning/weekly-template.org")
+         (week-file (format "~/knowledge/praxis/planning//weeks/week-%s-%s.org"
                             (format-time-string "%Y")
                             (format-time-string "%W"))))
     (unless (file-exists-p week-file)
@@ -394,7 +395,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (defun open-current-weekly-note ()
   "Open the weekly note for the current week."
   (interactive)
-  (let ((week-file (format "~/docs/planning/weeks/week-%s-%s.org"
+  (let ((week-file (format "~/knowledge/praxis/planning/weeks/week-%s-%s.org"
                            (format-time-string "%Y")
                            (format-time-string "%W"))))
     (if (file-exists-p week-file)
