@@ -273,6 +273,7 @@
 
 
 (setq org-roam-directory (file-truename "~/knowledge/episteme"))
+(load "~/knowledge/praxis/lisp/praxis-utils.el")
 
 (org-roam-db-autosync-mode)
 (use-package org-roam
