@@ -1,18 +1,60 @@
-* Imported Feeds            :elfeed:
+* Impoted Feeds            :elfeed:
 ** AI :ai:blog:
 *** [[https://karpathy.github.io/feed.xml][Andrej Karpathy blog]]
+*** [[https://simonwillison.net/atom/everything/][Simon Willison]] :uncurated:
+*** [[https://magazine.sebastianraschka.com/feed][Sebastian Raschka - Ahead of AI]] :uncurated:
+*** [[https://lilianweng.github.io/index.xml][Lil'Log (Lilian Weng)]] :uncurated:
 ** Math :math:blog:
 *** [[https://math.andrej.com/feed.xml][Andrej Bauer blog]]
 *** [[https://bartoszmilewski.com/feed][Bartosz Milewski's Programming Cafe]]
 *** [[https://golem.ph.utexas.edu/category/atom10.xml][The n-Category Café]]
 *** [[https://lawrencecpaulson.github.io/feed.xml][Lawrence C. Paulson blog]]
 *** [[https://gwaithimirdain.github.io/feed.xml][Gwaith-i-Mírdain Development Blog]]
+*** [[https://terrytao.wordpress.com/feed/][Terence Tao - What's New]] :uncurated:
+*** [[https://gowers.wordpress.com/feed/][Gowers's Weblog]] :uncurated:
+*** [[https://qchu.wordpress.com/feed/][Annoying Precision (Qiaochu Yuan)]] :uncurated:
+*** [[https://sbseminar.wordpress.com/feed/][Secret Blogging Seminar]] :uncurated:
+*** [[https://www.galoisrepresentations.com/feed/][Persiflage (Frank Calegari)]] :uncurated:
+*** [[https://www.jeremykun.com/index.xml][Math ∩ Programming (Jeremy Kun)]] :uncurated:
+*** [[https://rjlipton.com/feed/][Gödel's Lost Letter and P=NP]] :uncurated:
+*** [[https://blog.computationalcomplexity.org/feeds/posts/default][Computational Complexity]] :uncurated:
+** Formal Methods :formalmethods:pl:blog:
+*** [[https://homotopytypetheory.org/feed/][Homotopy Type Theory]] :uncurated:
+*** [[https://blog.sigplan.org/feed/][SIGPLAN PL Perspectives]] :uncurated:
+*** [[https://www.hillelwayne.com/index.xml][Hillel Wayne]] :uncurated:
+*** [[https://xenaproject.wordpress.com/feed/][Xena Project (Kevin Buzzard)]] :uncurated:
+*** [[https://existentialtype.wordpress.com/feed/][Existential Type (Robert Harper)]] :uncurated:
+** Physics :physics:blog:
+*** [[https://www.preposterousuniverse.com/blog/feed/][Sean Carroll - Preposterous Universe]] :uncurated:
+*** [[http://backreaction.blogspot.com/feeds/posts/default][Sabine Hossenfelder - Backreaction]] :uncurated:
+*** [[https://profmattstrassler.com/feed/][Matt Strassler]] :uncurated:
+*** [[https://johncarlosbaez.wordpress.com/feed/][John Baez - Azimuth]] :uncurated:
+** Philosophy :philosophy:blog:
+*** [[https://dailynous.com/feed/][Daily Nous]] :uncurated:
+*** [[https://aeon.co/feed.rss][Aeon]] :uncurated:
+*** [[https://3quarksdaily.com/feed][3 Quarks Daily]] :uncurated:
+*** [[https://plato.stanford.edu/rss/sep.xml][Stanford Encyclopedia - What's New]] :uncurated:
+*** [[https://schwitzsplinters.blogspot.com/feeds/posts/default][The Splintered Mind (Eric Schwitzgebel)]] :uncurated:
+*** [[https://leiterreports.typepad.com/blog/atom.xml][Leiter Reports]] :uncurated:
+*** [[https://philosophyofbrains.com/feed][Brains Blog]] :uncurated:
+*** [[https://crookedtimber.org/feed/][Crooked Timber]] :uncurated:
+** Philosophy - Asian :philosophy:asian:blog:
+*** [[https://warpweftandway.com/feed/][Warp, Weft, and Way]] :uncurated:
+*** [[https://indianphilosophyblog.org/feed/][The Indian Philosophy Blog]] :uncurated:
+*** [[https://loveofallwisdom.com/feed/][Love of All Wisdom (Amod Lele)]] :uncurated:
+*** [[https://tif.ssrc.org/feed/][The Immanent Frame]] :uncurated:
+** History :history:blog:
+*** [[https://acoup.blog/feed/][ACOUP - A Collection of Unmitigated Pedantry]] :uncurated:
+*** [[https://publicdomainreview.org/rss.xml][The Public Domain Review]] :uncurated:
+*** [[https://daily.jstor.org/feed/][JSTOR Daily]] :uncurated:
+*** [[https://www.themarginalian.org/feed/][The Marginalian]] :uncurated:
 
 ** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]] :blog:
 
 ** CS :cs:paper:
 *** Logic :logic:
 **** [[https://rss.arxiv.org/atom/cs.LO][arXiv cs.LO]]
+**** [[https://rss.arxiv.org/atom/math.LO][arXiv math.LO]]
 *** PL :pl:
 **** [[https://rss.arxiv.org/atom/cs.PL][arXiv cs.PL]]
 *** FL :fl:

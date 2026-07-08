@@ -76,6 +76,28 @@
       (list (expand-file-name "elfeed.org" user-emacs-directory)))
 (elfeed-org)
 
+(defun my/elfeed-purge-feed (feed-url)
+  "Remove FEED-URL and all its entries from the elfeed database.
+Note: also delete the feed's line from elfeed.org, or reopening
+elfeed will re-subscribe on the next fetch."
+  (interactive
+   (let* ((entry (ignore-errors (car (elfeed-search-selected))))
+          (default (and entry (elfeed-feed-url (elfeed-entry-feed entry)))))
+     (list (completing-read
+            (if default (format "Purge feed (default %s): " default) "Purge feed: ")
+            (hash-table-keys elfeed-db-feeds) nil nil nil nil default))))
+  (let (ids)
+    ;; collect first — don't mutate the index while walking it
+    (with-elfeed-db-visit (entry _feed)
+      (when (equal (elfeed-entry-feed-id entry) feed-url)
+        (push (elfeed-entry-id entry) ids)))
+    (dolist (id ids)
+      (avl-tree-delete elfeed-db-index id)
+      (remhash id elfeed-db-entries))
+    (remhash feed-url elfeed-db-feeds)
+    (elfeed-db-save)
+    (message "Purged %d entries from %s" (length ids) feed-url)))
+
 ; === TeX MODE ===
 ;; TeX (https://chatgpt.com/share/682a517f-6cb8-8002-be7a-a0d9f44ae0fe)
 (setq TeX-view-evince-keep-focus nil) ;; or whichever viewer you use
