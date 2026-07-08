@@ -1,9 +1,29 @@
 * Imported Feeds            :elfeed:
-** AI
+** AI :ai:blog:
 *** [[https://karpathy.github.io/feed.xml][Andrej Karpathy blog]]
-** Math
+** Math :math:blog:
 *** [[https://math.andrej.com/feed.xml][Andrej Bauer blog]]
 *** [[https://bartoszmilewski.com/feed][Bartosz Milewski's Programming Cafe]]
 *** [[https://golem.ph.utexas.edu/category/atom10.xml][The n-Category Café]]
 *** [[https://lawrencecpaulson.github.io/feed.xml][Lawrence C. Paulson blog]]
-** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]]
+*** [[https://gwaithimirdain.github.io/feed.xml][Gwaith-i-Mírdain Development Blog]]
+
+** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]] :blog:
+
+** CS :cs:paper:
+*** Logic :logic:
+**** [[https://rss.arxiv.org/atom/cs.LO][arXiv cs.LO]]
+*** PL :pl:
+**** [[https://rss.arxiv.org/atom/cs.PL][arXiv cs.PL]]
+*** FL :fl:
+**** [[https://rss.arxiv.org/atom/cs.FL][arXiv cs.FL]]
+
+** Math :math:paper:
+*** Category Theory :ct:
+**** [[https://rss.arxiv.org/atom/math.CT][arXiv math.CT]]
+*** Algebraic Geometry :ag:
+**** [[https://rss.arxiv.org/atom/math.AG][arXiv math.AG]]
+*** Commutative Algebra :ac:
+**** [[https://rss.arxiv.org/atom/math.AC][arXiv math.AC]]
+*** Algebraic Topology :at:
+**** [[https://rss.arxiv.org/atom/math.AT][arXiv math.AT]]
