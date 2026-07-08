@@ -7,6 +7,9 @@ alias ssh="TERM=xterm-256color ssh"
 # usermount alias
 alias usermount="mount -o gid=$USER,fmask=113,dmask=002"
 
+# Flush the Praxis Secreta gpg key from the agent cache (force re-prompt).
+alias secreta-lock="gpg-connect-agent 'CLEAR_PASSPHRASE --mode=normal FC5833230506D9A8A4A24F2F951C5DC6AF027CE2' /bye"
+
 ZSH_THEME="bira"
 POWERLEVEL9K_MODE="nerdfont-complete"
 

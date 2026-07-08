@@ -15,7 +15,18 @@
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 
+; GPG Config
 (setq epa-pinentry-mode 'loopback)
+;; Praxis Secreta key must never linger in the gpg-agent cache: flush its
+;; keygrip right after each decrypt so every secreta note re-prompts. The
+;; mail/identity key keeps its normal 24h cache -- only this keygrip is
+;; evicted, and clearing a non-cached keygrip is a harmless no-op.
+(defconst my/secreta-keygrip "FC5833230506D9A8A4A24F2F951C5DC6AF027CE2")
+(defun my/flush-secreta-passphrase (&rest _)
+  (call-process "gpg-connect-agent" nil 0 nil
+                (format "CLEAR_PASSPHRASE --mode=normal %s" my/secreta-keygrip) "/bye"))
+(advice-add 'epg-decrypt-file   :after #'my/flush-secreta-passphrase)
+(advice-add 'epg-decrypt-string :after #'my/flush-secreta-passphrase)
 
 ;; Open files
 (defun my/open-marked-file ()
