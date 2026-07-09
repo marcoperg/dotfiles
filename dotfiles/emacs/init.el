@@ -99,6 +99,90 @@ elfeed will re-subscribe on the next fetch."
     (elfeed-db-save)
     (message "Purged %d entries from %s" (length ids) feed-url)))
 
+;; --- Send the selected entry to wallabag (read-later on the phone) ---
+;; Credentials live in ~/.authinfo.gpg, never here:
+;;   machine perseo.penguin-hen.ts.net port 8443 login USER password PASS
+;;   machine wallabag-api login CLIENT_ID password CLIENT_SECRET
+(require 'cl-lib)
+(defvar my/wallabag-host "https://perseo.penguin-hen.ts.net:8443"
+  "Base URL of the wallabag instance.")
+
+(defvar my/wallabag--token nil
+  "Cached OAuth access token for the wallabag API.")
+
+(defun my/wallabag--auth (host)
+  "Return (LOGIN . SECRET) for HOST from auth-source, or signal an error."
+  (let ((f (car (auth-source-search :host host :require '(:user :secret) :max 1))))
+    (unless f (error "No authinfo entry for %s" host))
+    (cons (plist-get f :user)
+          (let ((s (plist-get f :secret)))
+            (if (functionp s) (funcall s) s)))))
+
+(defun my/wallabag--skip-headers ()
+  "Move point past the HTTP headers in a url retrieval buffer."
+  (goto-char (point-min))
+  (re-search-forward "\r?\n\r?\n"))
+
+(defun my/wallabag--fetch-token ()
+  "Obtain and cache an OAuth token via the password grant."
+  (let* ((client (my/wallabag--auth "wallabag-api"))
+         (user   (my/wallabag--auth "perseo.penguin-hen.ts.net"))
+         (url-request-method "POST")
+         (url-request-extra-headers
+          '(("Content-Type" . "application/x-www-form-urlencoded")))
+         (url-request-data
+          (url-build-query-string
+           `(("grant_type" "password")
+             ("client_id" ,(car client))
+             ("client_secret" ,(cdr client))
+             ("username" ,(car user))
+             ("password" ,(cdr user)))))
+         (buf (url-retrieve-synchronously
+               (concat my/wallabag-host "/oauth/v2/token") t t)))
+    (with-current-buffer buf
+      (my/wallabag--skip-headers)
+      (let ((json (json-parse-buffer :object-type 'alist)))
+        (setq my/wallabag--token (alist-get 'access_token json))
+        (unless my/wallabag--token
+          (error "wallabag token error: %S" json))
+        my/wallabag--token))))
+
+(defun my/wallabag--token ()
+  (or my/wallabag--token (my/wallabag--fetch-token)))
+
+(defun my/wallabag-add-url (url)
+  "Add URL to wallabag, refreshing the token once on a 401."
+  (cl-flet ((post ()
+              (let* ((url-request-method "POST")
+                     (url-request-extra-headers
+                      `(("Authorization" . ,(concat "Bearer " (my/wallabag--token)))
+                        ("Content-Type" . "application/x-www-form-urlencoded")))
+                     (url-request-data (url-build-query-string `(("url" ,url))))
+                     (buf (url-retrieve-synchronously
+                           (concat my/wallabag-host "/api/entries") t t)))
+                (with-current-buffer buf
+                  (goto-char (point-min))
+                  (and (looking-at "HTTP/[0-9.]+ \\([0-9]+\\)")
+                       (string-to-number (match-string 1)))))))
+    (let ((code (post)))
+      (when (eql code 401)
+        (setq my/wallabag--token nil)
+        (setq code (post)))
+      (if (memql code '(200 201))
+          (message "Sent to wallabag: %s" url)
+        (error "wallabag add failed (HTTP %s)" code)))))
+
+(defun my/elfeed-send-to-wallabag ()
+  "Send the selected elfeed entry to wallabag, then mark it read."
+  (interactive)
+  (let ((entry (car (elfeed-search-selected))))
+    (unless entry (user-error "No elfeed entry selected"))
+    (my/wallabag-add-url (elfeed-entry-link entry))
+    (elfeed-search-untag-all-unread)))
+
+(with-eval-after-load 'elfeed-search
+  (define-key elfeed-search-mode-map (kbd "R") #'my/elfeed-send-to-wallabag))
+
 ; === TeX MODE ===
 ;; TeX (https://chatgpt.com/share/682a517f-6cb8-8002-be7a-a0d9f44ae0fe)
 (setq TeX-view-evince-keep-focus nil) ;; or whichever viewer you use
