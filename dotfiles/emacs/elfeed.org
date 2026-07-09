@@ -1,7 +1,6 @@
 * Impoted Feeds            :elfeed:
 ** AI :ai:blog:
 *** [[https://karpathy.github.io/feed.xml][Andrej Karpathy blog]]
-*** [[https://simonwillison.net/atom/everything/][Simon Willison]] :uncurated:
 *** [[https://magazine.sebastianraschka.com/feed][Sebastian Raschka - Ahead of AI]] :uncurated:
 *** [[https://lilianweng.github.io/index.xml][Lil'Log (Lilian Weng)]] :uncurated:
 ** Math :math:blog:
@@ -26,13 +25,11 @@
 *** [[https://existentialtype.wordpress.com/feed/][Existential Type (Robert Harper)]] :uncurated:
 ** Physics :physics:blog:
 *** [[https://www.preposterousuniverse.com/blog/feed/][Sean Carroll - Preposterous Universe]] :uncurated:
-*** [[http://backreaction.blogspot.com/feeds/posts/default][Sabine Hossenfelder - Backreaction]] :uncurated:
 *** [[https://profmattstrassler.com/feed/][Matt Strassler]] :uncurated:
 *** [[https://johncarlosbaez.wordpress.com/feed/][John Baez - Azimuth]] :uncurated:
 ** Philosophy :philosophy:blog:
 *** [[https://dailynous.com/feed/][Daily Nous]] :uncurated:
-*** [[https://aeon.co/feed.rss][Aeon]] :uncurated:
-*** [[https://3quarksdaily.com/feed][3 Quarks Daily]] :uncurated:
+*** [[https://aeon.co/feed.rss][Aeon]] :uncurated:hidden:
 *** [[https://plato.stanford.edu/rss/sep.xml][Stanford Encyclopedia - What's New]] :uncurated:
 *** [[https://schwitzsplinters.blogspot.com/feeds/posts/default][The Splintered Mind (Eric Schwitzgebel)]] :uncurated:
 *** [[https://leiterreports.typepad.com/blog/atom.xml][Leiter Reports]] :uncurated:
@@ -47,7 +44,7 @@
 *** [[https://acoup.blog/feed/][ACOUP - A Collection of Unmitigated Pedantry]] :uncurated:
 *** [[https://publicdomainreview.org/rss.xml][The Public Domain Review]] :uncurated:
 *** [[https://daily.jstor.org/feed/][JSTOR Daily]] :uncurated:
-*** [[https://www.themarginalian.org/feed/][The Marginalian]] :uncurated:
+*** [[https://www.themarginalian.org/feed/][The Marginalian]] :uncurated:hidden:
 
 ** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]] :blog:
 

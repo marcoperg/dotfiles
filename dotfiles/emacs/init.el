@@ -75,6 +75,7 @@
 (setq rmh-elfeed-org-files
       (list (expand-file-name "elfeed.org" user-emacs-directory)))
 (elfeed-org)
+(setq-default elfeed-search-filter "@6-months-ago +unread -hidden")
 
 (defun my/elfeed-purge-feed (feed-url)
   "Remove FEED-URL and all its entries from the elfeed database.
