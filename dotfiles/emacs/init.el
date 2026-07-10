@@ -22,9 +22,18 @@
 ;; mail/identity key keeps its normal 24h cache -- only this keygrip is
 ;; evicted, and clearing a non-cached keygrip is a harmless no-op.
 (defconst my/secreta-keygrip "FC5833230506D9A8A4A24F2F951C5DC6AF027CE2")
+;; (defun my/flush-secreta-passphrase (&rest _)
+;;   (call-process "gpg-connect-agent" nil 0 nil
+;;                 (format "CLEAR_PASSPHRASE --mode=normal %s" my/secreta-keygrip) "/bye"))
+
 (defun my/flush-secreta-passphrase (&rest _)
-  (call-process "gpg-connect-agent" nil 0 nil
-                (format "CLEAR_PASSPHRASE --mode=normal %s" my/secreta-keygrip) "/bye"))
+  (call-process "gpg-connect-agent"
+                nil 0 nil
+                "CLEAR_PASSPHRASE"
+                "--mode=normal"
+                my/secreta-keygrip
+                "/bye"))
+
 (advice-add 'epg-decrypt-file   :after #'my/flush-secreta-passphrase)
 (advice-add 'epg-decrypt-string :after #'my/flush-secreta-passphrase)
 
@@ -112,7 +121,25 @@
             (when (re-search-forward "\\\\documentclass" nil t)
               (throw 'found f))))))))
 
-(setq-default TeX-master #'my-TeX-master-from-documentclass)
+;; AUCTeX's `TeX-master' does NOT accept a function value; it only understands
+;; nil/t/'shared/'dwim/string.  So we run the finder ourselves on mode entry and
+;; set a concrete value, which stops AUCTeX from ever prompting for the master.
+(defun my-TeX-set-master ()
+  "Set `TeX-master' from the file containing \\documentclass, without prompting."
+  (unless (TeX-local-master-p)          ; respect an explicit `% TeX-master:' line
+    (let ((master (my-TeX-master-from-documentclass)))
+      (setq TeX-master
+            (cond
+             ((null master) t)          ; nothing found: treat file as its own master
+             ((string= (file-truename master)
+                       (file-truename (or buffer-file-name "")))
+              t)                         ; this file *is* the master
+             (t (file-name-sans-extension master)))))))
+
+(add-hook 'LaTeX-mode-hook #'my-TeX-set-master)
+
+;; Never let AUCTeX write a `% TeX-master:' line into my files.
+(setq TeX-one-master "<none>")
 
 (with-eval-after-load 'tex
   ;; 1. Define the LatexMk command
