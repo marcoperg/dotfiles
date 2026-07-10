@@ -641,8 +641,9 @@ elfeed will re-subscribe on the next fetch."
 
 (with-eval-after-load 'evil
   (with-eval-after-load 'elfeed-search
-    (evil-set-initial-state 'elfeed-search-mode 'motion)
-    (evil-define-key 'motion elfeed-search-mode-map
+    ;; Keep evil-collection's default `normal' state (which provides j/k and
+    ;; all the other elfeed bindings) and only override R in that state.
+    (evil-define-key 'normal elfeed-search-mode-map
       (kbd "R") #'my/elfeed-send-to-wallabag)))
 
 
