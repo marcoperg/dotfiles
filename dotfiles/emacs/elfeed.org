@@ -46,6 +46,13 @@
 *** [[https://daily.jstor.org/feed/][JSTOR Daily]] :uncurated:
 *** [[https://www.themarginalian.org/feed/][The Marginalian]] :uncurated:hidden:
 
+** Linguistics :linguistics:blog:
+*** [[https://languagelog.ldc.upenn.edu/nll/?feed=rss2][Language Log]] :uncurated:
+*** [[https://arnoldzwicky.org/feed/][Arnold Zwicky's Blog]] :uncurated:
+*** [[https://www.superlinguo.com/rss][Superlinguo (Lauren Gawne)]] :uncurated:
+*** [[https://stancarey.wordpress.com/feed/][Sentence First (Stan Carey)]] :uncurated:
+*** [[https://languagehat.com/feed/][Language Hat]] :uncurated:
+
 ** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]] :blog:
 
 ** CS :cs:paper:
@@ -66,3 +73,7 @@
 **** [[https://export.arxiv.org/api/query?search_query=cat:math.AC&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AC]]
 *** Algebraic Topology :at:
 **** [[https://export.arxiv.org/api/query?search_query=cat:math.AT&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AT]]
+
+** Linguistics :linguistics:paper:
+*** Computation and Language :cl:
+**** [[https://export.arxiv.org/api/query?search_query=cat:cs.CL&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv cs.CL]]
