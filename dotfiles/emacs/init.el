@@ -106,19 +106,30 @@
 ;; Prefer line highlighting instead of rectangle when jumping
 (setq pdf-view-display-size 'fit-page)
 
+(defun my-TeX-file-has-documentclass-p (f)
+  "Non-nil if file F contains \\documentclass in its first KB."
+  (and f (file-readable-p f)
+       (with-temp-buffer
+         (insert-file-contents f nil 0 1000) ; only first KB
+         (goto-char (point-min))
+         (re-search-forward "\\\\documentclass" nil t))))
+
 (defun my-TeX-master-from-documentclass ()
-  "Return master file by searching upwards for a \\documentclass line."
-  (let ((dir (locate-dominating-file
-              (or buffer-file-name default-directory)
-              (lambda (d)
-                (directory-files d nil "\\.tex\\'" t)))))
-    (when dir
-      (catch 'found
-        (dolist (f (directory-files dir t "\\.tex\\'" t))
-          (with-temp-buffer
-            (insert-file-contents f nil 0 1000) ; only first KB
-            (goto-char (point-min))
-            (when (re-search-forward "\\\\documentclass" nil t)
+  "Return the master .tex file (the one with \\documentclass).
+If the current buffer's own file has \\documentclass it is its own master;
+otherwise search its directory for a sibling that does.  Checking the current
+file first is what makes a directory with several master files (e.g. two decks
+that share \\input fragments) each compile itself."
+  (if (my-TeX-file-has-documentclass-p buffer-file-name)
+      buffer-file-name                    ; this file IS a master
+    (let ((dir (locate-dominating-file
+                (or buffer-file-name default-directory)
+                (lambda (d)
+                  (directory-files d nil "\\.tex\\'" t)))))
+      (when dir
+        (catch 'found
+          (dolist (f (directory-files dir t "\\.tex\\'" t))
+            (when (my-TeX-file-has-documentclass-p f)
               (throw 'found f))))))))
 
 ;; AUCTeX's `TeX-master' does NOT accept a function value; it only understands
@@ -144,8 +155,8 @@
 (with-eval-after-load 'tex
   ;; 1. Define the LatexMk command
   (add-to-list 'TeX-command-list
-               '("LatexMk" 
-                 "latexmk -lualatex -interaction=nonstopmode %t"
+               '("LatexMk"
+                 "latexmk -pdf -interaction=nonstopmode %t"
                  TeX-run-TeX 
                  nil 
                  t 
