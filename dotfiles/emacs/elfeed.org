@@ -50,19 +50,19 @@
 
 ** CS :cs:paper:
 *** Logic :logic:
-**** [[https://rss.arxiv.org/atom/cs.LO][arXiv cs.LO]]
-**** [[https://rss.arxiv.org/atom/math.LO][arXiv math.LO]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:cs.LO&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv cs.LO]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.LO&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.LO]]
 *** PL :pl:
-**** [[https://rss.arxiv.org/atom/cs.PL][arXiv cs.PL]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:cs.PL&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv cs.PL]]
 *** FL :fl:
-**** [[https://rss.arxiv.org/atom/cs.FL][arXiv cs.FL]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:cs.FL&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv cs.FL]]
 
 ** Math :math:paper:
 *** Category Theory :ct:
-**** [[https://rss.arxiv.org/atom/math.CT][arXiv math.CT]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.CT&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.CT]]
 *** Algebraic Geometry :ag:
-**** [[https://rss.arxiv.org/atom/math.AG][arXiv math.AG]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.AG&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AG]]
 *** Commutative Algebra :ac:
-**** [[https://rss.arxiv.org/atom/math.AC][arXiv math.AC]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.AC&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AC]]
 *** Algebraic Topology :at:
-**** [[https://rss.arxiv.org/atom/math.AT][arXiv math.AT]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.AT&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AT]]
