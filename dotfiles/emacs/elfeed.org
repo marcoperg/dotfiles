@@ -53,6 +53,33 @@
 *** [[https://stancarey.wordpress.com/feed/][Sentence First (Stan Carey)]] :uncurated:
 *** [[https://languagehat.com/feed/][Language Hat]] :uncurated:
 
+** Galego :gl:blog:
+
+** Español :es:blog:
+*** [[https://culturacientifica.com/feed/][Cuaderno de Cultura Científica]] :science:math:uncurated:
+*** [[https://www.gaussianos.com/feed/][Gaussianos]] :math:uncurated:
+*** [[http://feeds.feedburner.com/naukas/francis][La Ciencia de la Mula Francis]] :physics:uncurated:
+*** [[https://www.jotdown.es/feed/][Jot Down]] :culture:literature:history:uncurated:hidden:
+
+** Italiano :it:blog:
+*** [[https://maddmaths.simai.eu/feed/][MaddMaths!]] :math:uncurated:
+*** [[https://www.terminologiaetc.it/feed/][Terminologia etc.]] :linguistics:uncurated:
+*** [[https://www.iltascabile.com/feed/][Il Tascabile]] :culture:uncurated:
+*** [[https://www.leparoleelecose.it/?feed=rss2][Le parole e le cose]] :literature:uncurated:
+
+** Music :music:blog:
+*** Classical :classical:
+**** [[https://slippedisc.com/feed/][Slipped Disc]] :uncurated:
+**** [[https://interlude.hk/feed/][Interlude]] :uncurated:
+*** Opera :opera:
+**** [[https://parterre.com/feed/][Parterre Box]] :uncurated:
+**** [[https://operawire.com/feed/][OperaWire]] :uncurated:
+*** Jazz :jazz:
+**** [[https://www.jazzwax.com/feed][JazzWax (Marc Myers)]] :uncurated:
+**** [[https://burningambulance.com/feed/][Burning Ambulance]] :uncurated:
+*** Blues :blues:
+**** [[https://www.americanbluesscene.com/feed/][American Blues Scene]] :uncurated:
+
 ** [[https://scottaaronson.blog/?feed=rss2][Scott Aaronson blog]] :blog:
 
 ** CS :cs:paper:
@@ -76,4 +103,4 @@
 
 ** Linguistics :linguistics:paper:
 *** Computation and Language :cl:
-**** [[https://export.arxiv.org/api/query?search_query=cat:cs.CL&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv cs.CL]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:cs.CL&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv cs.CL]] :hidden:
