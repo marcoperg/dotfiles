@@ -63,7 +63,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
- '(package-selected-packages '(claude-code-ide))
+ '(package-selected-packages
+   '(claude-code-ide company flycheck flycheck-color-mode-line
+		     flycheck-pos-tip))
  '(package-vc-selected-packages
    '((claude-code-ide :url
 		      "https://github.com/manzaltu/claude-code-ide.el")))
@@ -770,5 +772,378 @@ elfeed will re-subscribe on the next fetch."
 (if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el")
   (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el"))
 ; @end(53614285)@ - End of automatically added lines.
+
+;; -------------------------------------------------
+ ;; ** Ciao company
+ ;; -------------------------------------------------
+ ;;; Paths to use ciao source instead of package in ./emacs.c/elpa: ***
+ (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib")
+ (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/company-ciao")
+ ;; For Company support, insert the next line into your Emacs init file.
+
+ ;; ****** Set up company-ciao once ciao is actually loaded (ciao-mode is
+ ;; autoloaded lazily, so `featurep' is nil at startup even when installed).
+ (with-eval-after-load 'ciao
+   (require 'company-ciao)
+   (add-hook 'company-mode-hook 'company-ciao-setup))
+ ;; If you use [use-package]
+ ;; (https://github.com/jwiegley/use-package
+ ;; ), you can insert instead
+ ;; (use-package company-ciao
+ ;;   :after company
+ ;;   :hook
+ ;;   (company-mode . company-ciao-setup)
+ ;;   )
+ ;; **Optional**: Enable `company-mode` in all buffers where possible.
+ (add-hook 'after-init-hook 'global-company-mode)
+ ;;
+ ;; This is super-useful in general: first tab indents, second auto-completes
+ (setq tab-always-indent 'complete)
+ ;;
+ ;; -------------------------------------------------
+ ;; ** Ciao flycheck ("verifly")
+ ;; -------------------------------------------------
+ ;; 
+ ;; (MH: This below already done above in this file:)
+ ;;      (require 'package)
+ ;;      (add-to-list 'package-archives '("MELPA Stable" .
+ ;; "https://stable.melpa.org/packages/"
+ ;; ) t)
+ ;;      (package-initialize)
+ ;; 
+ ;; There are two options for the setup:
+ ;;    * Insert the next line into your `emacs' init file.
+ ;;           (eval-after-load 'flycheck '(add-hook 'flycheck-mode-hook #'flycheck-ciao-setup))
+ ;;    * If you use use-package
+ ;; (https://github.com/jwiegley/use-package
+ ;; ),
+ ;;      you can insert instead.
+ ;;           (use-package flycheck-ciao
+ ;;             :after flycheck
+ ;;             :hook
+ ;;             (flycheck-mode . flycheck-ciao-setup)
+ ;;             )
+ ;; 
+ ;; Install `ciao-emacs-plus` package via Emacs built-in package manager (`package.el`).
+ ;; [ALT+X]package-install-file[RET](ciao-emacs-plus.el PATH)[RET]
+ ;; ~/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/ciao-emacs-plus.el
+ ;; 
+ ;;; Paths to ciao source instead of package in ./emacs.c/elpa: ***
+ (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/flycheck-ciao")
+ (require 'flycheck)
+ (with-eval-after-load 'ciao (load-library "flycheck-ciao"))
+ ;; `flycheck-ciao-setup' lives in flycheck-ciao.el, which is loaded lazily
+ ;; only once the `ciao' feature loads (the `load-library' above, on first
+ ;; .pl file).  `global-flycheck-mode' can enable flycheck in a non-Ciao
+ ;; buffer (*scratch*, etc.) at startup, before any .pl file has been opened;
+ ;; the bare symbol would then be void and signal an error.  Guard the call so
+ ;; it runs only once actually defined -- Ciao buffers load it on demand.
+ (with-eval-after-load 'flycheck
+   (add-hook 'flycheck-mode-hook
+             (lambda ()
+               (when (fboundp 'flycheck-ciao-setup) (flycheck-ciao-setup)))))
+ (with-eval-after-load 'flycheck (add-hook 'flycheck-mode-hook 'my-change-flycheck-faces))
+ ;; Optional: Enable `flycheck-mode` in all buffers where syntax checking is possible.
+ (add-hook 'after-init-hook 'global-flycheck-mode)
+ ;; CiaoPP analysis is heavy and the ciaopp server handles one request at a
+ ;; time.  Checking on every keystroke makes concurrent checks race: one
+ ;; check's temp-file cleanup deletes the file another is analyzing, the server
+ ;; returns {"not_ready":"No such file or directory"}, and flycheck then shows 0
+ ;; errors and drops the assertion notes.  Only check on save (and mode enable).
+ (setq flycheck-check-syntax-automatically '(save mode-enabled))
+ ;; Give in-flight checks room to finish before another can start.
+ (setq flycheck-idle-change-delay 3)
+ ;; Use the serverless CiaoPP checker.  The default `ciaopp' checker talks to a
+ ;; persistent `ciao-serve' server, which proved unreliable two ways:
+ ;;   * when the server DIED, `ciaopp-client' returned empty output (it only errs
+ ;;     on curl exit 7 / connection-refused, not on timeouts) and flycheck
+ ;;     silently showed "0 errors";
+ ;;   * when the server was still BOOTING, the timeout-less curl blocked on the
+ ;;     cold load and the check hung forever in "running".
+ ;; `ciaopp-no-keep-alive' runs the `ciaopp' binary directly (~0.6s for a small
+ ;; module) with no server to die, boot, or hang; flycheck manages the process
+ ;; itself.  Force it as the checker in every Ciao buffer.
+ (defun my-ciao-use-serverless-checker ()
+   "Force the serverless `ciaopp-no-keep-alive' checker in Ciao buffers."
+   (when (derived-mode-p 'ciao-mode)
+     (setq-local flycheck-checker 'ciaopp-no-keep-alive)))
+ (with-eval-after-load 'flycheck
+   (add-hook 'flycheck-mode-hook 'my-ciao-use-serverless-checker))
+ ;; Add to 'flycheck-ciao-setup?
+ (defun my-change-flycheck-faces ()
+  (defface flycheck-info
+    ;; Use just margin mark (no underline) for info-level messages
+    ;; (e.g., checked)
+    '((t))
+    "Flycheck face for informational messages."
+    :group 'flycheck-faces))
+ ;; Flycheck changes color in mode line 
+ (require 'flycheck-color-mode-line)
+ (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
+ ;; To re-flycheck after a file revert: 
+ (eval-after-load 'flycheck
+  '(add-to-list 'flycheck-hooks-alist '(after-revert-hook
+                                        . flycheck-buffer)))
+ ;; Trying something else:
+ ;; (custom-set-faces!
+ ;; (custom-set-faces
+ ;;  '(flycheck-error :underline (:color "red2" :style wave))
+ ;;  )
+
+ ;;
+ ;; Now done in flycheck-ciao ***
+ ;; Disable flycheck for for _co files:
+ ;; ------------------------------------
+ ;; (add-hook 'flycheck-mode-hook 'my-skip-flycheck-for-ciaopp-output)
+ ;; 
+ ;; (defun my-skip-flycheck-for-ciaopp-output ()
+ ;;   "Hook to turn off flycheck on _co.pl files (output from CiaoPP)."
+ ;;   (let ((filename))
+ ;;     (when (and (eq major-mode 'ciao-mode)
+ ;;                (buffer-file-name)
+ ;;                ; Check if flycheck is enabled, also avoids going
+ ;;                ; recursively into hook. 
+ ;;                (and (boundp 'flycheck-mode) flycheck-mode) 
+ ;;                (string= (substring (buffer-file-name)
+ ;;                                    (-  (length "_co.pl"))
+ ;;                                    nil)
+ ;;                         "_co.pl"))
+ ;;       (flycheck-mode -1)
+ ;;       (message "flycheck mode disabled for CiaoPP output buffer")
+ ;;       )))
+
+ ;; ** Pop-ups for Ciao flycheck ("verifly")
+ ;; -------------------------------------------------
+ ;; *** A) flycheck-pos-tip-mode (works best with syntax coloring)
+ ;; ----------------------------------------------------------
+ (with-eval-after-load 'flycheck
+  (progn
+    (flycheck-pos-tip-mode)
+    (setq flycheck-pos-tip-timeout -1)
+    ;; Fixes problem with tool tip width (was one character short)
+    (defun pos-tip-tooltip-width (width char-width)
+      "Calculate tooltip pixel width."
+      (+ (* width char-width)
+         (ash (+ pos-tip-border-width
+             pos-tip-internal-border-width)
+          2)))
+    ;; Fix so that text properties are displayed
+    (defun flycheck-pos-tip-error-messages (errors)
+      "Display ERRORS, using a graphical tooltip on GUI frames."
+      (when errors
+        (if (display-graphic-p)
+            (let ((message (flycheck-help-echo-all-error-messages errors))
+                  (line-height (car (window-line-height))))
+              (flycheck-pos-tip--check-pos)
+              ;; MH: This is the relevant change:
+              ;; pos-tip-show -> pos-tip-show-no-propertize
+              (pos-tip-show-no-propertize message nil nil nil flycheck-pos-tip-timeout
+                                          flycheck-pos-tip-max-width nil
+                                          ;; Add a little offset to the tooltip to move it away
+                                          ;; from the corresponding text in the buffer.  We
+                                          ;; explicitly take the line height into account because
+                                          ;; pos-tip computes the offset from the top of the line
+                                          ;; apparently.
+                                          nil (and line-height (+ line-height 5)))
+              )
+          (funcall flycheck-pos-tip-display-errors-tty-function errors))))))
+
+ ;; *** B) flycheck-popup-tip
+ ;; ;; ---------------------
+ ;; (require 'flycheck-popup-tip)
+ ;; (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode)
+ ;; ;; (defface popup-face
+ ;; ;;   ;; '((t (:inherit default :background "lightgray" :foreground "black")))
+ ;; ;;   '((t ()))
+ ;; ;;   "Face for popup."
+ ;; ;;   :group 'popup)
+ ;; ;; (defface popup-tip-face
+ ;; ;;   '((t (:background "khaki1" :foreground "black")))
+ ;; ;;   "Face for popup tip."
+ ;; ;;   :group 'popup)
+ ;; (defface popup-tip-face
+ ;;   ;; '((t (:background "lightgray")))
+ ;;   '((t (:background "white")))
+ ;;   "Face for popup tip."
+ ;;   :group 'popup)
+ ;; 
+ ;; (defun flycheck-popup-tip-format-errors (errors)
+ ;;   "Formats ERRORS messages for display."
+ ;;   (let* ((messages-and-id (mapcar #'flycheck-error-format-message-and-id
+ ;;                                   (delete-dups errors)))
+ ;;          (messages (sort
+ ;;                     (mapcar
+ ;;                      (lambda (m) (concat flycheck-popup-tip-error-prefix m))
+ ;;                      messages-and-id)
+ ;;                     'string-lessp)))
+ ;;     (propertize
+ ;;      (mapconcat 'identity messages "\n")
+ ;;      'face
+ ;;      '(;; MH:
+ ;;       :background "white"
+ ;; ;;      :background "lightgray"
+ ;; ;; :inherit popup-tip-face
+ ;; ;;                 :underline nil
+ ;; ;;                 :overline nil
+ ;; ;;                 :strike-through nil
+ ;; ;;                 :box nil
+ ;; ;;                 :slant normal
+ ;; ;;                 :width normal
+ ;; ;;                 :weight normal
+ ;;      ))
+ ;;     )
+ ;;   )
+
+ ;; ** Defining a checker by hand (not necessary: new versions are connected to menu)
+ ;; ------------------------------------------------------------------------------
+ ;; (flycheck-define-checker ciaopp-full-noinc
+ ;;   "A Ciao syntax and assertions checker using CiaoPP for ciao-mode"
+ ;;   :command ("ciaopp"
+ ;; ;;             "-op"
+ ;; ;;             (eval flycheck-tmp-file-ciao-suffix)
+ ;;             "-V"
+ ;;             (eval (ciao-flycheck-create-tmp-file))
+ ;; ;            "-fassert_ctcheck=auto"
+ ;;             "-fassert_ctcheck=manual"
+ ;;             "-fcheck_config_ana=on"
+ ;;             "-fana_nf=nf"
+ ;; ;            "-fmodes=shfr" ; Forced by nf and det?
+ ;; ;            "-ftypes=eterms" ; Forced by nf and det?
+ ;; ;            "-fana_cost=resources"
+ ;; ;            "-fana_cost=steps_ualb"
+ ;;             "-fana_det=det"
+ ;; ;;             "-fentry_point=entry"
+ ;; ;;             "-fpp_ctchecks=off"
+ ;; ;;             "-fincremental=off"
+ ;;             "-fmenu_output=off"
+ ;; ;;             "-fpp_info=on"
+ ;;             )
+ ;;   :predicate (lambda ()
+ ;;           (if (not (flycheck-ciao-enable-check))
+ ;;           nil
+ ;;         (when (not ciao-server-process)
+ ;;                    (ciao-server-start))
+ ;;         t))
+ ;;   :error-parser flycheck-parse-ciao
+ ;;   :error-filter
+ ;;   (lambda (errors)
+ ;;      (flycheck-ciao-skip-comments
+ ;;       (flycheck-fill-empty-line-numbers
+ ;;        (flycheck-sanitize-errors errors))))
+ ;;   :modes ciao-mode
+ ;;   )
+ ;; 
+ ;; (flycheck-define-checker ciaopp-default
+ ;;   "A Ciao syntax and assertions checker using CiaoPP for ciao-mode"
+ ;;   :command ("ciaopp"
+ ;; ;;             "-op"
+ ;; ;;             (eval flycheck-tmp-file-ciao-suffix)
+ ;;             "-V"
+ ;;             (eval (ciao-flycheck-create-tmp-file))
+ ;; ;            "-fassert_ctcheck=auto"
+ ;; ;            "-fassert_ctcheck=manual"
+ ;; ;            "-fcheck_config_ana=on"
+ ;; ;            "-fana_nf=nf"
+ ;; ;            "-fmodes=shfr" ; Forced by nf and det?
+ ;; ;            "-ftypes=eterms" ; Forced by nf and det?
+ ;; ;            "-fana_cost=resources"
+ ;; ;            "-fana_cost=steps_ualb"
+ ;; ;            "-fana_det=det"
+ ;; ;;             "-fentry_point=entry"
+ ;; ;;             "-fpp_ctchecks=off"
+ ;; ;;             "-fincremental=off"
+ ;; ;            "-fmenu_output=off"
+ ;; ;;             "-fpp_info=on"
+ ;;             )
+ ;;   :predicate (lambda ()
+ ;;           (if (not (flycheck-ciao-enable-check))
+ ;;           nil
+ ;;         (when (not ciao-server-process)
+ ;;                    (ciao-server-start))
+ ;;         t))
+ ;;   :error-parser flycheck-parse-ciao
+ ;;   :error-filter
+ ;;   (lambda (errors)
+ ;;      (flycheck-ciao-skip-comments
+ ;;       (flycheck-fill-empty-line-numbers
+ ;;        (flycheck-sanitize-errors errors))))
+ ;;   :modes ciao-mode
+ ;;   )
+ ;;
+ ;; (flycheck-define-checker ciaopp-non-incremental
+ ;;   "A Ciao syntax and assertions checker using CiaoPP for ciao-mode"
+ ;;   :command ("ciaopp-client"
+ ;;        "-op"
+ ;;             (eval flycheck-tmp-file-ciao-suffix)
+ ;;             "-V"
+ ;;             (eval (ciao-flycheck-create-tmp-file))
+ ;;              ;; (option-list "-f" flycheck-ciaopp-flags concat)
+ ;;             "-fassert_ctcheck=manual"
+ ;;             "-ftypes=none"
+ ;;             "-fmodes=sharefree_clique"
+ ;;             "-fpp_ctchecks=off"
+ ;;             "-fintermod=on"
+ ;;             ;; "-fct_modular=curr_mod"
+ ;;             "-fct_modular=all"
+ ;;             "-fentry_policy=top_level"
+ ;;             "-ffixpoint=dd"
+ ;;             "-fmain_module=/Users/isabel.garcia/git/ciao-devel/bndls/chat80/src/top/top.pl"
+ ;;             "-fincremental=off"
+ ;;             "-fdel_strategy=bottom_up"
+ ;;             "-fmenu_output=off"
+ ;;              )
+ ;;   :predicate (lambda ()
+ ;;           (if (not (flycheck-ciao-enable-check))
+ ;;           nil
+ ;;         (when (not ciao-server-process)
+ ;;                    (ciao-server-start))
+ ;;         t))
+ ;;   :error-parser flycheck-parse-ciao
+ ;;   :error-filter
+ ;;   (lambda (errors)
+ ;;      (flycheck-ciao-skip-comments
+ ;;       (flycheck-fill-empty-line-numbers
+ ;;        (flycheck-sanitize-errors errors))))
+ ;;   :modes ciao-mode
+ ;;   )
+ ;;
+ ;; (flycheck-define-checker ciaopp-incremental
+ ;;   "A Ciao syntax and assertions checker using CiaoPP for ciao-mode"
+ ;;   :command ("ciaopp-client"
+ ;;        "-op"
+ ;;             (eval flycheck-tmp-file-ciao-suffix)
+ ;;             "-V"
+ ;;             (eval (ciao-flycheck-create-tmp-file))
+ ;;              ;; (option-list "-f" flycheck-ciaopp-flags concat)
+ ;;             "-fassert_ctcheck=manual"
+ ;;             "-ftypes=none"
+ ;;             "-fmodes=sharefree_clique"
+ ;;             "-fpp_ctchecks=off"
+ ;;             "-fintermod=on"
+ ;;             ;; "-fct_modular=curr_mod"
+ ;;             "-fct_modular=all"
+ ;;             "-fentry_policy=top_level"
+ ;;             "-ffixpoint=dd"
+ ;;             "-fmain_module=/Users/isabel.garcia/git/ciao-devel/bndls/chat80/src/top/top.pl"
+ ;;             "-fincremental=on"
+ ;;             "-fdel_strategy=bottom_up"
+ ;;             "-fmenu_output=off"
+ ;;              )
+ ;;   :predicate (lambda ()
+ ;;           (if (not (flycheck-ciao-enable-check))
+ ;;           nil
+ ;;         (when (not ciao-server-process)
+ ;;                    (ciao-server-start))
+ ;;         t))
+ ;;   :error-parser flycheck-parse-ciao
+ ;;   :error-filter
+ ;;   (lambda (errors)
+ ;;      (flycheck-ciao-skip-comments
+ ;;       (flycheck-fill-empty-line-numbers
+ ;;        (flycheck-sanitize-errors errors))))
+ ;;   :modes ciao-mode
+ ;;   )
+ ;; -------------- END FLYCHECK AND COMPANY ---------------------
+
 
 (global-display-line-numbers-mode)
