@@ -64,7 +64,7 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(claude-code-ide company flycheck flycheck-color-mode-line
+   '(claude-code-ide company eat flycheck flycheck-color-mode-line
 		     flycheck-pos-tip))
  '(package-vc-selected-packages
    '((claude-code-ide :url
@@ -712,6 +712,8 @@ elfeed will re-subscribe on the next fetch."
   :bind ("C-c C-'" . claude-code-ide-menu))
 (with-eval-after-load 'vterm
   (evil-set-initial-state 'vterm-mode 'emacs))
+(with-eval-after-load 'eat
+  (evil-set-initial-state 'eat-mode 'emacs))
 
 (defun project-root-override (dir)
   (let ((root (locate-dominating-file dir ".project.el"))
@@ -719,11 +721,19 @@ elfeed will re-subscribe on the next fetch."
     (when root (list 'vc backend root))))
 
 (add-hook 'project-find-functions #'project-root-override)
+;; Use the `eat' terminal backend instead of vterm to fix rendering
+;; glitches (reflow/scroll/flicker). eat handles TUI redraws differently
+;; and often renders these full-screen agents more cleanly than vterm.
+;; The vterm-* tweaks below become no-ops under eat, but are kept so
+;; switching back to 'vterm restores the previous tuning.
+(setq claude-code-ide-terminal-backend 'eat)
+(setq claude-code-ide-no-flicker t)  ; CLAUDE_CODE_NO_FLICKER=1, Claude's own flicker-free renderer
+
 (setq claude-code-ide-prevent-reflow-glitch t)
 (setq claude-code-ide-vterm-anti-flicker t)
 (setq claude-code-ide-vterm-render-delay 0.01) ; increase from default 0.005s
 (setq claude-code-ide-terminal-initialization-delay 0.15)  ; bump from 0.1
-(setq claude-code-ide-cli-extra-flags "--plugin-dir ~/fun/ciao-verify")
+(setq claude-code-ide-cli-extra-flags "--plugin-dir ~/clip/Systems/ciao-skills")
 
 ; ispell
 (with-eval-after-load 'ispell
