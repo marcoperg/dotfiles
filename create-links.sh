@@ -38,6 +38,35 @@ symlink_dotfile() {
 	fi
 }
 
+link_managed_file() {
+	source_path="$DOTFILEDIR/$1"
+	target_path="$HOMEDIR/$2"
+	backup_path="$BACKUPDIR/$2"
+	backup_count=1
+
+	if [[ -L "$target_path" ]] && [[ "$(readlink "$target_path")" == "$source_path" ]]; then
+		return
+	fi
+
+	if [[ -e "$target_path" ]] || [[ -L "$target_path" ]]; then
+		while [[ -e "$backup_path" ]] || [[ -L "$backup_path" ]]; do
+			backup_path="$BACKUPDIR/$2.$backup_count"
+			((backup_count++))
+		done
+		mkdir -p "$(dirname "$backup_path")"
+		mv "$target_path" "$backup_path"
+	fi
+
+	mkdir -p "$(dirname "$target_path")"
+	ln -s "$source_path" "$target_path"
+}
+
+link_managed_configs() {
+	link_managed_file claude/settings.json .claude/settings.json
+	link_managed_file claude/keybindings.json .claude/keybindings.json
+	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
+}
+
 
 if [[ $SUDO_USER ]]; then
 	echo "Running scripts you find on the internet as root is dangerous. Try again without 'sudo'."
@@ -50,6 +79,11 @@ if [[ ! -e $BACKUPDIR ]]; then
 	mkdir $BACKUPDIR
 fi
 
+if [[ "$1" == "--managed" ]]; then
+	link_managed_configs
+	exit 0
+fi
+
 
 dotfiles=$(ls -1 -A $DOTFILEDIR 2> /dev/null)
 
@@ -57,10 +91,15 @@ if [[ $dotfiles ]]; then
 	echo "Symlinking dotfiles..."
 
 	for dotfile in $dotfiles; do
+		if [[ "$dotfile" == "claude" ]] || [[ "$dotfile" == "opencode" ]]; then
+			continue
+		fi
 		echo "$dotfile"
 		backup_dotfile $dotfile
 		symlink_dotfile $dotfile
 	done
+
+	link_managed_configs
 
 	git submodule update --init
 	echo "All set! Any existing files were moved to $BACKUPDIR"

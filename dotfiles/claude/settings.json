@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/meu/clip/Systems/ciao-devel/**)",
+      "Read(//tmp/**)",
+      "Write(//tmp/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/meu/clip/Systems/ciao-skills"
+    ]
+  },
+  "model": "opus",
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true
+  },
+  "tui": "fullscreen",
+  "theme": "dark",
+  "agentPushNotifEnabled": true,
+  "effortLevel": "high"
+}

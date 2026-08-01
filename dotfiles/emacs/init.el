@@ -696,24 +696,233 @@ elfeed will re-subscribe on the next fetch."
 (transient-mark-mode 1)
 (add-hook 'lptp-mode #'display-line-numbers-mode)
 
-; Claude code ide
+; === AI TOOLS ===
+;; Claude is the first-party coding agent. Keep arbitrary Elisp evaluation
+;; disabled while retaining the navigation and diagnostics MCP tools.
 (use-package claude-code-ide
   :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
-  :bind ("C-c C-'" . claude-code-ide-menu)
+  :bind (("C-c C-'" . claude-code-ide-menu)
+         ("C-c a c" . claude-code-ide-menu))
+  :custom
+  (claude-code-ide-enable-execute-code nil)
   :config
-  (claude-code-ide-emacs-tools-setup)) ; expose xref, treesit, imenu, etc.
-(use-package claude-code-ide
-  :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
-  :config
-  (claude-code-ide-emacs-tools-setup)
-  ;; Force Emacs state (pass-through) in Claude terminal buffers
-  (evil-set-initial-state 'claude-code-ide-mode 'emacs)
-  ;; Optionally: get back to normal state with C-z as usual
-  :bind ("C-c C-'" . claude-code-ide-menu))
-(with-eval-after-load 'vterm
-  (evil-set-initial-state 'vterm-mode 'emacs))
+  (claude-code-ide-emacs-tools-setup))
+
+;; Claude keeps the first-party fullscreen TUI and Emacs IDE integration.
+;; Evil normal state navigates the transcript; insert state edits the prompt.
+(defun my/claude-code-eat-send-control (key &optional meta)
+  "Send CTRL+KEY, prefixed with META when non-nil, to Claude's Eat terminal."
+  (eat-term-send-string
+   eat-terminal
+   (concat (if meta "\e" "")
+           (string (logand (string-to-char key) 31)))))
+
+(defun my/claude-code-line-up ()
+  (interactive)
+  (my/claude-code-eat-send-control "y" t))
+
+(defun my/claude-code-line-down ()
+  (interactive)
+  (my/claude-code-eat-send-control "e" t))
+
+(defun my/claude-code-half-page-up ()
+  (interactive)
+  (my/claude-code-eat-send-control "u" t))
+
+(defun my/claude-code-half-page-down ()
+  (interactive)
+  (my/claude-code-eat-send-control "d" t))
+
+(defun my/claude-code-page-up ()
+  (interactive)
+  (my/claude-code-eat-send-control "b" t))
+
+(defun my/claude-code-page-down ()
+  (interactive)
+  (my/claude-code-eat-send-control "f" t))
+
+(defun my/claude-code-first-message ()
+  (interactive)
+  (my/claude-code-eat-send-control "h" t))
+
+(defun my/claude-code-last-message ()
+  (interactive)
+  (my/claude-code-eat-send-control "l" t))
+
+(defun my/claude-code-command ()
+  "Enter insert state and begin a Claude slash command."
+  (interactive)
+  (evil-insert-state)
+  (eat-term-send-string eat-terminal "/"))
+
+(defun my/claude-code-interrupt ()
+  "Send Escape to Claude."
+  (interactive)
+  (eat-term-send-string eat-terminal "\e"))
+
+(defvar my/claude-code-eat-mode-map (make-sparse-keymap))
+
+(define-minor-mode my/claude-code-eat-mode
+  "Vim-style controls for Claude Code's fullscreen TUI in Eat."
+  :lighter " Claude"
+  :keymap my/claude-code-eat-mode-map)
+
+(with-eval-after-load 'evil
+  (evil-define-key 'normal my/claude-code-eat-mode-map
+    "j" #'my/claude-code-line-down
+    "k" #'my/claude-code-line-up
+    (kbd "C-d") #'my/claude-code-half-page-down
+    (kbd "C-u") #'my/claude-code-half-page-up
+    (kbd "C-f") #'my/claude-code-page-down
+    (kbd "C-b") #'my/claude-code-page-up
+    (kbd "g g") #'my/claude-code-first-message
+    "G" #'my/claude-code-last-message
+    ":" #'my/claude-code-command
+    "/" #'my/claude-code-command
+    (kbd "<escape>") #'my/claude-code-interrupt))
+
+(defun my/claude-code-eat-setup (&rest _)
+  "Enable modal controls only in Claude Code IDE Eat buffers."
+  (when (string-prefix-p "*claude-code[" (buffer-name))
+    (my/claude-code-eat-mode 1)
+    (evil-normal-state)))
+
 (with-eval-after-load 'eat
-  (evil-set-initial-state 'eat-mode 'emacs))
+  (add-hook 'eat-exec-hook #'my/claude-code-eat-setup))
+
+;; OpenCode is the autonomous OpenAI coding agent. It uses the existing
+;; ChatGPT OAuth credential managed by the OpenCode CLI.
+(let ((opencode-bin-directory (expand-file-name "~/.opencode/bin")))
+  (add-to-list 'exec-path opencode-bin-directory)
+  (setenv "PATH" (concat opencode-bin-directory path-separator (getenv "PATH"))))
+
+;; The official OpenCode TUI is the primary coding interface. Evil normal
+;; state controls OpenCode's message viewport; insert state controls its prompt.
+(defun my/opencode-vterm-send (key &optional meta ctrl)
+  "Send KEY with optional META and CTRL modifiers to OpenCode."
+  (vterm-send-key key nil meta ctrl))
+
+(defun my/opencode-vterm-line-up ()
+  (interactive)
+  (my/opencode-vterm-send "y" t t))
+
+(defun my/opencode-vterm-line-down ()
+  (interactive)
+  (my/opencode-vterm-send "e" t t))
+
+(defun my/opencode-vterm-half-page-up ()
+  (interactive)
+  (my/opencode-vterm-send "u" t t))
+
+(defun my/opencode-vterm-half-page-down ()
+  (interactive)
+  (my/opencode-vterm-send "d" t t))
+
+(defun my/opencode-vterm-page-up ()
+  (interactive)
+  (my/opencode-vterm-send "b" t t))
+
+(defun my/opencode-vterm-page-down ()
+  (interactive)
+  (my/opencode-vterm-send "f" t t))
+
+(defun my/opencode-vterm-first-message ()
+  (interactive)
+  (my/opencode-vterm-send "g" nil t))
+
+(defun my/opencode-vterm-last-message ()
+  (interactive)
+  (my/opencode-vterm-send "g" t t))
+
+(defun my/opencode-vterm-wheel-up (_event)
+  (interactive "e")
+  (dotimes (_ 3) (my/opencode-vterm-line-up)))
+
+(defun my/opencode-vterm-wheel-down (_event)
+  (interactive "e")
+  (dotimes (_ 3) (my/opencode-vterm-line-down)))
+
+(defun my/opencode-vterm-leader ()
+  "Read one key and send it after OpenCode's C-x leader."
+  (interactive)
+  (let ((key (read-char "OpenCode leader key: ")))
+    (unless (characterp key)
+      (user-error "OpenCode leader expects a character"))
+    (my/opencode-vterm-send "x" nil t)
+    (my/opencode-vterm-send (char-to-string key))))
+
+(defun my/opencode-vterm-command ()
+  "Enter insert state and begin an OpenCode slash command."
+  (interactive)
+  (evil-insert-state)
+  (vterm-send-string "/"))
+
+(defun my/opencode-vterm-interrupt ()
+  "Send Escape to OpenCode."
+  (interactive)
+  (vterm-send-key "<escape>"))
+
+(defvar my/opencode-vterm-mode-map (make-sparse-keymap))
+
+(define-minor-mode my/opencode-vterm-mode
+  "Vim-style controls for the OpenCode TUI in vterm."
+  :lighter " OpenCode"
+  :keymap my/opencode-vterm-mode-map
+  (when my/opencode-vterm-mode
+    (display-line-numbers-mode -1)))
+
+(with-eval-after-load 'evil
+  (evil-define-key 'normal my/opencode-vterm-mode-map
+    "j" #'my/opencode-vterm-line-down
+    "k" #'my/opencode-vterm-line-up
+    (kbd "C-d") #'my/opencode-vterm-half-page-down
+    (kbd "C-u") #'my/opencode-vterm-half-page-up
+    (kbd "C-f") #'my/opencode-vterm-page-down
+    (kbd "C-b") #'my/opencode-vterm-page-up
+    (kbd "g g") #'my/opencode-vterm-first-message
+    "G" #'my/opencode-vterm-last-message
+    (kbd "SPC") #'my/opencode-vterm-leader
+    ":" #'my/opencode-vterm-command
+    "/" #'my/opencode-vterm-command
+    (kbd "<escape>") #'my/opencode-vterm-interrupt)
+  (evil-define-key '(normal insert) my/opencode-vterm-mode-map
+    (kbd "<wheel-up>") #'my/opencode-vterm-wheel-up
+    (kbd "<wheel-down>") #'my/opencode-vterm-wheel-down))
+
+(defun my/opencode-vterm ()
+  "Open the official OpenCode TUI in a project-local vterm."
+  (interactive)
+  (require 'vterm)
+  (let* ((project (project-current))
+         (root (file-name-as-directory
+                (expand-file-name (if project (project-root project)
+                                    default-directory))))
+         (name (format "*opencode:%s*"
+                       (file-name-nondirectory (directory-file-name root))))
+         (existing (get-buffer name)))
+    (if (buffer-live-p existing)
+        (pop-to-buffer existing)
+      (let ((default-directory root)
+            (vterm-shell (expand-file-name "~/.opencode/bin/opencode")))
+        (let ((buffer (vterm name)))
+          (with-current-buffer buffer
+            (my/opencode-vterm-mode 1)
+            (evil-normal-state))
+          buffer)))))
+
+(global-set-key (kbd "C-c a o") #'my/opencode-vterm)
+
+;; gptel is the lightweight ChatGPT interface for conversations, selected
+;; context, and in-place rewrites. It intentionally has no agentic tools.
+(use-package gptel
+  :ensure t
+  :commands (gptel gptel-send gptel-rewrite gptel-openai-oauth-login)
+  :bind (("C-c a g" . gptel)
+         ("C-c a s" . gptel-send)
+         ("C-c a r" . gptel-rewrite))
+  :config
+  (setq gptel-model 'gpt-5.6-terra
+        gptel-backend (gptel-make-openai-oauth "ChatGPT")))
 
 (defun project-root-override (dir)
   (let ((root (locate-dominating-file dir ".project.el"))

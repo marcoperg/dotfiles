@@ -1,0 +1,19 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
+  "$docs": "https://code.claude.com/docs/en/keybindings",
+  "bindings": [
+    {
+      "context": "Scroll",
+      "bindings": {
+        "ctrl+alt+y": "scroll:lineUp",
+        "ctrl+alt+e": "scroll:lineDown",
+        "ctrl+alt+u": "scroll:halfPageUp",
+        "ctrl+alt+d": "scroll:halfPageDown",
+        "ctrl+alt+b": "scroll:fullPageUp",
+        "ctrl+alt+f": "scroll:fullPageDown",
+        "ctrl+alt+h": "scroll:top",
+        "ctrl+alt+l": "scroll:bottom"
+      }
+    }
+  ]
+}
