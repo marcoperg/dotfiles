@@ -845,11 +845,15 @@ elfeed will re-subscribe on the next fetch."
 (defun my/opencode-vterm-leader ()
   "Read one key and send it after OpenCode's C-x leader."
   (interactive)
-  (let ((key (read-char "OpenCode leader key: ")))
-    (unless (characterp key)
-      (user-error "OpenCode leader expects a character"))
+  (let ((key (read-event "OpenCode leader key: ")))
     (my/opencode-vterm-send "x" nil t)
-    (my/opencode-vterm-send (char-to-string key))))
+    (vterm-send (key-description (vector key)))))
+
+(defun my/opencode-vterm-first-child ()
+  "Open the first OpenCode child session."
+  (interactive)
+  (my/opencode-vterm-send "x" nil t)
+  (vterm-send "<down>"))
 
 (defun my/opencode-vterm-command ()
   "Enter insert state and begin an OpenCode slash command."
@@ -886,11 +890,13 @@ elfeed will re-subscribe on the next fetch."
     "/" #'my/opencode-vterm-command
     (kbd "<escape>") #'my/opencode-vterm-interrupt)
   (evil-define-key '(normal insert) my/opencode-vterm-mode-map
+    (kbd "C-x") nil
+    (kbd "C-x <down>") #'my/opencode-vterm-first-child
     (kbd "<wheel-up>") #'my/opencode-vterm-wheel-up
     (kbd "<wheel-down>") #'my/opencode-vterm-wheel-down))
 
 (defun my/opencode-vterm ()
-  "Open the official OpenCode TUI in a project-local vterm."
+  "open the official opencode tui in a project-local vterm."
   (interactive)
   (require 'vterm)
   (let* ((project (project-current))
@@ -903,7 +909,15 @@ elfeed will re-subscribe on the next fetch."
     (if (buffer-live-p existing)
         (pop-to-buffer existing)
       (let ((default-directory root)
-            (vterm-shell (expand-file-name "~/.opencode/bin/opencode")))
+            (vterm-shell
+             (mapconcat
+              #'shell-quote-argument
+              (list (expand-file-name "~/.opencode/bin/opencode")
+                    "attach"
+                    "http://localhost:4096"
+                    "--dir"
+                    root)
+              " ")))
         (let ((buffer (vterm name)))
           (with-current-buffer buffer
             (my/opencode-vterm-mode 1)

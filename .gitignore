@@ -81,6 +81,9 @@ org-roam.db
 # URL cache
 dotfiles/emacs/url/
 
+# HTTP request cookies
+dotfiles/emacs/request/
+
 # Compiled files
 *.elc
 

@@ -61,10 +61,36 @@ link_managed_file() {
 	ln -s "$source_path" "$target_path"
 }
 
+install_opencode_state_defaults() {
+	local defaults_path="$DOTFILEDIR/opencode/state-defaults.json"
+	local state_path="$HOMEDIR/.local/state/opencode/kv.json"
+	local temp_path
+
+	mkdir -p "$(dirname "$state_path")"
+	if [[ ! -e "$state_path" ]]; then
+		cp "$defaults_path" "$state_path"
+		return
+	fi
+
+	if ! command -v jq >/dev/null 2>&1; then
+		echo "jq is required to merge OpenCode state defaults into $state_path"
+		return 1
+	fi
+
+	temp_path=$(mktemp "$state_path.XXXXXX")
+	if jq -s '.[0] * .[1]' "$state_path" "$defaults_path" > "$temp_path"; then
+		mv "$temp_path" "$state_path"
+	else
+		rm -f "$temp_path"
+		return 1
+	fi
+}
+
 link_managed_configs() {
 	link_managed_file claude/settings.json .claude/settings.json
 	link_managed_file claude/keybindings.json .claude/keybindings.json
 	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
+	install_opencode_state_defaults
 }
 
 

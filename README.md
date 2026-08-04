@@ -16,7 +16,10 @@ runtime state directories intact:
 - `~/.claude/keybindings.json`
 - `~/.config/opencode/opencode.jsonc`
 
-Run `./create-links.sh --managed` to install just these links.
+It also merges `dotfiles/opencode/state-defaults.json` into OpenCode's mutable
+`~/.local/state/opencode/kv.json`. This keeps preferences such as disabled TUI
+animations reproducible without symlinking or tracking the rest of the runtime
+state. Run `./create-links.sh --managed` to apply these managed settings.
 
 Do not add `~/.claude.json`, `~/.claude/` runtime state, or
 `~/.config/opencode/node_modules/`; they contain account data, sessions, and
