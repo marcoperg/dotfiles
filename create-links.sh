@@ -87,6 +87,7 @@ install_opencode_state_defaults() {
 }
 
 link_managed_configs() {
+	link_managed_file .zshenv .zshenv
 	link_managed_file claude/settings.json .claude/settings.json
 	link_managed_file claude/keybindings.json .claude/keybindings.json
 	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
