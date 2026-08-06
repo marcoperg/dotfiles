@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>local.opencode.server</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/meu/.opencode/bin/opencode</string>
+    <string>web</string>
+    <string>--hostname</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>4096</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/meu</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/meu/Library/Logs/OpenCode/server.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/meu/Library/Logs/OpenCode/server-error.log</string>
+</dict>
+</plist>
