@@ -796,135 +796,114 @@ elfeed will re-subscribe on the next fetch."
   (add-to-list 'exec-path opencode-bin-directory)
   (setenv "PATH" (concat opencode-bin-directory path-separator (getenv "PATH"))))
 
-;; The official OpenCode TUI is the primary coding interface. Evil normal
-;; state controls OpenCode's message viewport; insert state controls its prompt.
-(defun my/opencode-vterm-send (key &optional meta ctrl)
-  "Send KEY with optional META and CTRL modifiers to OpenCode."
-  (vterm-send-key key nil meta ctrl))
+;; OpenCode uses SGR mouse reporting, which vterm does not forward from Emacs
+;; mouse events.  Send clicks explicitly while leaving all keyboard input to
+;; vterm and OpenCode.
+(defun my/opencode-vterm-send-mouse (event button final)
+  "Send mouse EVENT to OpenCode using SGR FINAL byte."
+  (let* ((position (event-start event))
+         (column-row (posn-col-row position 'use-window)))
+    (vterm-send-string
+     (format "\e[<%d;%d;%d%s"
+             button
+             (1+ (car column-row))
+             (1+ (cdr column-row))
+             final))))
+
+(defun my/opencode-vterm-mouse-down (event)
+  (interactive "e")
+  (my/opencode-vterm-send-mouse event 0 "M"))
+
+(defun my/opencode-vterm-mouse-up (event)
+  (interactive "e")
+  (my/opencode-vterm-send-mouse event 0 "m"))
+
+(defun my/opencode-vterm-wheel-up (event)
+  (interactive "e")
+  (my/opencode-vterm-send-mouse event 64 "M"))
+
+(defun my/opencode-vterm-wheel-down (event)
+  (interactive "e")
+  (my/opencode-vterm-send-mouse event 65 "M"))
+
+(defun my/opencode-vterm-toggle-output ()
+  "Send OpenCode's C-x o output toggle."
+  (interactive)
+  (vterm-send-key "x" nil nil t)
+  (vterm-send-key "o"))
 
 (defun my/opencode-vterm-line-up ()
   (interactive)
-  (my/opencode-vterm-send "y" t t))
+  (vterm-send-key "y" nil t t))
 
 (defun my/opencode-vterm-line-down ()
   (interactive)
-  (my/opencode-vterm-send "e" t t))
-
-(defun my/opencode-vterm-half-page-up ()
-  (interactive)
-  (my/opencode-vterm-send "u" t t))
-
-(defun my/opencode-vterm-half-page-down ()
-  (interactive)
-  (my/opencode-vterm-send "d" t t))
+  (vterm-send-key "e" nil t t))
 
 (defun my/opencode-vterm-page-up ()
   (interactive)
-  (my/opencode-vterm-send "b" t t))
+  (vterm-send-key "b" nil t t))
 
 (defun my/opencode-vterm-page-down ()
   (interactive)
-  (my/opencode-vterm-send "f" t t))
+  (vterm-send-key "f" nil t t))
 
-(defun my/opencode-vterm-first-message ()
-  (interactive)
-  (my/opencode-vterm-send "g" nil t))
+(defvar my/opencode-vterm-input-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [down-mouse-1] #'my/opencode-vterm-mouse-down)
+    (define-key map [mouse-1] #'my/opencode-vterm-mouse-up)
+    (define-key map [wheel-up] #'my/opencode-vterm-wheel-up)
+    (define-key map [wheel-down] #'my/opencode-vterm-wheel-down)
+    (define-key map [mouse-4] #'my/opencode-vterm-wheel-up)
+    (define-key map [mouse-5] #'my/opencode-vterm-wheel-down)
+    (define-key map (kbd "M-o") #'my/opencode-vterm-toggle-output)
+    (define-key map (kbd "C-x o") #'my/opencode-vterm-toggle-output)
+    (define-key map (kbd "C-y") #'my/opencode-vterm-line-up)
+    (define-key map (kbd "C-e") #'my/opencode-vterm-line-down)
+    (define-key map (kbd "C-b") #'my/opencode-vterm-page-up)
+    (define-key map (kbd "C-f") #'my/opencode-vterm-page-down)
+    map))
 
-(defun my/opencode-vterm-last-message ()
-  (interactive)
-  (my/opencode-vterm-send "g" t t))
+(define-minor-mode my/opencode-vterm-input-mode
+  "Forward OpenCode mouse input from vterm."
+  :keymap my/opencode-vterm-input-mode-map)
 
-(defun my/opencode-vterm-wheel-up (_event)
-  (interactive "e")
-  (dotimes (_ 3) (my/opencode-vterm-line-up)))
+(defun my/opencode-configure-vterm-buffer ()
+  "Give OpenCode unfiltered keyboard and mouse input in the current vterm."
+  (display-line-numbers-mode -1)
+  (when (fboundp 'evil-local-mode)
+    (evil-local-mode -1))
+  (my/opencode-vterm-input-mode 1))
 
-(defun my/opencode-vterm-wheel-down (_event)
-  (interactive "e")
-  (dotimes (_ 3) (my/opencode-vterm-line-down)))
-
-(defun my/opencode-vterm-leader ()
-  "Read one key and send it after OpenCode's C-x leader."
-  (interactive)
-  (let ((key (read-event "OpenCode leader key: ")))
-    (my/opencode-vterm-send "x" nil t)
-    (vterm-send (key-description (vector key)))))
-
-(defun my/opencode-vterm-first-child ()
-  "Open the first OpenCode child session."
-  (interactive)
-  (my/opencode-vterm-send "x" nil t)
-  (vterm-send "<down>"))
-
-(defun my/opencode-vterm-command ()
-  "Enter insert state and begin an OpenCode slash command."
-  (interactive)
-  (evil-insert-state)
-  (vterm-send-string "/"))
-
-(defun my/opencode-vterm-interrupt ()
-  "Send Escape to OpenCode."
-  (interactive)
-  (vterm-send-key "<escape>"))
-
-(defvar my/opencode-vterm-mode-map (make-sparse-keymap))
-
-(define-minor-mode my/opencode-vterm-mode
-  "Vim-style controls for the OpenCode TUI in vterm."
-  :lighter " OpenCode"
-  :keymap my/opencode-vterm-mode-map
-  (when my/opencode-vterm-mode
-    (display-line-numbers-mode -1)))
-
-(with-eval-after-load 'evil
-  (evil-define-key 'normal my/opencode-vterm-mode-map
-    "j" #'my/opencode-vterm-line-down
-    "k" #'my/opencode-vterm-line-up
-    (kbd "C-d") #'my/opencode-vterm-half-page-down
-    (kbd "C-u") #'my/opencode-vterm-half-page-up
-    (kbd "C-f") #'my/opencode-vterm-page-down
-    (kbd "C-b") #'my/opencode-vterm-page-up
-    (kbd "g g") #'my/opencode-vterm-first-message
-    "G" #'my/opencode-vterm-last-message
-    (kbd "SPC") #'my/opencode-vterm-leader
-    ":" #'my/opencode-vterm-command
-    "/" #'my/opencode-vterm-command
-    (kbd "<escape>") #'my/opencode-vterm-interrupt)
-  (evil-define-key '(normal insert) my/opencode-vterm-mode-map
-    (kbd "C-x") nil
-    (kbd "C-x <down>") #'my/opencode-vterm-first-child
-    (kbd "<wheel-up>") #'my/opencode-vterm-wheel-up
-    (kbd "<wheel-down>") #'my/opencode-vterm-wheel-down))
-
-(defun my/opencode-vterm ()
-  "open the official opencode tui in a project-local vterm."
+(defun my/opencode ()
+  "Open the official OpenCode TUI in a project-local vterm."
   (interactive)
   (require 'vterm)
   (let* ((project (project-current))
          (root (file-name-as-directory
-                (expand-file-name (if project (project-root project)
-                                    default-directory))))
+                 (expand-file-name (if project (project-root project)
+                                     default-directory))))
          (name (format "*opencode:%s*"
                        (file-name-nondirectory (directory-file-name root))))
          (existing (get-buffer name)))
     (if (buffer-live-p existing)
-        (pop-to-buffer existing)
+        (progn
+          (pop-to-buffer existing)
+          (with-current-buffer existing
+            (my/opencode-configure-vterm-buffer)))
       (let ((default-directory root)
             (vterm-shell
              (mapconcat
               #'shell-quote-argument
               (list (expand-file-name "~/.opencode/bin/opencode")
-                    "attach"
-                    "http://localhost:4096"
-                    "--dir"
-                    root)
+                    "attach" "http://localhost:4096" "--dir" root)
               " ")))
         (let ((buffer (vterm name)))
           (with-current-buffer buffer
-            (my/opencode-vterm-mode 1)
-            (evil-normal-state))
+            (my/opencode-configure-vterm-buffer))
           buffer)))))
 
-(global-set-key (kbd "C-c a o") #'my/opencode-vterm)
+(global-set-key (kbd "C-c a o") #'my/opencode)
 
 ;; gptel is the lightweight ChatGPT interface for conversations, selected
 ;; context, and in-place rewrites. It intentionally has no agentic tools.
