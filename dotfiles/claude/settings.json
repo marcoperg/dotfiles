@@ -1,24 +1,52 @@
 {
-    "permissions": {
-        "allow": [
-            "Read(//Users/meu/clip/Systems/ciao-devel/**)",
-            "Read(//tmp/**)",
-            "Write(//tmp/**)"
-        ],
-        "additionalDirectories": [
-            "/Users/meu/clip/Systems/ciao-skills"
-        ]
-    },
-    "model": "opus",
-    "enabledPlugins": {
-        "typescript-lsp@claude-plugins-official": true,
-        "clangd-lsp@claude-plugins-official": true
-    },
-    "effortLevel": "high",
-    "tui": "fullscreen",
-    "theme": "dark",
-    "agentPushNotifEnabled": true,
-    "attribution": {
-        "commit": ""
-    }
+  "attribution": {
+    "commit": ""
+  },
+  "permissions": {
+    "allow": [
+      "Read(//Users/meu/clip/Systems/ciao-devel/**)",
+      "Read(//tmp/**)",
+      "Write(//tmp/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/meu/clip/Systems/ciao-skills"
+    ]
+  },
+  "model": "opus",
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "theme": "dark",
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: assume private (gitlab.software.imdea.org host, not queryable via gh; no public-visibility evidence found) — cliplab/papers/assrt-to-lptp",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: main (default branch; protection status not queryable — gh check unavailable for this host)",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Source control**: gitlab.software.imdea.org/cliplab/papers/assrt-to-lptp (origin) only — as scoped by Trusted repo and Repository visibility above",
+      "**Trusted internal domains**: gitlab.software.imdea.org",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries prod or production as a whole word or name segment (hyphen/underscore/dot-delimited)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries prod or production as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (Ciao Prolog / LPTP research paper implementation and translator)",
+      "**Trusted repo**: /Users/meu/clip/Papers/assrt-to-lptp (working directory) and its remote origin at gitlab.software.imdea.org/cliplab/papers/assrt-to-lptp.git — assumed private; confidential material OK there, but secrets and sensitive personal/entrusted data are never cleared into it by visibility alone",
+      "**Org-specific CLIs**: ciaopp, ciao (Ciao/CiaoPP toolchain, used routinely in this project)",
+      "routine under /Users/meu/clip/Papers/assrt-to-lptp/ prefix"
+    ]
+  }
 }

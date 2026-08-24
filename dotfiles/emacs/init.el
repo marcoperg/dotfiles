@@ -832,6 +832,18 @@ elfeed will re-subscribe on the next fetch."
   (vterm-send-key "x" nil nil t)
   (vterm-send-key "o"))
 
+(defun my/opencode-vterm-leader-key ()
+  "Forward OpenCode's C-x leader followed by the invoking key."
+  (interactive)
+  (vterm-send-key "x" nil nil t)
+  (dolist (key (vterm--translate-event-to-args last-command-event))
+    (apply #'vterm-send-key key)))
+
+(defun my/opencode-vterm-interrupt ()
+  "Send Escape directly to OpenCode."
+  (interactive)
+  (vterm-send-key "<escape>"))
+
 (defun my/opencode-vterm-line-up ()
   (interactive)
   (vterm-send-key "y" nil t t))
@@ -848,20 +860,33 @@ elfeed will re-subscribe on the next fetch."
   (interactive)
   (vterm-send-key "f" nil t t))
 
+(defconst my/opencode-leader-keys
+  '("q" "e" "t" "b" "s" "x" "n" "l" "g" "c" "<down>"
+    "m" "a" "y" "u" "r" "h" "o")
+  "Keys used after OpenCode's C-x leader.")
+
 (defvar my/opencode-vterm-input-mode-map
-  (let ((map (make-sparse-keymap)))
+  (let ((map (make-sparse-keymap))
+        (alternate-leader-map (make-sparse-keymap)))
     (define-key map [down-mouse-1] #'my/opencode-vterm-mouse-down)
     (define-key map [mouse-1] #'my/opencode-vterm-mouse-up)
     (define-key map [wheel-up] #'my/opencode-vterm-wheel-up)
     (define-key map [wheel-down] #'my/opencode-vterm-wheel-down)
     (define-key map [mouse-4] #'my/opencode-vterm-wheel-up)
     (define-key map [mouse-5] #'my/opencode-vterm-wheel-down)
+    (define-key map [escape] #'my/opencode-vterm-interrupt)
     (define-key map (kbd "M-o") #'my/opencode-vterm-toggle-output)
-    (define-key map (kbd "C-x o") #'my/opencode-vterm-toggle-output)
     (define-key map (kbd "C-y") #'my/opencode-vterm-line-up)
     (define-key map (kbd "C-e") #'my/opencode-vterm-line-down)
     (define-key map (kbd "C-b") #'my/opencode-vterm-page-up)
     (define-key map (kbd "C-f") #'my/opencode-vterm-page-down)
+    (dolist (key my/opencode-leader-keys)
+      (define-key alternate-leader-map (kbd key)
+                  #'my/opencode-vterm-leader-key)
+      (let ((sequence (kbd (concat "C-x " key))))
+        (unless (key-binding sequence)
+          (define-key map sequence #'my/opencode-vterm-leader-key))))
+    (define-key map (kbd "C-c o") alternate-leader-map)
     map))
 
 (define-minor-mode my/opencode-vterm-input-mode
