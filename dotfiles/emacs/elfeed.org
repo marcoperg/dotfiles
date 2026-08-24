@@ -95,11 +95,11 @@
 *** Category Theory :ct:
 **** [[https://export.arxiv.org/api/query?search_query=cat:math.CT&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.CT]]
 *** Algebraic Geometry :ag:
-**** [[https://export.arxiv.org/api/query?search_query=cat:math.AG&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AG]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.AG&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AG]] :hidden:
 *** Commutative Algebra :ac:
-**** [[https://export.arxiv.org/api/query?search_query=cat:math.AC&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AC]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.AC&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AC]] :hidden:
 *** Algebraic Topology :at:
-**** [[https://export.arxiv.org/api/query?search_query=cat:math.AT&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AT]]
+**** [[https://export.arxiv.org/api/query?search_query=cat:math.AT&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending][arXiv math.AT]] :hidden:
 
 ** Linguistics :linguistics:paper:
 *** Computation and Language :cl:
