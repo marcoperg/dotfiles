@@ -14,30 +14,6 @@ CURRENTDIR=$(pwd -P)
 DOTFILEDIR="$CURRENTDIR/dotfiles"
 
 
-backup_dotfile() {
-	if [[ -e "$HOMEDIR/$1" ]]; then
-
-		# Do we already have any backups? How many?
-		# This needs some work. Doesn't handle things like
-		# $BACKUPDIR/.vim* and $BACKUPDIR/.vimrc* well
-		dotfile_count=$(find $BACKUPDIR/$1* -maxdepth 0 2> /dev/null | wc -l | sed 's/ //g')
-
-		if [[ $dotfile_count -ne '0' ]]; then
-			mv $HOMEDIR/$1 $BACKUPDIR/$1.$dotfile_count
-		else
-			mv $HOMEDIR/$1 $BACKUPDIR/$1
-		fi
-	fi
-}
-
-symlink_dotfile() {
-	if [[ $DOTFILEDIR/$1 == *"nvim"* ]] | [[ $DOTFILEDIR/$1 == *"i3"* ]]; then
-		ln -s $DOTFILEDIR/$1 $HOMEDIR/.config/$1
-	else
-		ln -s $DOTFILEDIR/$1 $HOMEDIR/$1
-	fi
-}
-
 link_managed_file() {
 	source_path="$DOTFILEDIR/$1"
 	target_path="$HOMEDIR/$2"
@@ -59,6 +35,16 @@ link_managed_file() {
 
 	mkdir -p "$(dirname "$target_path")"
 	ln -s "$source_path" "$target_path"
+}
+
+link_dotfile() {
+	local target_path
+	case "$1" in
+		emacs) target_path=.emacs.d ;;
+		nvim|i3) target_path=.config/$1 ;;
+		*) target_path=$1 ;;
+	esac
+	link_managed_file "$1" "$target_path"
 }
 
 install_opencode_state_defaults() {
@@ -123,8 +109,7 @@ if [[ $dotfiles ]]; then
 			continue
 		fi
 		echo "$dotfile"
-		backup_dotfile $dotfile
-		symlink_dotfile $dotfile
+		link_dotfile "$dotfile"
 	done
 
 	link_managed_configs

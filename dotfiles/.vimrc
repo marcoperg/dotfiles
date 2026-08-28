@@ -6,11 +6,8 @@ set ai
 set smartindent
 set laststatus=2
 set mouse=a
-set ts=3
-set sw=3
+set autoindent expandtab tabstop=4 shiftwidth=4
 set hlsearch
 set spelllang=es,en
 set showcmd
 set bg=dark
-autocmd FileType haskell setlocal expandtab
-" autocmd FileType python setlocal expandtab
