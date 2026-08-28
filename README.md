@@ -37,5 +37,7 @@ synchronization, vterm, PDF Tools, spelling, and LaTeX with:
 
 The script supports Ubuntu/Debian (`apt-get`), Arch Linux (`pacman`, plus
 `paru` or `yay` for the AUR `mu` package), and macOS or Linux with Homebrew.
+When the `apt-get` version of mu is too old for current Emacs releases, the
+script builds a pinned mu release under `~/.local` and verifies its checksum.
 It does not run from `create-links.sh`, so linking dotfiles never changes
 system packages unexpectedly.

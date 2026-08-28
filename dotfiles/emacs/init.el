@@ -505,6 +505,9 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 ; === MAIL ===
 ;; mu4e ships with the external mu program, not as an ELPA package.
+(let ((local-mu4e-dir (expand-file-name "~/.local/share/emacs/site-lisp/mu4e")))
+  (when (file-directory-p local-mu4e-dir)
+    (add-to-list 'load-path local-mu4e-dir)))
 (dolist (dir (append
               '("/usr/share/emacs/site-lisp/mu4e"
                 "/usr/local/share/emacs/site-lisp/mu4e"
@@ -521,10 +524,13 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
               (file-expand-wildcards "/opt/homebrew/Cellar/mu/*/share/emacs/site-lisp/mu4e")
               (file-expand-wildcards "/opt/homebrew/Cellar/mu/*/share/emacs/site-lisp/mu/mu4e")))
   (when (file-directory-p dir)
-    (add-to-list 'load-path dir)))
+    (add-to-list 'load-path dir t)))
 (when (require 'mu4e nil t)
 
 ;; Base configuration
+(let ((local-mu (expand-file-name "~/.local/bin/mu")))
+  (when (file-executable-p local-mu)
+    (setq mu4e-mu-binary local-mu)))
 (setq mu4e-maildir "~/Mail")
 ;; Getting mail
 (setq mu4e-get-mail-command "mbsync -a")
