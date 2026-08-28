@@ -74,6 +74,7 @@ dotfiles/emacs/tramp/
 dotfiles/emacs/bookmarks/
 dotfiles/emacs/transient/
 dotfiles/emacs/projects
+dotfiles/emacs/projects.eld
 
 # Org-roam database
 org-roam.db

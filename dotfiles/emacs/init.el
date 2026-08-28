@@ -1,4 +1,14 @@
-(load-theme 'modus-vivendi)
+;;; init.el --- Personal Emacs configuration -*- lexical-binding: t; -*-
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+
+(condition-case err
+    (load-theme 'modus-vivendi t)
+  (error
+   (message "Modus Vivendi unavailable (%s); using Wombat" (error-message-string err))
+   (load-theme 'wombat t)))
 (global-visual-line-mode t)
 (global-auto-revert-mode t)
 
@@ -177,7 +187,8 @@ that share \\input fragments) each compile itself."
 )
 
 ; === PDF READER ===
-(pdf-tools-install)
+(when (require 'pdf-tools nil t)
+  (pdf-tools-install))
 (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 (customize-set-variable 'tramp-default-method "ssh")
@@ -237,24 +248,14 @@ that share \\input fragments) each compile itself."
 ; EVIL MODE
 (defconst evil_mode_enabled t
   "If not-nil, activate evil mode.")
-(when evil_mode_enabled
+(when (and evil_mode_enabled
+           (require 'evil nil t)
+           (require 'evil-collection nil t))
     (setq evil-undo-system 'undo-fu)
     ;; https://github.com/emacs-evil/evil-collection/issues/60
     (setq evil-want-keybinding nil)
 
-    ;; Set up package.el to work with MELPA
-    (require 'package)
-    (add-to-list 'package-archives
-		'("melpa" . "https://melpa.org/packages/"))
-    (package-initialize)
-    ; (package-refresh-contents)
-
-    ;; Download Evil
-    (unless (package-installed-p 'evil)
-    (package-install 'evil))
-
     ;; Enable Evil
-    (require 'evil)
     (evil-mode 1)
 
     (evil-collection-init)
@@ -321,8 +322,10 @@ that share \\input fragments) each compile itself."
 (setq org-roam-directory (file-truename "~/knowledge/episteme"))
 (load "~/knowledge/praxis/lisp/praxis-utils.el")
 
-(org-roam-db-autosync-mode)
-(use-package org-roam
+(when (and (require 'org-roam nil t)
+           (require 'use-package nil t))
+  (org-roam-db-autosync-mode)
+  (use-package org-roam
     :after org
     :custom
     (org-roam-directory (file-truename org-roam-directory))
@@ -335,7 +338,7 @@ that share \\input fragments) each compile itself."
                   ("C-c n o" . org-id-get-create)
                   ("C-c n t" . org-roam-tag-add)
                   ("C-c n a" . org-roam-alias-add)
-                  ("C-c n l" . org-roam-buffer-toggle)))))
+                  ("C-c n l" . org-roam-buffer-toggle))))))
 
 (defun my/org-roam-get-path ()
   "Create Org-roam note path in current buffer's directory using raw title."
@@ -378,9 +381,11 @@ that share \\input fragments) each compile itself."
             (delete-file tex-file))
           (message "PDF exported to: %s" target-file))))))
 
-(define-key org-mode-map (kbd "C-c C-v") #'my/org-export-to-pdf-in-dotpdfs)
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-v") #'my/org-export-to-pdf-in-dotpdfs))
 
-(plist-put org-format-latex-options :scale 4)
+(with-eval-after-load 'org
+  (plist-put org-format-latex-options :scale 4))
 (defun my/image-scale-advice (image)
   (let* ((factor (image-property image :scale))
          (new-factor (if factor
@@ -466,7 +471,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 ; === MAIL ===
 ;; Add mu4e to your load path
 (add-to-list 'load-path "/opt/homebrew/share/emacs/site-lisp/mu/mu4e")
-(require 'mu4e)
+(when (require 'mu4e nil t)
 
 ;; Base configuration
 (setq mu4e-maildir "~/Mail")
@@ -546,7 +551,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 (add-hook 'mu4e-compose-mode-hook
           (lambda ()
-            (set-input-method "spanish-prefix")))
+            (set-input-method "spanish-prefix"))))
 
 ; Telega package
 (setq telega-server-libs-prefix "/opt/homebrew/Cellar/tdlib/HEAD-0ae923c")
@@ -568,12 +573,14 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
   (define-key dired-mode-map (kbd "C-c o") #'my/dired-open-in-file-manager))
 
 (setq dired-mouse-drag-files nil)
-(setopt dired-mouse-drag-files nil)
+(when (fboundp 'setopt)
+  (setopt dired-mouse-drag-files nil))
 
 ; === RSS FEED ===
 (setq rmh-elfeed-org-files
       (list (expand-file-name "elfeed.org" user-emacs-directory)))
-(elfeed-org)
+(when (require 'elfeed-org nil t)
+  (elfeed-org))
 (setq-default elfeed-search-filter "@6-months-ago +unread -hidden")
 
 (defun my/elfeed-purge-feed (feed-url)
@@ -989,18 +996,13 @@ elfeed will re-subscribe on the next fetch."
   (lambda ()
     (set-face-attribute 'org-table nil :inherit 'fixed-pitch)))
 
-; Lean
-(add-to-list 'load-path "~/.emacs.d/lean4-mode")
-(require 'lean4-mode)
-(require 'lean4-input)
-(add-hook 'lean-mode-hook 'lean-toggle-show-goal)
-
 ; Agda
-(load-file (let ((coding-system-for-read 'utf-8))
-                (shell-command-to-string "agda --emacs-mode locate")))
-(require 'agda-input)
-(add-hook 'LaTeX-mode-hook
-          (lambda () (set-input-method "Agda")))
+(when (executable-find "agda")
+  (load-file (let ((coding-system-for-read 'utf-8))
+               (string-trim (shell-command-to-string "agda --emacs-mode locate"))))
+  (require 'agda-input)
+  (add-hook 'LaTeX-mode-hook
+            (lambda () (set-input-method "Agda"))))
 
 ; CIAO
 
@@ -1034,6 +1036,7 @@ elfeed will re-subscribe on the next fetch."
  ;;   (company-mode . company-ciao-setup)
  ;;   )
  ;; **Optional**: Enable `company-mode` in all buffers where possible.
+ (use-package company :ensure t)
  (add-hook 'after-init-hook 'global-company-mode)
  ;;
  ;; This is super-useful in general: first tab indents, second auto-completes
@@ -1069,7 +1072,7 @@ elfeed will re-subscribe on the next fetch."
  ;; 
  ;;; Paths to ciao source instead of package in ./emacs.c/elpa: ***
  (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/flycheck-ciao")
- (require 'flycheck)
+ (use-package flycheck :ensure t)
  (with-eval-after-load 'ciao (load-library "flycheck-ciao"))
  ;; `flycheck-ciao-setup' lives in flycheck-ciao.el, which is loaded lazily
  ;; only once the `ciao' feature loads (the `load-library' above, on first
@@ -1117,7 +1120,8 @@ elfeed will re-subscribe on the next fetch."
     "Flycheck face for informational messages."
     :group 'flycheck-faces))
  ;; Flycheck changes color in mode line 
- (require 'flycheck-color-mode-line)
+ (use-package flycheck-color-mode-line :ensure t)
+ (use-package flycheck-pos-tip :ensure t)
  (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
  ;; To re-flycheck after a file revert: 
  (eval-after-load 'flycheck
