@@ -79,6 +79,9 @@ dotfiles/emacs/projects.eld
 # Org-roam database
 org-roam.db
 
+# Elfeed database
+dotfiles/emacs/elfeed/
+
 # URL cache
 dotfiles/emacs/url/
 

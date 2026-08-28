@@ -4,6 +4,43 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 
+(defconst my/required-packages
+  '(auctex
+    auto-dim-other-buffers
+    company
+    eat
+    elfeed
+    elfeed-org
+    evil
+    evil-collection
+    flycheck
+    flycheck-color-mode-line
+    flycheck-pos-tip
+    gptel
+    org-roam
+    pdf-tools
+    undo-fu
+    visual-fill-column
+    vterm)
+  "Packages installed automatically by this configuration.")
+
+(defun my/ensure-required-packages ()
+  "Install packages from `my/required-packages' that are missing."
+  (let ((missing (seq-remove #'package-installed-p my/required-packages)))
+    (when missing
+      (package-refresh-contents)
+      (dolist (pkg missing)
+        (condition-case err
+            ;; DONT-SELECT keeps package.el from rewriting this tracked file.
+            (package-install pkg t)
+          (error
+           (display-warning
+            'packages
+            (format "Could not install %s: %s" pkg (error-message-string err))
+            :warning)))))))
+
+(my/ensure-required-packages)
+
 (condition-case err
     (load-theme 'modus-vivendi t)
   (error
@@ -74,8 +111,8 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(claude-code-ide company eat flycheck flycheck-color-mode-line
-		     flycheck-pos-tip))
+   '(claude-code-ide company eat evil evil-collection flycheck
+		     flycheck-color-mode-line flycheck-pos-tip undo-fu))
  '(package-vc-selected-packages
    '((claude-code-ide :url
 		      "https://github.com/manzaltu/claude-code-ide.el")))
@@ -187,8 +224,6 @@ that share \\input fragments) each compile itself."
 )
 
 ; === PDF READER ===
-(when (require 'pdf-tools nil t)
-  (pdf-tools-install))
 (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 (customize-set-variable 'tramp-default-method "ssh")
@@ -248,24 +283,24 @@ that share \\input fragments) each compile itself."
 ; EVIL MODE
 (defconst evil_mode_enabled t
   "If not-nil, activate evil mode.")
-(when (and evil_mode_enabled
-           (require 'evil nil t)
-           (require 'evil-collection nil t))
-    (setq evil-undo-system 'undo-fu)
-    ;; https://github.com/emacs-evil/evil-collection/issues/60
-    (setq evil-want-keybinding nil)
-
-    ;; Enable Evil
-    (evil-mode 1)
-
+(when evil_mode_enabled
+  (use-package undo-fu :ensure t)
+  (use-package evil
+    :ensure t
+    :init
+    (setq evil-undo-system 'undo-fu
+          ;; https://github.com/emacs-evil/evil-collection/issues/60
+          evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+  (use-package evil-collection
+    :ensure t
+    :after evil
+    :config
     (evil-collection-init)
-
-    ;; DocView
     (evil-collection-define-key 'normal 'doc-view-mode-map
       "j" 'doc-view-next-page
-      "k" 'doc-view-previous-page
-    )
-)
+      "k" 'doc-view-previous-page)))
 
 (with-eval-after-load 'evil-maps
   (define-key evil-motion-state-map (kbd "SPC") nil)
@@ -469,8 +504,24 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
   (define-key org-mode-map (kbd "C-c c") #'org-capture))
 
 ; === MAIL ===
-;; Add mu4e to your load path
-(add-to-list 'load-path "/opt/homebrew/share/emacs/site-lisp/mu/mu4e")
+;; mu4e ships with the external mu program, not as an ELPA package.
+(dolist (dir (append
+              '("/usr/share/emacs/site-lisp/mu4e"
+                "/usr/local/share/emacs/site-lisp/mu4e"
+                "/usr/local/share/emacs/site-lisp/mu/mu4e"
+                "/usr/local/opt/mu/share/emacs/site-lisp/mu4e"
+                "/usr/local/opt/mu/share/emacs/site-lisp/mu/mu4e"
+                "/opt/homebrew/share/emacs/site-lisp/mu4e"
+                "/opt/homebrew/share/emacs/site-lisp/mu/mu4e"
+                "/opt/homebrew/opt/mu/share/emacs/site-lisp/mu4e"
+                "/opt/homebrew/opt/mu/share/emacs/site-lisp/mu/mu4e")
+              (file-expand-wildcards "/usr/share/emacs/site-lisp/elpa/mu4e-*")
+              (file-expand-wildcards "/usr/local/Cellar/mu/*/share/emacs/site-lisp/mu4e")
+              (file-expand-wildcards "/usr/local/Cellar/mu/*/share/emacs/site-lisp/mu/mu4e")
+              (file-expand-wildcards "/opt/homebrew/Cellar/mu/*/share/emacs/site-lisp/mu4e")
+              (file-expand-wildcards "/opt/homebrew/Cellar/mu/*/share/emacs/site-lisp/mu/mu4e")))
+  (when (file-directory-p dir)
+    (add-to-list 'load-path dir)))
 (when (require 'mu4e nil t)
 
 ;; Base configuration
