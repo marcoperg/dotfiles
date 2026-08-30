@@ -666,6 +666,8 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 
 (with-eval-after-load 'dired
   (setq dired-mouse-drag-files nil)  ; prevent crash on macOS
+  (add-to-list 'dired-guess-shell-alist-user
+               (list "\\.py\\'" (expand-file-name "~/miniconda3/bin/python3")))
   (define-key dired-mode-map (kbd "C-c o") #'my/dired-open-in-file-manager))
 
 (setq dired-mouse-drag-files nil)
