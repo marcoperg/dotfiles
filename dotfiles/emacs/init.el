@@ -361,6 +361,12 @@ that share \\input fragments) each compile itself."
 (defconst my/bibliotheca-file
   (expand-file-name "~/knowledge/bibliotheca/zotero-library.org"))
 
+(defconst my/episteme-directory
+  (expand-file-name "~/knowledge/episteme"))
+
+(defconst my/episteme-relation-query
+  (expand-file-name "bin/query-relations" my/episteme-directory))
+
 (defun my/citar-open-bibliotheca-entry (citekey)
   "Open CITEKEY's generated entry in Bibliotheca."
   (find-file my/bibliotheca-file)
@@ -376,13 +382,66 @@ that share \\input fragments) each compile itself."
         (org-fold-show-entry))
     (user-error "Citation key not found in Bibliotheca: %s" citekey)))
 
+(defun my/bibliotheca-entry-citekey ()
+  "Return the current Bibliotheca item's citation key, if any."
+  (when (and buffer-file-name
+             (file-equal-p buffer-file-name my/bibliotheca-file))
+    (save-excursion
+      (when (org-before-first-heading-p)
+        (user-error "Point is not in a Bibliotheca item"))
+      (org-back-to-heading t)
+      (org-entry-get nil "CITEKEY"))))
+
+(defun my/episteme-notes-referencing (citekey)
+  "Return (PATH . LINE) entries in Episteme that reference CITEKEY."
+  (unless (file-executable-p my/episteme-relation-query)
+    (user-error "Relation query is not executable: %s"
+                my/episteme-relation-query))
+  (with-temp-buffer
+    (let* ((default-directory my/episteme-directory)
+           (status (process-file my/episteme-relation-query nil t nil
+                                 "references" citekey)))
+      (unless (zerop status)
+        (user-error "Relation query failed: %s"
+                    (string-trim (buffer-string))))
+      (let (notes)
+        (dolist (row (split-string (buffer-string) "\n" t))
+          (let* ((fields (split-string row "\t"))
+                 (path (nth 1 fields))
+                 (line (and (nth 2 fields)
+                            (string-to-number (nth 2 fields)))))
+            (when (and path line (> line 0) (not (assoc path notes)))
+              (push (cons path line) notes))))
+        (nreverse notes)))))
+
+(defun my/bibliotheca-open-referencing-note (citekey)
+  "Open an Episteme note that references CITEKEY."
+  (let* ((notes (my/episteme-notes-referencing citekey))
+         (path (cond
+                ((null notes)
+                 (user-error "No Episteme note references %s" citekey))
+                ((null (cdr notes)) (caar notes))
+                (t (completing-read "Episteme note: "
+                                    (mapcar #'car notes) nil t))))
+         (line (cdr (assoc path notes))))
+    (find-file (expand-file-name path my/episteme-directory))
+    (widen)
+    (goto-char (point-min))
+    (forward-line (1- line))
+    (when (fboundp 'org-fold-show-context)
+      (org-fold-show-context))))
+
 (defun my/citar-open-bibliotheca-dwim ()
-  "Open the citation at point in Bibliotheca, or select a reference."
+  "Navigate between an Episteme citation and its Bibliotheca entry.
+In a Bibliotheca item, open a referencing Episteme note.  Elsewhere, open the
+citation at point or select a reference."
   (interactive)
-  (if-let ((citekey (or (citar-key-at-point)
-                        (car (citar-citation-at-point)))))
-      (citar-open-entry citekey)
-    (call-interactively #'citar-open-entry)))
+  (if-let ((citekey (my/bibliotheca-entry-citekey)))
+      (my/bibliotheca-open-referencing-note citekey)
+    (if-let ((citekey (or (citar-key-at-point)
+                          (car (citar-citation-at-point)))))
+        (citar-open-entry citekey)
+      (call-interactively #'citar-open-entry))))
 
 (use-package citar
   :ensure t
