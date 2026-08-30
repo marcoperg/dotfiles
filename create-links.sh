@@ -10,7 +10,7 @@
 
 HOMEDIR=$HOME
 BACKUPDIR="$HOMEDIR/.dotfiles.backups"
-CURRENTDIR=$(pwd -P)
+CURRENTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
 DOTFILEDIR="$CURRENTDIR/dotfiles"
 
 
