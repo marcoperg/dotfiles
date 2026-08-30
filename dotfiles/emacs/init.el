@@ -376,6 +376,14 @@ that share \\input fragments) each compile itself."
         (org-fold-show-entry))
     (user-error "Citation key not found in Bibliotheca: %s" citekey)))
 
+(defun my/citar-open-bibliotheca-dwim ()
+  "Open the citation at point in Bibliotheca, or select a reference."
+  (interactive)
+  (if-let ((citekey (or (citar-key-at-point)
+                        (car (citar-citation-at-point)))))
+      (citar-open-entry citekey)
+    (call-interactively #'citar-open-entry)))
+
 (use-package citar
   :ensure t
   :no-require
@@ -392,7 +400,7 @@ that share \\input fragments) each compile itself."
   :hook
   (org-mode . citar-capf-setup)
   :bind
-  (("C-c B" . citar-open-entry)
+  (("C-c B" . my/citar-open-bibliotheca-dwim)
    (:map org-mode-map :package org
          ("C-c b" . org-cite-insert))))
 
