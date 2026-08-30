@@ -7,6 +7,7 @@
 (defconst my/required-packages
   '(auctex
     auto-dim-other-buffers
+    citar
     company
     eat
     elfeed
@@ -111,7 +112,7 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice t)
  '(package-selected-packages
-   '(claude-code-ide company eat evil evil-collection flycheck
+   '(citar claude-code-ide company eat evil evil-collection flycheck
 		     flycheck-color-mode-line flycheck-pos-tip undo-fu))
  '(package-vc-selected-packages
    '((claude-code-ide :url
@@ -356,6 +357,44 @@ that share \\input fragments) each compile itself."
 
 (setq org-roam-directory (file-truename "~/knowledge/episteme"))
 (load "~/knowledge/praxis/lisp/praxis-utils.el")
+
+(defconst my/bibliotheca-file
+  (expand-file-name "~/knowledge/bibliotheca/zotero-library.org"))
+
+(defun my/citar-open-bibliotheca-entry (citekey)
+  "Open CITEKEY's generated entry in Bibliotheca."
+  (find-file my/bibliotheca-file)
+  (widen)
+  (goto-char (point-min))
+  (if (re-search-forward
+       (format "^:CITEKEY:[ \t]+%s[ \t]*$"
+               (regexp-quote citekey))
+       nil t)
+      (progn
+        (org-back-to-heading t)
+        (org-fold-show-context)
+        (org-fold-show-entry))
+    (user-error "Citation key not found in Bibliotheca: %s" citekey)))
+
+(use-package citar
+  :ensure t
+  :no-require
+  :custom
+  (org-cite-global-bibliography
+   (list (expand-file-name "~/knowledge/bibliotheca/zotero-library.bib")))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  (citar-bibliography org-cite-global-bibliography)
+  (citar-open-entry-function #'my/citar-open-bibliotheca-entry)
+  ;; Bibliotheca is the catalogue; source-specific notes remain hand-authored.
+  (citar-open-resources '(:files :links))
+  :hook
+  (org-mode . citar-capf-setup)
+  :bind
+  (("C-c B" . citar-open-entry)
+   (:map org-mode-map :package org
+         ("C-c b" . org-cite-insert))))
 
 (when (and (require 'org-roam nil t)
            (require 'use-package nil t))
