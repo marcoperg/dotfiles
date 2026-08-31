@@ -72,6 +72,26 @@ install_opencode_state_defaults() {
 	fi
 }
 
+
+install_user_services() {
+	if [[ "$(uname -s)" != "Linux" ]] || ! command -v systemctl >/dev/null 2>&1; then
+		return
+	fi
+
+	link_managed_file emacs/emacs.service .config/systemd/user/emacs.service
+	link_managed_file opencode/opencode.service .config/systemd/user/opencode.service
+	systemctl --user daemon-reload
+	systemctl --user enable --now emacs.service
+
+	if [[ ! -x "$HOMEDIR/.opencode/bin/opencode" ]]; then
+		echo "OpenCode service installed but not started: $HOMEDIR/.opencode/bin/opencode is missing"
+		return
+	fi
+
+	systemctl --user enable --now opencode.service
+}
+
+
 link_managed_configs() {
 	link_managed_file .zshenv .zshenv
 	link_managed_file claude/settings.json .claude/settings.json
@@ -79,6 +99,7 @@ link_managed_configs() {
 	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
 	link_managed_file opencode/tui.jsonc .config/opencode/tui.jsonc
 	install_opencode_state_defaults
+	install_user_services
 }
 
 

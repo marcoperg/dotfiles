@@ -1,0 +1,11 @@
+[Unit]
+Description=Emacs daemon
+
+[Service]
+Type=simple
+ExecStart=/snap/bin/emacs --fg-daemon
+ExecStop=/snap/bin/emacsclient --eval "(kill-emacs)"
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

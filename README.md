@@ -35,7 +35,17 @@ leaving their runtime state directories intact and moving replaced files into
 It also merges `dotfiles/opencode/state-defaults.json` into OpenCode's mutable
 `~/.local/state/opencode/kv.json`. This keeps preferences such as disabled TUI
 animations reproducible without symlinking or tracking the rest of the runtime
-state. Run `./create-links.sh --managed` to apply these managed settings.
+state. On Linux, it also installs and starts user services for the Emacs daemon
+and the local OpenCode server used by the Emacs `C-c a o` command. Run
+`./create-links.sh --managed` to apply these managed settings.
+
+The `marco` user must have lingering enabled for these services to start at
+boot without an interactive login:
+
+```sh
+sudo loginctl enable-linger marco
+loginctl show-user marco -p Linger
+```
 
 Do not add `~/.claude.json`, `~/.claude/` runtime state, or
 `~/.config/opencode/node_modules/`; they contain account data, sessions, and
