@@ -16,6 +16,7 @@
     evil-collection
     flycheck
     flycheck-color-mode-line
+    magit
     flycheck-pos-tip
     gptel
     org-roam
@@ -49,6 +50,7 @@
    (load-theme 'wombat t)))
 (global-visual-line-mode t)
 (global-auto-revert-mode t)
+(xterm-mouse-mode 1)
 
 ; === SOME GLOBAL PREFERENCES ===
 ;; Prefer vert split
