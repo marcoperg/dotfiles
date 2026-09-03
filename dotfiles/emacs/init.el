@@ -348,6 +348,8 @@ that share \\input fragments) each compile itself."
 (setq org-return-follows-link t)
 (setq visual-fill-column-width 100) ; Change to desired max width
 (setq visual-fill-column-center-text t)
+(with-eval-after-load 'visual-fill-column
+  (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
 (defun my/org-maybe-disable-line-numbers ()
   "Disable line numbers if the current file is in an 'episteme' folder."
   (when (and buffer-file-name
