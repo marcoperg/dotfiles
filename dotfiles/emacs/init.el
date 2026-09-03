@@ -295,6 +295,9 @@ that share \\input fragments) each compile itself."
           ;; https://github.com/emacs-evil/evil-collection/issues/60
           evil-want-keybinding nil)
     :config
+    ;; OpenCode is a full-screen TUI: Evil must not enter insert state before
+    ;; the buffer-local vterm forwarding map is installed.
+    (add-to-list 'evil-buffer-regexps '("^\\*opencode:" . nil))
     (evil-mode 1))
   (use-package evil-collection
     :ensure t
