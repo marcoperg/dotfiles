@@ -329,6 +329,11 @@ that share \\input fragments) each compile itself."
     current-shell-name))
 (global-set-key "\C-cns" 'new-shell)
 
+(with-eval-after-load 'shell
+  (evil-define-key 'insert shell-mode-map
+    (kbd "RET") #'comint-send-input
+    (kbd "<return>") #'comint-send-input))
+
 (defun new-named-shell (name &optional target-dir)
   (interactive)
   (shell name)
