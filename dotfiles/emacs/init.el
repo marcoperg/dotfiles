@@ -365,7 +365,7 @@ that share \\input fragments) each compile itself."
 (setq org-roam-directory (file-truename "~/knowledge/episteme"))
 (load "~/knowledge/praxis/lisp/praxis-utils.el")
 (add-to-list 'load-path
-             (expand-file-name "~/knowledge/episteme/lisp"))
+             (expand-file-name "~/knowledge/episteme/infra/emacs"))
 (require 'episteme-citations)
 
 (use-package citar
@@ -1007,25 +1007,20 @@ elfeed will re-subscribe on the next fetch."
          (root (file-name-as-directory
                  (expand-file-name (if project (project-root project)
                                      default-directory))))
-         (name (format "*opencode:%s*"
-                       (file-name-nondirectory (directory-file-name root))))
-         (existing (get-buffer name)))
-    (if (buffer-live-p existing)
-        (progn
-          (pop-to-buffer existing)
-          (with-current-buffer existing
-            (my/opencode-configure-vterm-buffer)))
-      (let ((default-directory root)
-            (vterm-shell
-             (mapconcat
-              #'shell-quote-argument
-              (list (expand-file-name "~/.opencode/bin/opencode")
-                    "attach" "http://localhost:4096" "--dir" root)
-              " ")))
-        (let ((buffer (vterm name)))
-          (with-current-buffer buffer
-            (my/opencode-configure-vterm-buffer))
-          buffer)))))
+         (name (generate-new-buffer-name
+                (format "*opencode:%s*"
+                        (file-name-nondirectory (directory-file-name root)))))
+         (default-directory root)
+         (vterm-shell
+          (mapconcat
+           #'shell-quote-argument
+           (list (expand-file-name "~/.opencode/bin/opencode")
+                 "attach" "http://localhost:4096" "--dir" root)
+           " ")))
+    (let ((buffer (vterm name)))
+      (with-current-buffer buffer
+        (my/opencode-configure-vterm-buffer))
+      buffer)))
 
 (global-set-key (kbd "C-c a o") #'my/opencode)
 
