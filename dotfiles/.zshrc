@@ -66,3 +66,11 @@ fpath+=${ZDOTDIR:-~}/.zsh_functions
 ta () {
 	tmux attach-session -t $1
 }
+
+# @begin(89126513)@ - Do not edit these lines - added automatically!
+# You should customize CIAOPATH before this chunk if you place bundles in
+# places other than ~/.ciao
+if [ -x "$HOME/clip/Systems/ciao-devel/build/bin/ciao-env" ] ; then
+  eval "$("$HOME/clip/Systems/ciao-devel/build/bin/ciao-env" --sh)"
+fi
+# @end(89126513)@ - End of automatically added lines.

@@ -786,7 +786,7 @@ elfeed will re-subscribe on the next fetch."
 
 ; === WRITTING TOOLS ===
 ; LPTP
-(autoload 'lptp-mode "/Users/meu/fun/lptp/etc/lptp-mode" 
+(autoload 'lptp-mode (expand-file-name "~/fun/lptp/etc/lptp-mode")
     "Major mode for editing formal proofs" t)
 (setq auto-mode-alist 
     (cons '("\\.pr$" . lptp-mode) auto-mode-alist))
@@ -1096,20 +1096,30 @@ elfeed will re-subscribe on the next fetch."
 
 ; CIAO
 
-(if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_lptp/etc/ciao-lptp.el")
-  (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_lptp/etc/ciao-lptp.el"))
+(defconst my/ciao-devel-directory
+  (expand-file-name "~/clip/Systems/ciao-devel/")
+  "Location of the Ciao development tree.")
+
+(let ((file (expand-file-name "bndls/ciao_lptp/etc/ciao-lptp.el"
+                              my/ciao-devel-directory)))
+  (when (file-exists-p file)
+    (load-file file)))
 
 ; @begin(53614285)@ - Do not edit these lines - added automatically!
-(if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el")
-  (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el"))
+(let ((file (expand-file-name "bndls/ciao_emacs/elisp/ciao-site-file.el"
+                              my/ciao-devel-directory)))
+  (when (file-exists-p file)
+    (load-file file)))
 ; @end(53614285)@ - End of automatically added lines.
 
 ;; -------------------------------------------------
  ;; ** Ciao company
  ;; -------------------------------------------------
  ;;; Paths to use ciao source instead of package in ./emacs.c/elpa: ***
- (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib")
- (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/company-ciao")
+ (add-to-list 'load-path (expand-file-name "bndls/ciao_emacs/contrib"
+                                           my/ciao-devel-directory))
+ (add-to-list 'load-path (expand-file-name "bndls/ciao_emacs/contrib/company-ciao"
+                                           my/ciao-devel-directory))
  ;; For Company support, insert the next line into your Emacs init file.
 
  ;; ****** Set up company-ciao once ciao is actually loaded (ciao-mode is
@@ -1161,7 +1171,8 @@ elfeed will re-subscribe on the next fetch."
  ;; ~/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/ciao-emacs-plus.el
  ;; 
  ;;; Paths to ciao source instead of package in ./emacs.c/elpa: ***
- (add-to-list 'load-path "/Users/Meu/clip/Systems/ciao-devel/bndls/ciao_emacs/contrib/flycheck-ciao")
+ (add-to-list 'load-path (expand-file-name "bndls/ciao_emacs/contrib/flycheck-ciao"
+                                           my/ciao-devel-directory))
  (use-package flycheck :ensure t)
  (with-eval-after-load 'ciao (load-library "flycheck-ciao"))
  ;; `flycheck-ciao-setup' lives in flycheck-ciao.el, which is loaded lazily
@@ -1420,7 +1431,8 @@ elfeed will re-subscribe on the next fetch."
  ;;             "-fct_modular=all"
  ;;             "-fentry_policy=top_level"
  ;;             "-ffixpoint=dd"
- ;;             "-fmain_module=/Users/isabel.garcia/git/ciao-devel/bndls/chat80/src/top/top.pl"
+ ;;             (eval (concat "-fmain_module="
+ ;;                           (expand-file-name "~/git/ciao-devel/bndls/chat80/src/top/top.pl")))
  ;;             "-fincremental=off"
  ;;             "-fdel_strategy=bottom_up"
  ;;             "-fmenu_output=off"
@@ -1457,7 +1469,8 @@ elfeed will re-subscribe on the next fetch."
  ;;             "-fct_modular=all"
  ;;             "-fentry_policy=top_level"
  ;;             "-ffixpoint=dd"
- ;;             "-fmain_module=/Users/isabel.garcia/git/ciao-devel/bndls/chat80/src/top/top.pl"
+ ;;             (eval (concat "-fmain_module="
+ ;;                           (expand-file-name "~/git/ciao-devel/bndls/chat80/src/top/top.pl")))
  ;;             "-fincremental=on"
  ;;             "-fdel_strategy=bottom_up"
  ;;             "-fmenu_output=off"

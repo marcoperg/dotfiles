@@ -9,16 +9,10 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/meu/.opencode/bin/opencode</string>
-    <string>web</string>
-    <string>--hostname</string>
-    <string>127.0.0.1</string>
-    <string>--port</string>
-    <string>4096</string>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>mkdir -p "$HOME/Library/Logs/OpenCode" &amp;&amp; cd "$HOME" &amp;&amp; exec "$HOME/.opencode/bin/opencode" web --hostname 127.0.0.1 --port 4096 &gt;&gt;"$HOME/Library/Logs/OpenCode/server.log" 2&gt;&gt;"$HOME/Library/Logs/OpenCode/server-error.log"</string>
   </array>
-
-  <key>WorkingDirectory</key>
-  <string>/Users/meu</string>
 
   <key>RunAtLoad</key>
   <true/>
@@ -29,10 +23,5 @@
   <key>ThrottleInterval</key>
   <integer>10</integer>
 
-  <key>StandardOutPath</key>
-  <string>/Users/meu/Library/Logs/OpenCode/server.log</string>
-
-  <key>StandardErrorPath</key>
-  <string>/Users/meu/Library/Logs/OpenCode/server-error.log</string>
 </dict>
 </plist>

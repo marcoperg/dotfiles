@@ -4,12 +4,12 @@
   },
   "permissions": {
     "allow": [
-      "Read(//Users/meu/clip/Systems/ciao-devel/**)",
+      "Read(~/clip/Systems/ciao-devel/**)",
       "Read(//tmp/**)",
       "Write(//tmp/**)"
     ],
     "additionalDirectories": [
-      "/Users/meu/clip/Systems/ciao-skills"
+      "~/clip/Systems/ciao-skills"
     ]
   },
   "model": "opus",
@@ -44,9 +44,9 @@
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries prod or production as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: software development (Ciao Prolog / LPTP research paper implementation and translator)",
-      "**Trusted repo**: /Users/meu/clip/Papers/assrt-to-lptp (working directory) and its remote origin at gitlab.software.imdea.org/cliplab/papers/assrt-to-lptp.git — assumed private; confidential material OK there, but secrets and sensitive personal/entrusted data are never cleared into it by visibility alone",
+      "**Trusted repo**: ~/clip/Papers/assrt-to-lptp (working directory) and its remote origin at gitlab.software.imdea.org/cliplab/papers/assrt-to-lptp.git — assumed private; confidential material OK there, but secrets and sensitive personal/entrusted data are never cleared into it by visibility alone",
       "**Org-specific CLIs**: ciaopp, ciao (Ciao/CiaoPP toolchain, used routinely in this project)",
-      "routine under /Users/meu/clip/Papers/assrt-to-lptp/ prefix"
+      "routine under ~/clip/Papers/assrt-to-lptp/ prefix"
     ]
   }
 }
