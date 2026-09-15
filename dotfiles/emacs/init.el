@@ -348,17 +348,15 @@ that share \\input fragments) each compile itself."
 ;; Shell names
 ;; New version that reuses deleted shell names
 (defun new-shell ()
-  "Same as shell, but gives the shell an appropriate name"
+  "Start a uniquely named shell in the current buffer's directory."
   (interactive)
-  (setq new_shell_name (find-free-shell-name 0))
-  (new-named-shell new_shell_name)
-  )
+  (new-named-shell (find-free-shell-name 0) default-directory))
 
 (defun find-free-shell-name (n)
-  (setq current-shell-name (concat (int-to-string (+ n 1)) "shell"))
-  (if (get-buffer current-shell-name) 
-      (find-free-shell-name (+ n 1))
-    current-shell-name))
+  (let ((name (format "%dshell" (1+ n))))
+    (if (get-buffer name)
+        (find-free-shell-name (1+ n))
+      name)))
 (global-set-key "\C-cns" 'new-shell)
 
 (with-eval-after-load 'shell
@@ -367,19 +365,12 @@ that share \\input fragments) each compile itself."
     (kbd "<return>") #'comint-send-input))
 
 (defun new-named-shell (name &optional target-dir)
-  (interactive)
-  (shell name)
-  (switch-to-buffer name)
-  (message (concat "Target dir is " target-dir))
-  (if target-dir
-      (let ((string (concat "cd " target-dir " \n")))
-	(message (concat "Switching to " target-dir))
-	(cd target-dir)
-	(let ((inhibit-read-only t))
-	  (insert-before-markers string))
-	(process-send-string
-	 (get-buffer-process (current-buffer))
-	 string))))
+  "Start shell NAME in TARGET-DIR or the current `default-directory'."
+  (interactive "sShell name: ")
+  (let ((default-directory
+         (file-name-as-directory
+          (expand-file-name (or target-dir default-directory)))))
+    (shell name)))
 
 ; === ORG MODE ===
 (setq org-return-follows-link t)
