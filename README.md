@@ -39,6 +39,13 @@ state. On Linux, it also installs and starts user services for the Emacs daemon
 and the local OpenCode server used by the Emacs `C-c a o` command. Run
 `./create-links.sh --managed` to apply these managed settings.
 
+The OpenCode configuration discovers reusable Ciao guidance from
+`~/clip/Systems/ciao-skills/skills` and the private `knowledge-ecosystem` skill
+from `~/knowledge/praxis/skills`. Bootstrap the knowledge repositories before
+linking dotfiles so that the latter exists. Loading `knowledge-ecosystem`
+requires an OpenCode permission prompt; its private content remains in Praxis
+and is not copied into this public repository.
+
 The managed configuration also installs:
 
 - `~/.local/bin/e`, which attaches a terminal frame and self-starts an Emacs

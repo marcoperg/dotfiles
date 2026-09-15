@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -52,6 +53,17 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
     def test_terminal_client_self_starts_daemon(self):
         launcher = self.read("dotfiles/bin/e")
         self.assertIn('emacsclient -a "" -t "$@"', launcher)
+
+    def test_opencode_discovers_private_knowledge_skill_portably(self):
+        config = json.loads(self.read("dotfiles/opencode/opencode.jsonc"))
+
+        self.assertIn(
+            "~/knowledge/praxis/skills", config["skills"]["paths"]
+        )
+        self.assertEqual(
+            config["permission"]["skill"]["knowledge-ecosystem"], "ask"
+        )
+        self.assertNotIn("/Users/", str(config))
 
     def test_managed_bootstrap_links_remote_development_files(self):
         with tempfile.TemporaryDirectory() as home:
