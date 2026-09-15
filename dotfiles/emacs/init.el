@@ -1002,6 +1002,7 @@ elfeed will re-subscribe on the next fetch."
         (define-key map [mouse-4] #'my/opencode-vterm-wheel-up)
         (define-key map [mouse-5] #'my/opencode-vterm-wheel-down)
         (define-key map [escape] #'my/opencode-vterm-interrupt)
+        (define-key map (kbd "C-g") #'my/opencode-vterm-interrupt)
         (define-key map (kbd "M-o") #'my/opencode-vterm-toggle-output)
         (define-key map (kbd "C-y") #'my/opencode-vterm-line-up)
         (define-key map (kbd "C-e") #'my/opencode-vterm-line-down)
