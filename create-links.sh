@@ -74,14 +74,25 @@ install_opencode_state_defaults() {
 
 
 install_user_services() {
+	local service_path
 	if [[ "$(uname -s)" != "Linux" ]] || ! command -v systemctl >/dev/null 2>&1; then
 		return
 	fi
+	if [[ "${DOTFILES_SKIP_SERVICES:-0}" == 1 ]]; then
+		return
+	fi
+	service_path="$HOMEDIR/.local/bin:$HOMEDIR/.opencode/bin:$HOMEDIR/.ciao/build/bin:$HOMEDIR/clip/Systems/ciao-devel/build/bin:/home/linuxbrew/.linuxbrew/opt/llvm/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin"
 
 	link_managed_file emacs/emacs.service .config/systemd/user/emacs.service
 	link_managed_file opencode/opencode.service .config/systemd/user/opencode.service
 	systemctl --user daemon-reload
-	systemctl --user enable --now emacs.service
+
+	if PATH="$service_path" command -v emacs >/dev/null 2>&1 \
+		&& PATH="$service_path" command -v emacsclient >/dev/null 2>&1; then
+		systemctl --user enable --now emacs.service
+	else
+		echo "Emacs service installed but not started: emacs and emacsclient must be on PATH"
+	fi
 
 	if [[ ! -x "$HOMEDIR/.opencode/bin/opencode" ]]; then
 		echo "OpenCode service installed but not started: $HOMEDIR/.opencode/bin/opencode is missing"
@@ -94,10 +105,15 @@ install_user_services() {
 
 link_managed_configs() {
 	link_managed_file .zshenv .zshenv
+	link_managed_file bin/e .local/bin/e
+	link_managed_file ssh/config .ssh/config
 	link_managed_file claude/settings.json .claude/settings.json
 	link_managed_file claude/keybindings.json .claude/keybindings.json
 	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
 	link_managed_file opencode/tui.jsonc .config/opencode/tui.jsonc
+	if [[ "$(uname -s)" == "Darwin" ]]; then
+		link_managed_file ghostty/config "Library/Application Support/com.mitchellh.ghostty/config.ghostty"
+	fi
 	install_opencode_state_defaults
 	install_user_services
 }
@@ -111,8 +127,9 @@ fi
 
 if [[ ! -e $BACKUPDIR ]]; then
 	echo "Creating back ups folder $BACKUPDIR..."
-	mkdir $BACKUPDIR
+	mkdir -m 0700 "$BACKUPDIR"
 fi
+chmod 0700 "$BACKUPDIR"
 
 if [[ "$1" == "--managed" ]]; then
 	link_managed_configs
@@ -126,7 +143,9 @@ if [[ $dotfiles ]]; then
 	echo "Symlinking dotfiles..."
 
 	for dotfile in $dotfiles; do
-		if [[ "$dotfile" == "claude" ]] || [[ "$dotfile" == "opencode" ]]; then
+		if [[ "$dotfile" == "bin" ]] || [[ "$dotfile" == "claude" ]] \
+			|| [[ "$dotfile" == "ghostty" ]] || [[ "$dotfile" == "opencode" ]] \
+			|| [[ "$dotfile" == "ssh" ]]; then
 			continue
 		fi
 		echo "$dotfile"

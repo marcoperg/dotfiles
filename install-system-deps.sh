@@ -4,6 +4,25 @@ set -euo pipefail
 
 readonly MU_VERSION=1.12.15
 readonly MU_SHA256=49d75622acff9d8a552622eba29d8abe49ae26d7fe80d835898f75f43e673ee3
+readonly TYPESCRIPT_VERSION=5.9.2
+readonly TYPESCRIPT_LANGUAGE_SERVER_VERSION=4.3.4
+
+install_node_tools() {
+	local node_major
+	command -v npm >/dev/null 2>&1 || return
+	node_major=$(node --version)
+	node_major=${node_major#v}
+	node_major=${node_major%%.*}
+	if [[ ! "$node_major" =~ ^[0-9]+$ ]] || [[ "$node_major" -lt 18 ]]; then
+		printf '%s\n' \
+			'install-system-deps: TypeScript Language Server requires Node.js 18 or newer' >&2
+		return 1
+	fi
+	mkdir -p "$HOME/.local"
+	npm install --global --prefix "$HOME/.local" \
+		"typescript@$TYPESCRIPT_VERSION" \
+		"typescript-language-server@$TYPESCRIPT_LANGUAGE_SERVER_VERSION"
+}
 
 install_mu_local() {
 	local archive current_version meson_bin source_dir user_base work_dir
@@ -56,16 +75,20 @@ install_mu_local() {
 }
 
 install_apt() {
+	local clingo_metadata
 	local packages=(
 		autoconf
 		automake
 		build-essential
+		clangd
 		cmake
 		curl
+		git
 		hunspell
 		hunspell-en-us
 		hunspell-es
 		isync
+		jq
 		latexmk
 		libglib2.0-dev
 		libgmime-3.0-dev
@@ -77,45 +100,81 @@ install_apt() {
 		meson
 		msmtp
 		mu4e
+		neovim
 		ninja-build
+		nodejs
+		npm
 		pkg-config
 		python3-pip
+		ripgrep
+		rlwrap
+		tmux
 		xz-utils
+		zsh
 	)
-
 	printf '%s\n' 'Installing dependencies with apt-get...'
 	sudo apt-get update
+	clingo_metadata=$(apt-cache show clingo 2>/dev/null || true)
+	if [[ "$clingo_metadata" == *"Package: clingo"* ]]; then
+		packages+=(clingo)
+	else
+		printf '%s\n' \
+			'install-system-deps: clingo is unavailable from apt; install its executable, headers, and library separately' >&2
+	fi
+
 	sudo apt-get install --yes "${packages[@]}"
 	install_mu_local
+	install_node_tools
 }
 
 install_arch() {
 	local packages=(
 		base-devel
+		clang
 		cmake
+		git
 		hunspell
 		hunspell-en_us
 		hunspell-es_es
 		isync
+		jq
 		libtool
 		libvterm
 		msmtp
+		neovim
+		nodejs
+		npm
 		pkgconf
 		poppler-glib
+		ripgrep
+		rlwrap
 		texlive-binextra
+		tmux
+		zsh
 	)
 	local aur_helper=""
 
 	printf '%s\n' 'Installing dependencies with pacman...'
 	sudo pacman --sync --refresh --sysupgrade --needed "${packages[@]}"
+	install_node_tools
 
-	command -v mu >/dev/null 2>&1 && return
 	if command -v paru >/dev/null 2>&1; then
 		aur_helper=paru
 	elif command -v yay >/dev/null 2>&1; then
 		aur_helper=yay
 	fi
 
+	if ! command -v clingo >/dev/null 2>&1; then
+		if [[ -n "$aur_helper" ]]; then
+			printf 'Installing Clingo from the AUR with %s...\n' "$aur_helper"
+			"$aur_helper" --sync --needed clingo
+		else
+			printf '%s\n' \
+				'install-system-deps: Clingo requires the AUR package clingo; install it with paru or yay' >&2
+		fi
+	fi
+
+	command -v mu >/dev/null 2>&1 && return
 	if [[ -n "$aur_helper" ]]; then
 		printf 'Installing mu/mu4e from the AUR with %s...\n' "$aur_helper"
 		"$aur_helper" --sync --needed mu
@@ -148,15 +207,25 @@ install_brew() {
 	local packages=(
 		autoconf
 		automake
+		clingo
 		cmake
+		git
 		hunspell
 		isync
+		jq
 		libtool
 		libvterm
+		llvm
 		msmtp
 		mu
+		neovim
+		node
 		pkg-config
 		poppler
+		ripgrep
+		rlwrap
+		tmux
+		zsh
 	)
 
 	if [[ "$(uname -s)" == "Darwin" ]] && ! xcode-select -p >/dev/null 2>&1; then
@@ -167,6 +236,7 @@ install_brew() {
 
 	printf '%s\n' 'Installing dependencies with Homebrew...'
 	brew install "${packages[@]}"
+	install_node_tools
 	[[ "$(uname -s)" != "Darwin" ]] || install_brew_tex
 
 	if [[ "$(uname -s)" == "Darwin" ]]; then

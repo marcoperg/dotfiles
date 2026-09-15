@@ -1,8 +1,6 @@
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 export ZSH=$HOME/.oh-my-zsh
-# Ensure xterm on ssh
-alias ssh="TERM=xterm-256color ssh"
 
 # usermount alias
 alias usermount="mount -o gid=$USER,fmask=113,dmask=002"
@@ -54,8 +52,9 @@ unset __conda_setup
 
 
 # https://github.com/nvbn/thefuck
-# pip3 install thefuck
-eval $(thefuck --alias)
+if command -v thefuck >/dev/null 2>&1; then
+  eval "$(thefuck --alias)"
+fi
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
 # Autostart tmux

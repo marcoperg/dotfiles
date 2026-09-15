@@ -1,0 +1,15 @@
+Include ~/.ssh/config.local
+
+Host perseo
+    HostName perseo
+    User marco
+    ControlMaster auto
+    ControlPath ~/.ssh/control-%C
+    ControlPersist 10m
+    ServerAliveInterval 30
+    ServerAliveCountMax 3
+    SendEnv COLORTERM TERM_PROGRAM TERM_PROGRAM_VERSION
+
+Host caroline
+    HostName caroline
+    User marco

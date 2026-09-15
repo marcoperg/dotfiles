@@ -46,19 +46,51 @@
 (condition-case err
     (load-theme 'modus-vivendi t)
   (error
-   (message "Modus Vivendi unavailable (%s); using Wombat" (error-message-string err))
-   (load-theme 'wombat t)))
+    (message "Modus Vivendi unavailable (%s); using Wombat" (error-message-string err))
+    (load-theme 'wombat t)))
 (global-visual-line-mode t)
 (global-auto-revert-mode t)
-(xterm-mouse-mode 1)
+
+;; Make daemon-started Emacs see the same reconstructed development tools as
+;; login shells without importing interactive shell side effects.
+(let ((development-paths
+       (append
+        (list (expand-file-name "~/.local/bin")
+              (expand-file-name "~/.opencode/bin")
+              (expand-file-name "~/.ciao/build/bin")
+              (expand-file-name "~/clip/Systems/ciao-devel/build/bin")
+              "/home/linuxbrew/.linuxbrew/opt/llvm/bin"
+              "/home/linuxbrew/.linuxbrew/bin"
+              "/opt/homebrew/opt/llvm/bin"
+              "/opt/homebrew/bin")
+        (nreverse
+         (file-expand-wildcards
+          (expand-file-name "~/.nvm/versions/node/*/bin") t)))))
+  (dolist (directory (reverse development-paths))
+    (when (file-directory-p directory)
+      (add-to-list 'exec-path directory)))
+  (setenv "PATH" (mapconcat #'identity exec-path path-separator)))
+
+;; Ghostty supports these xterm extensions through SSH. Set them before a
+;; daemon receives its first terminal frame so keys and OSC 52 are reliable.
+(setq xterm-extra-capabilities
+      '(modifyOtherKeys reportBackground getSelection setSelection)
+      redisplay-skip-fontification-on-input t
+      scroll-conservatively 101)
+
+(defun my/setup-tty-frame (frame)
+  "Enable terminal input support in non-graphical FRAME."
+  (with-selected-frame frame
+    (unless (display-graphic-p)
+      (xterm-mouse-mode 1))))
+
+(add-hook 'after-make-frame-functions #'my/setup-tty-frame)
+(my/setup-tty-frame (selected-frame))
 
 ; === SOME GLOBAL PREFERENCES ===
 ;; Prefer vert split
 (setq split-height-threshold nil)  ; disable horizontal splitting
 (setq split-width-threshold 0)     ; always prefer vertical splits
-
-(setenv "PATH" (concat (getenv "PATH") ":/opt/homebrew/bin"))
-(add-to-list 'exec-path "/opt/homebrew/bin")
 
 (global-display-line-numbers-mode)
 (setq-default display-line-numbers-type 'relative)

@@ -39,6 +39,19 @@ state. On Linux, it also installs and starts user services for the Emacs daemon
 and the local OpenCode server used by the Emacs `C-c a o` command. Run
 `./create-links.sh --managed` to apply these managed settings.
 
+The managed configuration also installs:
+
+- `~/.local/bin/e`, which attaches a terminal frame and self-starts an Emacs
+  daemon if necessary
+- `~/.ssh/config`, with a local untracked override at `~/.ssh/config.local`
+- the native macOS Ghostty configuration, including Ghostty SSH environment and
+  terminfo integration
+
+On a remote development host, install Emacs and OpenCode first, clone the
+knowledge and Ciao repositories at the paths used below, run
+`./install-system-deps.sh`, and then run `./create-links.sh`. The Linux bootstrap
+only starts services whose executables are present.
+
 The `marco` user must have lingering enabled for these services to start at
 boot without an interactive login:
 
@@ -50,6 +63,15 @@ loginctl show-user marco -p Linger
 Do not add `~/.claude.json`, `~/.claude/` runtime state, or
 `~/.config/opencode/node_modules/`; they contain account data, sessions, and
 generated dependencies.
+
+Do not back up or track `~/.opencode`, `~/.local/share/opencode`, or the rest of
+`~/.local/state/opencode`. They contain authentication, sessions, logs, and
+generated state. Reinstall OpenCode and authenticate again on a rebuilt host.
+
+The Ghostty configuration allows OSC 52 clipboard reads and writes so remote
+Emacs can integrate with the Mac clipboard. Treat processes on SSH hosts as able
+to request clipboard contents; change `clipboard-read` back to `ask` when that
+trust is not appropriate.
 
 ## System Dependencies
 
@@ -65,6 +87,16 @@ The script supports Ubuntu/Debian (`apt-get`), Arch Linux (`pacman`, plus
 `paru` or `yay` for the AUR `mu` package), and macOS or Linux with Homebrew.
 LaTeX is included on apt, Arch, and macOS; a Linuxbrew installation requires a
 separate TeX distribution.
+It also installs the remote-development shell, compiler/LSP, Node, search, and
+terminal tools, including `clangd`, TypeScript Language Server, `jq`, Neovim,
+ripgrep, rlwrap, tmux, and Zsh. It installs Clingo where the package manager
+provides it and reports when apt requires a separate installation. Emacs, Ciao,
+and OpenCode remain explicit installations because their required versions and
+source trees are selected separately. Native `ciao_asp` sessions require both
+the Clingo executable and matching `clingo.h` and libclingo files.
+The pinned TypeScript tooling requires Node.js 18 or newer; on distributions
+whose package repository provides an older Node, install an approved current
+Node release before running this script.
 When the `apt-get` version of mu is too old for current Emacs releases, the
 script builds a pinned mu release under `~/.local` and verifies its checksum.
 It does not run from `create-links.sh`, so linking dotfiles never changes

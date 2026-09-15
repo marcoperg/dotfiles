@@ -3,8 +3,9 @@ Description=Emacs daemon
 
 [Service]
 Type=simple
-ExecStart=/snap/bin/emacs --fg-daemon
-ExecStop=/snap/bin/emacsclient --eval "(kill-emacs)"
+Environment="PATH=%h/.local/bin:%h/.opencode/bin:%h/.ciao/build/bin:%h/clip/Systems/ciao-devel/build/bin:/home/linuxbrew/.linuxbrew/opt/llvm/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin"
+ExecStart=/usr/bin/env emacs --fg-daemon
+ExecStop=/usr/bin/env emacsclient --eval "(kill-emacs)"
 Restart=on-failure
 
 [Install]

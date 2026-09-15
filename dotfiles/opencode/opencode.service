@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
+Environment="PATH=%h/.local/bin:%h/.opencode/bin:%h/.ciao/build/bin:%h/clip/Systems/ciao-devel/build/bin:/home/linuxbrew/.linuxbrew/opt/llvm/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin"
 ExecStart=%h/.opencode/bin/opencode serve --hostname 127.0.0.1 --port 4096
 Restart=always
 RestartSec=10
