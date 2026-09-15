@@ -19,6 +19,7 @@
     magit
     flycheck-pos-tip
     gptel
+    kkp
     org-roam
     pdf-tools
     undo-fu
@@ -77,6 +78,9 @@
       '(modifyOtherKeys reportBackground getSelection setSelection)
       redisplay-skip-fontification-on-input t
       scroll-conservatively 101)
+
+(use-package kkp
+  :hook (tty-setup . global-kkp-mode))
 
 (defun my/setup-tty-frame (frame)
   "Enable terminal input support in non-graphical FRAME."
