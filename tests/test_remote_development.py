@@ -82,6 +82,7 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
                 ".local/bin/e",
                 ".ssh/config",
                 ".config/opencode/opencode.jsonc",
+                ".config/opencode/plugins/shell-env.ts",
                 ".config/opencode/tui.jsonc",
             ]
             if os.uname().sysname == "Darwin":

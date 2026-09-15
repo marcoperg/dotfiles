@@ -111,6 +111,7 @@ link_managed_configs() {
 	link_managed_file claude/keybindings.json .claude/keybindings.json
 	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
 	link_managed_file opencode/tui.jsonc .config/opencode/tui.jsonc
+	link_managed_file opencode/plugins/shell-env.ts .config/opencode/plugins/shell-env.ts
 	if [[ "$(uname -s)" == "Darwin" ]]; then
 		link_managed_file ghostty/config "Library/Application Support/com.mitchellh.ghostty/config.ghostty"
 	fi
