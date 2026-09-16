@@ -79,8 +79,38 @@
       redisplay-skip-fontification-on-input t
       scroll-conservatively 101)
 
+(defvar evil-inhibit-esc)
+
+(defun my/kkp-call-with-evil-esc-inhibited (function &rest arguments)
+  "Call FUNCTION with ARGUMENTS without Evil intercepting ESC prefixes."
+  (let ((evil-inhibit-esc t))
+    (apply function arguments)))
+
+(defun my/kkp-preserve-evil-esc-during-setup (function map)
+  "Return MAP during KKP setup, otherwise call Evil's FUNCTION with MAP."
+  (let ((state (kkp--terminal-state (kkp--selected-terminal))))
+    (if (and state (kkp--state-setup-started state))
+        map
+      (funcall function map))))
+
+(defun my/kkp-enable-evil-compatibility ()
+  "Work around Evil intercepting KKP's terminal handshake and keymaps."
+  ;; Remove this shim once https://github.com/benotn/kkp/pull/39 is released.
+  (unless (fboundp 'kkp--evil-esc-during-setup-a)
+    (dolist (function '(kkp--terminal-setup kkp--terminal-teardown))
+      (unless (advice-member-p #'my/kkp-call-with-evil-esc-inhibited function)
+        (advice-add function :around #'my/kkp-call-with-evil-esc-inhibited)))
+    (when (and (fboundp 'evil-esc)
+               (not (advice-member-p
+                     #'my/kkp-preserve-evil-esc-during-setup 'evil-esc)))
+      (advice-add 'evil-esc :around #'my/kkp-preserve-evil-esc-during-setup))))
+
 (use-package kkp
-  :hook (tty-setup . global-kkp-mode))
+  :config
+  (my/kkp-enable-evil-compatibility)
+  (with-eval-after-load 'evil
+    (my/kkp-enable-evil-compatibility))
+  (global-kkp-mode 1))
 
 (defun my/setup-tty-frame (frame)
   "Enable terminal input support in non-graphical FRAME."
@@ -1135,10 +1165,19 @@ elfeed will re-subscribe on the next fetch."
 
 ; @begin(53614285)@ - Do not edit these lines - added automatically!
 (let ((file (expand-file-name "bndls/ciao_emacs/elisp/ciao-site-file.el"
-                              my/ciao-devel-directory)))
+                               my/ciao-devel-directory)))
   (when (file-exists-p file)
     (load-file file)))
 ; @end(53614285)@ - End of automatically added lines.
+
+;; `M-[' and `M-]' are the CSI and OSC terminal prefixes.  Mode-local
+;; bindings for them consume KKP, mouse, and terminal reply sequences.
+(with-eval-after-load 'ciao-bindings
+  (dolist (map (list ciao-mode-map ciao-inferior-mode-map))
+    (define-key map (kbd "M-[") nil)
+    (define-key map (kbd "M-]") nil)
+    (define-key map (kbd "C-c [") #'ciao-find-last-previous-run-errors)
+    (define-key map (kbd "C-c ]") #'ciao-find-last-run-errors)))
 
 ;; -------------------------------------------------
  ;; ** Ciao company
