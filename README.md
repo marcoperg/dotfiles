@@ -36,7 +36,9 @@ It also merges `dotfiles/opencode/state-defaults.json` into OpenCode's mutable
 `~/.local/state/opencode/kv.json`. This keeps preferences such as disabled TUI
 animations reproducible without symlinking or tracking the rest of the runtime
 state. On Linux, it also installs and starts user services for the Emacs daemon
-and the local OpenCode server used by the Emacs `C-c a o` command. Run
+and the local OpenCode server used by the Emacs `C-c a o` command. Perseo is the
+exception: its OpenCode service is installed but not enabled, and `C-c a o`
+launches OpenCode directly inside the persistent Emacs daemon. Run
 `./create-links.sh --managed` to apply these managed settings.
 
 The OpenCode configuration discovers reusable Ciao guidance from

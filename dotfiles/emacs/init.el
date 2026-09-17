@@ -1063,23 +1063,26 @@ elfeed will re-subscribe on the next fetch."
   (my/opencode-vterm-input-mode 1))
 
 (defun my/opencode ()
-  "Open the official OpenCode TUI in a project-local vterm."
+  "Open the official OpenCode TUI in a project-local vterm.
+Run OpenCode directly on Perseo and attach to the local server elsewhere."
   (interactive)
   (require 'vterm)
   (let* ((project (project-current))
          (root (file-name-as-directory
-                 (expand-file-name (if project (project-root project)
-                                     default-directory))))
+                  (expand-file-name (if project (project-root project)
+                                      default-directory))))
+         (opencode (expand-file-name "~/.opencode/bin/opencode"))
          (name (generate-new-buffer-name
-                (format "*opencode:%s*"
-                        (file-name-nondirectory (directory-file-name root)))))
+                 (format "*opencode:%s*"
+                         (file-name-nondirectory (directory-file-name root)))))
          (default-directory root)
          (vterm-shell
-          (mapconcat
-           #'shell-quote-argument
-           (list (expand-file-name "~/.opencode/bin/opencode")
-                 "attach" "http://localhost:4096" "--dir" root)
-           " ")))
+           (mapconcat
+            #'shell-quote-argument
+            (if (string-equal (system-name) "perseo")
+                (list opencode root)
+              (list opencode "attach" "http://localhost:4096" "--dir" root))
+            " ")))
     (let ((buffer (vterm name)))
       (with-current-buffer buffer
         (my/opencode-configure-vterm-buffer))

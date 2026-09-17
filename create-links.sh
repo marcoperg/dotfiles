@@ -94,6 +94,14 @@ install_user_services() {
 		echo "Emacs service installed but not started: emacs and emacsclient must be on PATH"
 	fi
 
+	if [[ "$(hostname -s)" == "perseo" ]]; then
+		systemctl --user disable opencode.service
+		link_managed_file opencode/opencode.service .config/systemd/user/opencode.service
+		systemctl --user daemon-reload
+		echo "OpenCode service not enabled on Perseo: Emacs launches OpenCode directly"
+		return
+	fi
+
 	if [[ ! -x "$HOMEDIR/.opencode/bin/opencode" ]]; then
 		echo "OpenCode service installed but not started: $HOMEDIR/.opencode/bin/opencode is missing"
 		return

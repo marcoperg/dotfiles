@@ -54,6 +54,16 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
         launcher = self.read("dotfiles/bin/e")
         self.assertIn('emacsclient -a "" -t "$@"', launcher)
 
+    def test_perseo_runs_opencode_directly(self):
+        init = self.read("dotfiles/emacs/init.el")
+        bootstrap = self.read("create-links.sh")
+
+        self.assertIn('(string-equal (system-name) "perseo")', init)
+        self.assertIn('(list opencode root)', init)
+        self.assertIn('"attach" "http://localhost:4096"', init)
+        self.assertIn('[[ "$(hostname -s)" == "perseo" ]]', bootstrap)
+        self.assertIn("systemctl --user disable opencode.service", bootstrap)
+
     def test_opencode_discovers_private_knowledge_skill_portably(self):
         config = json.loads(self.read("dotfiles/opencode/opencode.jsonc"))
 
