@@ -11,5 +11,18 @@
       "*": "allow",
       "knowledge-ecosystem": "ask"
     }
+  },
+  "mcp": {
+    "ciao": {
+      "type": "local",
+      "command": [
+        "/home/marco/.nvm/versions/node/v22.13.1/bin/node",
+        "/home/marco/clip/Systems/ciao-mcp/src/server.mjs"
+      ],
+      "environment": {
+        "CIAOSH": "/home/marco/clip/Systems/ciao-devel/build/bin/ciaosh"
+      },
+      "enabled": true
+    }
   }
 }
