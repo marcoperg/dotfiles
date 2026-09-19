@@ -1146,6 +1146,24 @@ Run OpenCode directly on Perseo and attach to the local server elsewhere."
 (add-hook 'org-mode-hook
   (lambda ()
     (set-face-attribute 'org-table nil :inherit 'fixed-pitch)))
+(require 'quail)
+
+(quail-define-package
+ "arabic-translit"
+ "Arabic"
+ "ع>"
+ t
+ "Arabic transliteration input method."
+ nil t t t t nil nil nil nil nil t)
+(quail-define-rules
+ ("a" ?ا) ("b" ?ب) ("t" ?ت) ("th" ?ث) ("j" ?ج)
+ ("H" ?ح) ("7" ?ح) ("kh" ?خ) ("d" ?د) ("dh" ?ذ)
+ ("r" ?ر) ("z" ?ز) ("s" ?س) ("sh" ?ش)
+ ("S" ?ص) ("D" ?ض) ("T" ?ط) ("Z" ?ظ)
+ ("3" ?ع) ("gh" ?غ)
+ ("f" ?ف) ("q" ?ق) ("k" ?ك) ("l" ?ل) ("m" ?م) ("n" ?ن) ("h" ?ه)
+ ("w" ?و) ("u" ?و) ("y" ?ي) ("i" ?ي)
+ ("'" ?ء) ("?" ?؟) ("," ?،))
 
 ; Agda
 (when (executable-find "agda")
