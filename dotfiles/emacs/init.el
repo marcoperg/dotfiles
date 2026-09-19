@@ -181,10 +181,11 @@
  '(initial-buffer-choice t)
  '(package-selected-packages
    '(citar claude-code-ide company eat evil evil-collection flycheck
-		     flycheck-color-mode-line flycheck-pos-tip undo-fu))
+           flycheck-color-mode-line flycheck-pos-tip markdown-mode
+           undo-fu))
  '(package-vc-selected-packages
    '((claude-code-ide :url
-		      "https://github.com/manzaltu/claude-code-ide.el")))
+                      "https://github.com/manzaltu/claude-code-ide.el")))
  '(warning-suppress-log-types '((native-compiler) (lsp-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
