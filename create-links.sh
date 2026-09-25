@@ -114,6 +114,7 @@ install_user_services() {
 link_managed_configs() {
 	link_managed_file .zshenv .zshenv
 	link_managed_file bin/e .local/bin/e
+	link_managed_file bin/opencode-blueprofit .local/bin/opencode-blueprofit
 	link_managed_file ssh/config .ssh/config
 	link_managed_file claude/settings.json .claude/settings.json
 	link_managed_file claude/keybindings.json .claude/keybindings.json

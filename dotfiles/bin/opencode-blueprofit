@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+
+export XDG_DATA_HOME="$HOME/.local/share/opencode-blueprofit"
+export XDG_STATE_HOME="$HOME/.local/state/opencode-blueprofit"
+
+exec "$HOME/.opencode/bin/opencode" "$@"

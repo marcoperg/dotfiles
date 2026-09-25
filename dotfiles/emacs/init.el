@@ -1092,6 +1092,27 @@ Run OpenCode directly on Perseo and attach to the local server elsewhere."
 
 (global-set-key (kbd "C-c a o") #'my/opencode)
 
+(defun my/opencode-blueprofit ()
+  "Open the BlueProfit OpenCode account in a vterm for the current directory."
+  (interactive)
+  (require 'vterm)
+  (let* ((directory (file-name-as-directory
+                     (expand-file-name default-directory)))
+         (opencode (expand-file-name "~/.local/bin/opencode-blueprofit"))
+         (name (generate-new-buffer-name
+                (format "*opencode-blueprofit:%s*"
+                        (file-name-nondirectory
+                         (directory-file-name directory)))))
+         (default-directory directory)
+         (vterm-shell
+          (mapconcat #'shell-quote-argument
+                     (list opencode directory)
+                     " ")))
+    (let ((buffer (vterm name)))
+      (with-current-buffer buffer
+        (my/opencode-configure-vterm-buffer))
+      buffer)))
+
 ;; gptel is the lightweight ChatGPT interface for conversations, selected
 ;; context, and in-place rewrites. It intentionally has no agentic tools.
 (use-package gptel

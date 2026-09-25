@@ -27,6 +27,7 @@ leaving their runtime state directories intact and moving replaced files into
 `~/.dotfiles.backups`:
 
 - `~/.zshenv`
+- `~/.local/bin/opencode-blueprofit`
 - `~/.claude/settings.json`
 - `~/.claude/keybindings.json`
 - `~/.config/opencode/opencode.jsonc`
@@ -40,6 +41,18 @@ and the local OpenCode server used by the Emacs `C-c a o` command. Perseo is the
 exception: its OpenCode service is installed but not enabled, and `C-c a o`
 launches OpenCode directly inside the persistent Emacs daemon. Run
 `./create-links.sh --managed` to apply these managed settings.
+
+`opencode-blueprofit` launches the same OpenCode executable with the same
+configuration, TUI settings, plugins, skills, and MCP servers as `opencode`, but
+with separate authentication, sessions, logs, repositories, and mutable state.
+Authenticate the account through OpenCode on first use. Its runtime files live
+under `~/.local/share/opencode-blueprofit/opencode/` and
+`~/.local/state/opencode-blueprofit/opencode/`; neither directory is tracked or
+backed up. The normal `opencode` command and its user service are unchanged.
+From Emacs, `M-x my/opencode-blueprofit` opens it in the current buffer's
+directory. Buffers include the directory name and Emacs adds numeric suffixes
+when more than one instance is open. The command intentionally has no global
+keybinding.
 
 The OpenCode configuration discovers reusable Ciao guidance from
 `~/clip/Systems/ciao-skills/skills` and the private `knowledge-ecosystem` skill
@@ -73,9 +86,10 @@ Do not add `~/.claude.json`, `~/.claude/` runtime state, or
 `~/.config/opencode/node_modules/`; they contain account data, sessions, and
 generated dependencies.
 
-Do not back up or track `~/.opencode`, `~/.local/share/opencode`, or the rest of
-`~/.local/state/opencode`. They contain authentication, sessions, logs, and
-generated state. Reinstall OpenCode and authenticate again on a rebuilt host.
+Do not back up or track `~/.opencode`, `~/.local/share/opencode`,
+`~/.local/share/opencode-blueprofit`, or the corresponding directories under
+`~/.local/state`. They contain authentication, sessions, logs, and generated
+state. Reinstall OpenCode and authenticate again on a rebuilt host.
 
 The Ghostty configuration allows OSC 52 clipboard reads and writes so remote
 Emacs can integrate with the Mac clipboard. Treat processes on SSH hosts as able
