@@ -20,6 +20,7 @@
     flycheck-pos-tip
     gptel
     kkp
+    maude-mode
     org-roam
     pdf-tools
     undo-fu
@@ -1130,6 +1131,11 @@ Run OpenCode directly on Perseo and attach to the local server elsewhere."
   (ispell-set-spellchecker-params)
   (ispell-hunspell-add-multi-dic "en_US,es_ES"))
 
+; Maude
+(use-package maude-mode
+  :commands run-maude
+  :mode "\\.maude\\'")
+
 ; Javascript
 (add-hook 'js-mode-hook
           (lambda ()
@@ -1191,6 +1197,13 @@ Run OpenCode directly on Perseo and attach to the local server elsewhere."
   (when (file-exists-p file)
     (load-file file)))
 ; @end(53614285)@ - End of automatically added lines.
+
+;; Ciao's legacy major mode bypasses globalized minor-mode activation.
+(defun my/ciao-enable-line-numbers ()
+  "Enable the globally configured line-number style in Ciao buffers."
+  (display-line-numbers-mode 1))
+
+(add-hook 'ciao-mode-hook #'my/ciao-enable-line-numbers)
 
 ;; `M-[' and `M-]' are the CSI and OSC terminal prefixes.  Mode-local
 ;; bindings for them consume KKP, mouse, and terminal reply sequences.
