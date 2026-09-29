@@ -187,7 +187,8 @@
  '(package-vc-selected-packages
    '((claude-code-ide :url
                       "https://github.com/manzaltu/claude-code-ide.el")))
- '(warning-suppress-log-types '((native-compiler) (lsp-mode))))
+ '(warning-suppress-log-types '((native-compiler) (lsp-mode)))
+ '(warning-suppress-types '((ox-latex))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -409,7 +410,31 @@ that share \\input fragments) each compile itself."
     (shell name)))
 
 ; === ORG MODE ===
-(setq org-return-follows-link t)
+(setq org-return-follows-link t
+      org-agenda-files
+      (list (expand-file-name "~/knowledge/praxis/projects.org"))
+      org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "WAITING(w@/!)"
+                  "|" "DONE(d!)" "CANCELLED(c@)"))
+      org-log-done 'time
+      org-agenda-start-on-weekday 1
+      org-agenda-span 7
+      org-deadline-warning-days 14
+      org-agenda-custom-commands
+      '(("d" "Praxis dashboard"
+         ((agenda "" ((org-agenda-overriding-header "Schedule and deadlines")))
+          (todo "NEXT" ((org-agenda-overriding-header "Next actions")))
+          (todo "WAITING" ((org-agenda-overriding-header "Waiting")))))))
+
+(defun my/org-agenda-dashboard ()
+  "Open the Praxis agenda dashboard."
+  (interactive)
+  (org-agenda nil "d"))
+
+(global-set-key (kbd "C-c a a") #'org-agenda-list)
+(global-set-key (kbd "C-c a d") #'my/org-agenda-dashboard)
+(global-set-key (kbd "C-c c") #'org-capture)
+
 (setq visual-fill-column-width 100) ; Change to desired max width
 (setq visual-fill-column-center-text t)
 (with-eval-after-load 'visual-fill-column
@@ -547,22 +572,26 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
           (error (message "Error exporting %s: %s" file err)))
         (kill-buffer)))))
 
+(defun my/current-weekly-note-file ()
+  "Return the current ISO week's Praxis planning file."
+  (expand-file-name
+   (format-time-string "week-%G-%V.org")
+   "~/knowledge/praxis/planning/weeks/"))
+
 (defun create-weekly-note-from-template ()
   "Create a weekly Org note using a template from a folder."
   (let* ((template-file "~/knowledge/praxis/planning/weekly-template.org")
-         (week-file (format "~/knowledge/praxis/planning//weeks/week-%s-%s.org"
-                            (format-time-string "%Y")
-                            (format-time-string "%W"))))
+         (week-file (my/current-weekly-note-file)))
     (unless (file-exists-p week-file)
       (copy-file template-file week-file)
       (with-current-buffer (find-file-noselect week-file)
         ;; Replace placeholders
         (goto-char (point-min))
-        (while (re-search-forward "%W" nil t)
-          (replace-match (format-time-string "%W")))
+        (while (re-search-forward "%V" nil t)
+          (replace-match (format-time-string "%V")))
         (goto-char (point-min))
-        (while (re-search-forward "%Y" nil t)
-          (replace-match (format-time-string "%Y")))
+        (while (re-search-forward "%G" nil t)
+          (replace-match (format-time-string "%G")))
         (save-buffer)))
     week-file))  ;; Return the path to capture into
 
@@ -577,9 +606,7 @@ to PDF using `my/org-export-to-pdf-in-dotpdfs`."
 (defun open-current-weekly-note ()
   "Open the weekly note for the current week."
   (interactive)
-  (let ((week-file (format "~/knowledge/praxis/planning/weeks/week-%s-%s.org"
-                           (format-time-string "%Y")
-                           (format-time-string "%W"))))
+  (let ((week-file (my/current-weekly-note-file)))
     (if (file-exists-p week-file)
         (find-file week-file)
       (message "Weekly note does not exist yet. Use capture to create it."))))
