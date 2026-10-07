@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "update": "disable",
+  "skills": [
+    "~/clip/Systems/ciao-skills/skills",
+    "~/knowledge/praxis/skills"
+  ],
+  "permissions": [
+    { "action": "skill", "resource": "*", "effect": "allow" },
+    { "action": "skill", "resource": "knowledge-ecosystem", "effect": "ask" }
+  ],
+  "mcp": {
+    "servers": {
+      "ciao": {
+        "type": "local",
+        "command": [
+          "node",
+          "{env:HOME}/clip/Systems/ciao-mcp/src/server.mjs"
+        ],
+        "environment": {
+          "CIAOSH": "{env:HOME}/clip/Systems/ciao-devel/build/bin/ciaosh"
+        },
+        "codemode": false
+      }
+    }
+  }
+}

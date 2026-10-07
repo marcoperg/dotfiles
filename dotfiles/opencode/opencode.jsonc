@@ -16,7 +16,7 @@
     "ciao": {
       "type": "local",
       "command": [
-        "node",
+        "/opt/homebrew/bin/node",
         "{env:HOME}/clip/Systems/ciao-mcp/src/server.mjs"
       ],
       "environment": {

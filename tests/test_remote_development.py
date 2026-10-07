@@ -102,6 +102,50 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
         self.assertIn('[[ "$(hostname -s)" == "perseo" ]]', bootstrap)
         self.assertIn("systemctl --user disable opencode.service", bootstrap)
 
+    def test_opencode2_isolates_profile_and_preserves_command_arguments(self):
+        with tempfile.TemporaryDirectory() as home:
+            executable = Path(home) / "v2 executable"
+            executable.write_text(
+                "#!/bin/sh\n"
+                "printf '%s\\n' \"$XDG_CONFIG_HOME\" \"$XDG_DATA_HOME\" "
+                "\"$XDG_STATE_HOME\" \"$XDG_CACHE_HOME\" "
+                "\"${OPENCODE_CONFIG-unset}\" \"${OPENCODE_DB-unset}\" \"$@\"\n"
+            )
+            executable.chmod(0o755)
+            env = os.environ.copy()
+            env.update({
+                "HOME": home,
+                "OPENCODE2_BIN": str(executable),
+                "OPENCODE_CONFIG": "/v1/config.json",
+                "OPENCODE_DB": "/v1/opencode.db",
+                "XDG_CONFIG_HOME": "/v1/config",
+                "XDG_DATA_HOME": "/v1/data",
+                "XDG_STATE_HOME": "/v1/state",
+                "XDG_CACHE_HOME": "/v1/cache",
+            })
+            cases = [
+                ([], ["--standalone"]),
+                (["project with spaces"], ["--standalone", "project with spaces"]),
+                (["run", "hello world"], ["run", "--standalone", "hello world"]),
+                (["mini"], ["mini", "--standalone"]),
+                (["debug", "paths"], ["debug", "paths"]),
+                (["mcp", "list"], ["mcp", "list"]),
+            ]
+            for arguments, forwarded in cases:
+                with self.subTest(arguments=arguments):
+                    result = subprocess.run(
+                        [str(ROOT / "dotfiles/bin/opencode2"), *arguments],
+                        capture_output=True, env=env, text=True, check=False,
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout.splitlines(), [
+                        f"{home}/.config/opencode-v2",
+                        f"{home}/.local/share/opencode-v2",
+                        f"{home}/.local/state/opencode-v2",
+                        f"{home}/.cache/opencode-v2",
+                        "unset", "unset", *forwarded,
+                    ])
+
     def test_emacs_opens_blueprofit_in_the_current_directory(self):
         init = self.read("dotfiles/emacs/init.el")
 
@@ -140,10 +184,14 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             expected = [
                 ".local/bin/e",
                 ".local/bin/opencode-blueprofit",
+                ".local/bin/opencode2",
                 ".ssh/config",
                 ".config/opencode/opencode.jsonc",
                 ".config/opencode/plugins/shell-env.ts",
                 ".config/opencode/tui.jsonc",
+                ".config/opencode-v2/opencode/opencode.jsonc",
+                ".config/opencode-v2/opencode/cli.json",
+                ".config/opencode-v2/opencode/plugins/chatgpt-compat.ts",
             ]
             if os.uname().sysname == "Darwin":
                 expected.append(

@@ -28,10 +28,13 @@ leaving their runtime state directories intact and moving replaced files into
 
 - `~/.zshenv`
 - `~/.local/bin/opencode-blueprofit`
+- `~/.local/bin/opencode2`
 - `~/.claude/settings.json`
 - `~/.claude/keybindings.json`
 - `~/.config/opencode/opencode.jsonc`
 - `~/.config/opencode/tui.jsonc`
+- `~/.config/opencode-v2/opencode/opencode.jsonc`
+- `~/.config/opencode-v2/opencode/cli.json`
 
 It also merges `dotfiles/opencode/state-defaults.json` into OpenCode's mutable
 `~/.local/state/opencode/kv.json`. This keeps preferences such as disabled TUI
@@ -61,6 +64,61 @@ linking dotfiles so that the latter exists. Loading `knowledge-ecosystem`
 requires an OpenCode permission prompt; its private content remains in Praxis
 and is not copied into this public repository.
 
+### OpenCode v2 testing
+
+Keep v1 at `~/.opencode/bin/opencode` and install v2 separately with Homebrew:
+
+```sh
+brew install anomalyco/tap/opencode-v2
+brew unlink opencode-v2
+./create-links.sh --managed
+opencode --version
+opencode2 --version
+opencode2 debug paths
+```
+
+`opencode2` uses the Homebrew `opt/opencode-v2/bin/opencode` executable on
+Apple Silicon, Intel macOS, or Linuxbrew. For another installation, set
+`OPENCODE2_BIN` to the absolute path of the v2 executable. Do not use the v2 curl
+installer during side-by-side testing: it replaces `~/.opencode/bin/opencode`.
+
+The launcher isolates all four XDG roots under directories named `opencode-v2`:
+configuration in `~/.config`, data in `~/.local/share`, state in `~/.local/state`,
+and cache in `~/.cache`. OpenCode appends `opencode/` to each root. Inherited
+explicit OpenCode config/database overrides are cleared. Project configuration
+is still loaded normally and must use a format compatible with v2.
+
+Interactive launches, `opencode2 run`, and `opencode2 mini` use private servers
+with `--standalone`. Management commands pass through normally; commands that
+start a shared server use the isolated v2 profile. Authenticate with `/connect`
+on first use. Existing v1 Emacs commands and server definitions keep using v1.
+
+From Emacs, `M-x my/opencode1` (`C-c a 1`) and `M-x my/opencode2` (`C-c a 2`)
+each open a fresh vterm in the current project root, or the current directory
+outside a project. Both launch directly; v2 uses the isolated `opencode2`
+launcher. Buffers are named `*opencode1:project*` and `*opencode2:project*`, with
+numeric suffixes for additional instances. The existing `C-c a o` command keeps
+its host-specific behavior. Restart Emacs or evaluate the new definitions and
+keybindings to make them available in a running instance.
+
+`dotfiles/opencode-v2/` owns the separately translated skills, skill permissions,
+Ciao MCP connection, and CLI settings. Ciao tools are exposed directly with
+`codemode: false`. `Alt+o` / leader-`o` cycle v2 transcript verbosity. The v1
+`shell-env.ts` plugin is not loaded by v2; v2 inherits the launcher's shell
+environment. Restart OpenCode after editing managed configuration.
+
+The v2 `chatgpt-compat.ts` plugin removes outgoing OpenAI reasoning-effort update
+markers. GPT-6 normally lowers these to `configuration_update` input items,
+which ChatGPT subscription sharing rejects. The selected reasoning level still
+applies to the request; stored history is preserved.
+
+V2's own update checks are disabled; update the binary explicitly with
+`brew upgrade anomalyco/tap/opencode-v2`, then `brew unlink opencode-v2` again
+and restart v2. To remove the trial binary, use `brew uninstall opencode-v2`.
+Runtime data and credentials remain local and are not tracked or backed up.
+
+### Other managed configuration
+
 The managed configuration also installs:
 
 - `~/.local/bin/e`, which attaches a terminal frame and self-starts an Emacs
@@ -88,8 +146,9 @@ generated dependencies.
 
 Do not back up or track `~/.opencode`, `~/.local/share/opencode`,
 `~/.local/share/opencode-blueprofit`, or the corresponding directories under
-`~/.local/state`. They contain authentication, sessions, logs, and generated
-state. Reinstall OpenCode and authenticate again on a rebuilt host.
+`~/.local/state`, or the isolated `opencode-v2` runtime/cache directories. They
+contain authentication, sessions, logs, and generated state. Reinstall OpenCode
+and authenticate again on a rebuilt host.
 
 The Ghostty configuration allows OSC 52 clipboard reads and writes so remote
 Emacs can integrate with the Mac clipboard. Treat processes on SSH hosts as able

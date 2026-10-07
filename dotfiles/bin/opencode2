@@ -1,0 +1,41 @@
+#!/bin/sh
+set -eu
+
+export XDG_CONFIG_HOME="$HOME/.config/opencode-v2"
+export XDG_DATA_HOME="$HOME/.local/share/opencode-v2"
+export XDG_STATE_HOME="$HOME/.local/state/opencode-v2"
+export XDG_CACHE_HOME="$HOME/.cache/opencode-v2"
+
+# Explicit v1 config/database overrides must not leak into the testing profile.
+unset OPENCODE_CONFIG OPENCODE_CONFIG_CONTENT OPENCODE_CONFIG_DIR OPENCODE_DB
+unset OPENCODE_CLI_CONFIG_CONTENT
+
+binary="${OPENCODE2_BIN:-}"
+if [ -z "$binary" ]; then
+  for prefix in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
+    if [ -x "$prefix/opt/opencode-v2/bin/opencode" ]; then
+      binary="$prefix/opt/opencode-v2/bin/opencode"
+      break
+    fi
+  done
+fi
+if [ -z "$binary" ] || [ ! -x "$binary" ]; then
+  printf '%s\n' 'Install anomalyco/tap/opencode-v2 with Homebrew, or set OPENCODE2_BIN to its executable.' >&2
+  exit 127
+fi
+
+# --standalone is a client flag, not a global flag accepted by every subcommand.
+case "${1:-}" in
+  run|mini)
+    command="$1"
+    shift
+    set -- "$command" --standalone "$@"
+    ;;
+  acp|api|auth|debug|mcp|models|pair|plugin|reload|serve|service|session|stats|uninstall|upgrade|update)
+    ;;
+  *)
+    set -- --standalone "$@"
+    ;;
+esac
+
+exec "$binary" "$@"

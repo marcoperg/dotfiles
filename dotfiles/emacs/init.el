@@ -366,7 +366,7 @@ that share \\input fragments) each compile itself."
     :config
     ;; OpenCode is a full-screen TUI: Evil must not enter insert state before
     ;; the buffer-local vterm forwarding map is installed.
-    (add-to-list 'evil-buffer-regexps '("^\\*opencode:" . nil))
+    (add-to-list 'evil-buffer-regexps '("^\\*opencode\\(?:[12]\\)?:" . nil))
     (evil-mode 1))
   (use-package evil-collection
     :ensure t
@@ -1118,6 +1118,39 @@ Run OpenCode directly on Perseo and attach to the local server elsewhere."
       buffer)))
 
 (global-set-key (kbd "C-c a o") #'my/opencode)
+
+(defun my/opencode-start-direct (executable version)
+  "Launch EXECUTABLE directly in a new project-local vterm for VERSION."
+  (require 'vterm)
+  (let* ((project (project-current))
+         (root (file-name-as-directory
+                (expand-file-name (if project (project-root project)
+                                    default-directory))))
+         (name (generate-new-buffer-name
+                (format "*opencode%s:%s*" version
+                        (file-name-nondirectory (directory-file-name root)))))
+         (default-directory root)
+         (vterm-shell
+          (mapconcat #'shell-quote-argument
+                     (list (expand-file-name executable) root)
+                     " ")))
+    (let ((buffer (vterm name)))
+      (with-current-buffer buffer
+        (my/opencode-configure-vterm-buffer))
+      buffer)))
+
+(defun my/opencode1 ()
+  "Start OpenCode v1 directly in a new project-local vterm."
+  (interactive)
+  (my/opencode-start-direct "~/.opencode/bin/opencode" "1"))
+
+(defun my/opencode2 ()
+  "Start isolated OpenCode v2 in a new project-local vterm."
+  (interactive)
+  (my/opencode-start-direct "~/.local/bin/opencode2" "2"))
+
+(global-set-key (kbd "C-c a 1") #'my/opencode1)
+(global-set-key (kbd "C-c a 2") #'my/opencode2)
 
 (defun my/opencode-blueprofit ()
   "Open the BlueProfit OpenCode account in a vterm for the current directory."

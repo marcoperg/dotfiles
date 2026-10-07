@@ -115,12 +115,16 @@ link_managed_configs() {
 	link_managed_file .zshenv .zshenv
 	link_managed_file bin/e .local/bin/e
 	link_managed_file bin/opencode-blueprofit .local/bin/opencode-blueprofit
+	link_managed_file bin/opencode2 .local/bin/opencode2
 	link_managed_file ssh/config .ssh/config
 	link_managed_file claude/settings.json .claude/settings.json
 	link_managed_file claude/keybindings.json .claude/keybindings.json
 	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
 	link_managed_file opencode/tui.jsonc .config/opencode/tui.jsonc
 	link_managed_file opencode/plugins/shell-env.ts .config/opencode/plugins/shell-env.ts
+	link_managed_file opencode-v2/opencode.jsonc .config/opencode-v2/opencode/opencode.jsonc
+	link_managed_file opencode-v2/cli.json .config/opencode-v2/opencode/cli.json
+	link_managed_file opencode-v2/plugins/chatgpt-compat.ts .config/opencode-v2/opencode/plugins/chatgpt-compat.ts
 	if [[ "$(uname -s)" == "Darwin" ]]; then
 		link_managed_file ghostty/config "Library/Application Support/com.mitchellh.ghostty/config.ghostty"
 	fi
@@ -155,7 +159,7 @@ if [[ $dotfiles ]]; then
 	for dotfile in $dotfiles; do
 		if [[ "$dotfile" == "bin" ]] || [[ "$dotfile" == "claude" ]] \
 			|| [[ "$dotfile" == "ghostty" ]] || [[ "$dotfile" == "opencode" ]] \
-			|| [[ "$dotfile" == "ssh" ]]; then
+			|| [[ "$dotfile" == "opencode-v2" ]] || [[ "$dotfile" == "ssh" ]]; then
 			continue
 		fi
 		echo "$dotfile"
