@@ -2,11 +2,16 @@
 set -eu
 
 export XDG_CONFIG_HOME="$HOME/.config/opencode-v2"
-export XDG_DATA_HOME="$HOME/.local/share/opencode-v2"
-export XDG_STATE_HOME="$HOME/.local/state/opencode-v2"
-export XDG_CACHE_HOME="$HOME/.cache/opencode-v2"
+case "${OPENCODE2_ACCOUNT:-}" in
+  "") profile=opencode-v2 ;;
+  blueprofit) profile=opencode-blueprofit-v2 ;;
+  *) printf '%s\n' 'Unknown OPENCODE2_ACCOUNT.' >&2; exit 2 ;;
+esac
+export XDG_DATA_HOME="$HOME/.local/share/$profile"
+export XDG_STATE_HOME="$HOME/.local/state/$profile"
+export XDG_CACHE_HOME="$HOME/.cache/$profile"
 
-# Explicit v1 config/database overrides must not leak into the testing profile.
+# Explicit legacy config/database overrides must not leak into the V2 profile.
 unset OPENCODE_CONFIG OPENCODE_CONFIG_CONTENT OPENCODE_CONFIG_DIR OPENCODE_DB
 unset OPENCODE_CLI_CONFIG_CONTENT
 

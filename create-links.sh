@@ -47,32 +47,6 @@ link_dotfile() {
 	link_managed_file "$1" "$target_path"
 }
 
-install_opencode_state_defaults() {
-	local defaults_path="$DOTFILEDIR/opencode/state-defaults.json"
-	local state_path="$HOMEDIR/.local/state/opencode/kv.json"
-	local temp_path
-
-	mkdir -p "$(dirname "$state_path")"
-	if [[ ! -e "$state_path" ]]; then
-		cp "$defaults_path" "$state_path"
-		return
-	fi
-
-	if ! command -v jq >/dev/null 2>&1; then
-		echo "jq is required to merge OpenCode state defaults into $state_path"
-		return 1
-	fi
-
-	temp_path=$(mktemp "$state_path.XXXXXX")
-	if jq -s '.[0] * .[1]' "$state_path" "$defaults_path" > "$temp_path"; then
-		mv "$temp_path" "$state_path"
-	else
-		rm -f "$temp_path"
-		return 1
-	fi
-}
-
-
 install_user_services() {
 	local service_path
 	if [[ "$(uname -s)" != "Linux" ]] || ! command -v systemctl >/dev/null 2>&1; then
@@ -81,10 +55,9 @@ install_user_services() {
 	if [[ "${DOTFILES_SKIP_SERVICES:-0}" == 1 ]]; then
 		return
 	fi
-	service_path="$HOMEDIR/.local/bin:$HOMEDIR/.opencode/bin:$HOMEDIR/.ciao/build/bin:$HOMEDIR/clip/Systems/ciao-devel/build/bin:/home/linuxbrew/.linuxbrew/opt/llvm/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin"
+	service_path="$HOMEDIR/.local/bin:$HOMEDIR/.ciao/build/bin:$HOMEDIR/clip/Systems/ciao-devel/build/bin:/home/linuxbrew/.linuxbrew/opt/llvm/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin"
 
 	link_managed_file emacs/emacs.service .config/systemd/user/emacs.service
-	link_managed_file opencode/opencode.service .config/systemd/user/opencode.service
 	systemctl --user daemon-reload
 
 	if PATH="$service_path" command -v emacs >/dev/null 2>&1 \
@@ -93,42 +66,29 @@ install_user_services() {
 	else
 		echo "Emacs service installed but not started: emacs and emacsclient must be on PATH"
 	fi
+}
 
-	if [[ "$(hostname -s)" == "perseo" ]]; then
-		systemctl --user disable opencode.service
-		link_managed_file opencode/opencode.service .config/systemd/user/opencode.service
-		systemctl --user daemon-reload
-		echo "OpenCode service not enabled on Perseo: Emacs launches OpenCode directly"
-		return
-	fi
 
-	if [[ ! -x "$HOMEDIR/.opencode/bin/opencode" ]]; then
-		echo "OpenCode service installed but not started: $HOMEDIR/.opencode/bin/opencode is missing"
-		return
-	fi
-
-	systemctl --user enable --now opencode.service
+link_opencode_configs() {
+	link_managed_file bin/opencode .local/bin/opencode
+	link_managed_file bin/opencode-blueprofit .local/bin/opencode-blueprofit
+	link_managed_file bin/opencode2 .local/bin/opencode2
+	link_managed_file opencode-v2/opencode.jsonc .config/opencode-v2/opencode/opencode.jsonc
+	link_managed_file opencode-v2/cli.json .config/opencode-v2/opencode/cli.json
+	link_managed_file opencode-v2/plugins/chatgpt-compat.ts .config/opencode-v2/opencode/plugins/chatgpt-compat.ts
 }
 
 
 link_managed_configs() {
 	link_managed_file .zshenv .zshenv
 	link_managed_file bin/e .local/bin/e
-	link_managed_file bin/opencode-blueprofit .local/bin/opencode-blueprofit
-	link_managed_file bin/opencode2 .local/bin/opencode2
+	link_opencode_configs
 	link_managed_file ssh/config .ssh/config
 	link_managed_file claude/settings.json .claude/settings.json
 	link_managed_file claude/keybindings.json .claude/keybindings.json
-	link_managed_file opencode/opencode.jsonc .config/opencode/opencode.jsonc
-	link_managed_file opencode/tui.jsonc .config/opencode/tui.jsonc
-	link_managed_file opencode/plugins/shell-env.ts .config/opencode/plugins/shell-env.ts
-	link_managed_file opencode-v2/opencode.jsonc .config/opencode-v2/opencode/opencode.jsonc
-	link_managed_file opencode-v2/cli.json .config/opencode-v2/opencode/cli.json
-	link_managed_file opencode-v2/plugins/chatgpt-compat.ts .config/opencode-v2/opencode/plugins/chatgpt-compat.ts
 	if [[ "$(uname -s)" == "Darwin" ]]; then
 		link_managed_file ghostty/config "Library/Application Support/com.mitchellh.ghostty/config.ghostty"
 	fi
-	install_opencode_state_defaults
 	install_user_services
 }
 
@@ -144,6 +104,11 @@ if [[ ! -e $BACKUPDIR ]]; then
 	mkdir -m 0700 "$BACKUPDIR"
 fi
 chmod 0700 "$BACKUPDIR"
+
+if [[ "$1" == "--opencode" ]]; then
+	link_opencode_configs
+	exit 0
+fi
 
 if [[ "$1" == "--managed" ]]; then
 	link_managed_configs

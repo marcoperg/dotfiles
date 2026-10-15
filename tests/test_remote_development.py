@@ -39,12 +39,10 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
     def test_daemon_services_receive_development_path(self):
         required_paths = (
             "%h/.local/bin",
-            "%h/.opencode/bin",
             "%h/clip/Systems/ciao-devel/build/bin",
         )
         for service_path in (
             "dotfiles/emacs/emacs.service",
-            "dotfiles/opencode/opencode.service",
         ):
             service = self.read(service_path)
             for path in required_paths:
@@ -56,18 +54,21 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
 
     def test_blueprofit_opencode_uses_isolated_account_state(self):
         with tempfile.TemporaryDirectory() as home:
-            executable = Path(home) / ".opencode/bin/opencode"
-            executable.parent.mkdir(parents=True)
+            executable = Path(home) / "v2 executable"
             executable.write_text(
                 "#!/bin/sh\n"
                 "printf '%s\\n' \"$XDG_DATA_HOME\" \"$XDG_STATE_HOME\" "
-                "\"$XDG_CONFIG_HOME\" \"$@\"\n"
+                "\"$XDG_CONFIG_HOME\" \"$XDG_CACHE_HOME\" \"$@\"\n"
             )
             executable.chmod(0o755)
+            launcher = Path(home) / ".local/bin/opencode2"
+            launcher.parent.mkdir(parents=True)
+            launcher.symlink_to(ROOT / "dotfiles/bin/opencode2")
 
             env = os.environ.copy()
             env["HOME"] = home
             env["XDG_CONFIG_HOME"] = "/shared/opencode-config"
+            env["OPENCODE2_BIN"] = str(executable)
             result = subprocess.run(
                 [
                     str(ROOT / "dotfiles/bin/opencode-blueprofit"),
@@ -84,23 +85,40 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             self.assertEqual(
                 result.stdout.splitlines(),
                 [
-                    f"{home}/.local/share/opencode-blueprofit",
-                    f"{home}/.local/state/opencode-blueprofit",
-                    "/shared/opencode-config",
+                    f"{home}/.local/share/opencode-blueprofit-v2",
+                    f"{home}/.local/state/opencode-blueprofit-v2",
+                    f"{home}/.config/opencode-v2",
+                    f"{home}/.cache/opencode-blueprofit-v2",
                     "run",
+                    "--standalone",
                     "hello world",
                 ],
             )
 
-    def test_perseo_runs_opencode_directly(self):
+    def test_default_opencode_is_v2_and_legacy_service_is_not_installed(self):
         init = self.read("dotfiles/emacs/init.el")
         bootstrap = self.read("create-links.sh")
 
-        self.assertIn('(string-equal (system-name) "perseo")', init)
-        self.assertIn('(list opencode root)', init)
-        self.assertIn('"attach" "http://localhost:4096"', init)
-        self.assertIn('[[ "$(hostname -s)" == "perseo" ]]', bootstrap)
-        self.assertIn("systemctl --user disable opencode.service", bootstrap)
+        self.assertIn('(my/opencode-start-direct "~/.local/bin/opencode" "")', init)
+        self.assertNotIn('"attach" "http://localhost:4096"', init)
+        self.assertNotIn("~/.opencode/bin", init)
+        self.assertNotIn("(defun my/opencode1 ()", init)
+        self.assertNotIn("opencode.service", bootstrap)
+        self.assertNotIn("install_opencode_state_defaults", bootstrap)
+
+    def test_default_launcher_delegates_to_v2_without_changing_arguments(self):
+        with tempfile.TemporaryDirectory() as home:
+            launcher = Path(home) / ".local/bin/opencode2"
+            launcher.parent.mkdir(parents=True)
+            launcher.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
+            launcher.chmod(0o755)
+            env = os.environ.copy()
+            env["HOME"] = home
+            result = subprocess.run(
+                [str(ROOT / "dotfiles/bin/opencode"), "run", "hello world"],
+                capture_output=True, env=env, text=True, check=True,
+            )
+            self.assertEqual(result.stdout.splitlines(), ["run", "hello world"])
 
     def test_opencode2_isolates_profile_and_preserves_command_arguments(self):
         with tempfile.TemporaryDirectory() as home:
@@ -158,13 +176,15 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
         )
 
     def test_opencode_discovers_private_knowledge_skill_portably(self):
-        config = json.loads(self.read("dotfiles/opencode/opencode.jsonc"))
+        config = json.loads(self.read("dotfiles/opencode-v2/opencode.jsonc"))
 
         self.assertIn(
-            "~/knowledge/praxis/skills", config["skills"]["paths"]
+            "~/knowledge/praxis/skills", config["skills"]
         )
         self.assertEqual(
-            config["permission"]["skill"]["knowledge-ecosystem"], "ask"
+            [rule["effect"] for rule in config["permissions"]
+             if rule["action"] == "skill" and rule["resource"] == "knowledge-ecosystem"],
+            ["ask"]
         )
         self.assertNotIn("/Users/", str(config))
 
@@ -183,12 +203,10 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             expected = [
                 ".local/bin/e",
+                ".local/bin/opencode",
                 ".local/bin/opencode-blueprofit",
                 ".local/bin/opencode2",
                 ".ssh/config",
-                ".config/opencode/opencode.jsonc",
-                ".config/opencode/plugins/shell-env.ts",
-                ".config/opencode/tui.jsonc",
                 ".config/opencode-v2/opencode/opencode.jsonc",
                 ".config/opencode-v2/opencode/cli.json",
                 ".config/opencode-v2/opencode/plugins/chatgpt-compat.ts",
@@ -200,6 +218,30 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             for relative_path in expected:
                 self.assertTrue((Path(home) / relative_path).is_symlink())
             self.assertTrue(os.access(Path(home) / ".local/bin/e", os.X_OK))
+            self.assertTrue(os.access(Path(home) / ".local/bin/opencode", os.X_OK))
+            self.assertFalse((Path(home) / ".config/opencode").exists())
+            self.assertFalse((Path(home) / ".local/state/opencode").exists())
+
+    def test_opencode_only_bootstrap_backs_up_local_cli_and_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as home:
+            cli = Path(home) / ".config/opencode-v2/opencode/cli.json"
+            cli.parent.mkdir(parents=True)
+            local_settings = '{"session":{"sidebar":"hide"}}\n'
+            cli.write_text(local_settings)
+            env = os.environ.copy()
+            env["HOME"] = home
+            for _ in range(2):
+                subprocess.run(
+                    ["bash", str(ROOT / "create-links.sh"), "--opencode"],
+                    capture_output=True, env=env, text=True, check=True,
+                )
+            self.assertTrue(cli.is_symlink())
+            backup = Path(home) / ".dotfiles.backups/.config/opencode-v2/opencode/cli.json"
+            self.assertEqual(backup.read_text(), local_settings)
+            self.assertFalse(backup.with_name("cli.json.1").exists())
+            self.assertFalse((Path(home) / ".ssh").exists())
+            self.assertFalse((Path(home) / ".config/systemd").exists())
+            self.assertFalse((Path(home) / ".local/share").exists())
 
 
 if __name__ == "__main__":

@@ -58,7 +58,6 @@
 (let ((development-paths
        (append
         (list (expand-file-name "~/.local/bin")
-              (expand-file-name "~/.opencode/bin")
               (expand-file-name "~/.ciao/build/bin")
               (expand-file-name "~/clip/Systems/ciao-devel/build/bin")
               "/home/linuxbrew/.linuxbrew/opt/llvm/bin"
@@ -978,11 +977,7 @@ elfeed will re-subscribe on the next fetch."
 (with-eval-after-load 'eat
   (add-hook 'eat-exec-hook #'my/claude-code-eat-setup))
 
-;; OpenCode is the autonomous OpenAI coding agent. It uses the existing
-;; ChatGPT OAuth credential managed by the OpenCode CLI.
-(let ((opencode-bin-directory (expand-file-name "~/.opencode/bin")))
-  (add-to-list 'exec-path opencode-bin-directory)
-  (setenv "PATH" (concat opencode-bin-directory path-separator (getenv "PATH"))))
+;; OpenCode V2 uses the managed launcher and the established V2 account profile.
 
 ;; OpenCode uses SGR mouse reporting, which vterm does not forward from Emacs
 ;; mouse events.  Send clicks explicitly while leaving all keyboard input to
@@ -1092,30 +1087,9 @@ elfeed will re-subscribe on the next fetch."
   (my/opencode-vterm-input-mode 1))
 
 (defun my/opencode ()
-  "Open the official OpenCode TUI in a project-local vterm.
-Run OpenCode directly on Perseo and attach to the local server elsewhere."
+  "Start OpenCode V2 directly in a new project-local vterm."
   (interactive)
-  (require 'vterm)
-  (let* ((project (project-current))
-         (root (file-name-as-directory
-                  (expand-file-name (if project (project-root project)
-                                      default-directory))))
-         (opencode (expand-file-name "~/.opencode/bin/opencode"))
-         (name (generate-new-buffer-name
-                 (format "*opencode:%s*"
-                         (file-name-nondirectory (directory-file-name root)))))
-         (default-directory root)
-         (vterm-shell
-           (mapconcat
-            #'shell-quote-argument
-            (if (string-equal (system-name) "perseo")
-                (list opencode root)
-              (list opencode "attach" "http://localhost:4096" "--dir" root))
-            " ")))
-    (let ((buffer (vterm name)))
-      (with-current-buffer buffer
-        (my/opencode-configure-vterm-buffer))
-      buffer)))
+  (my/opencode-start-direct "~/.local/bin/opencode" ""))
 
 (global-set-key (kbd "C-c a o") #'my/opencode)
 
@@ -1139,17 +1113,13 @@ Run OpenCode directly on Perseo and attach to the local server elsewhere."
         (my/opencode-configure-vterm-buffer))
       buffer)))
 
-(defun my/opencode1 ()
-  "Start OpenCode v1 directly in a new project-local vterm."
-  (interactive)
-  (my/opencode-start-direct "~/.opencode/bin/opencode" "1"))
-
 (defun my/opencode2 ()
-  "Start isolated OpenCode v2 in a new project-local vterm."
+  "Start OpenCode V2 in a new project-local vterm."
   (interactive)
   (my/opencode-start-direct "~/.local/bin/opencode2" "2"))
 
-(global-set-key (kbd "C-c a 1") #'my/opencode1)
+;; Clear the retired V1 shortcut when this section is re-evaluated.
+(global-unset-key (kbd "C-c a 1"))
 (global-set-key (kbd "C-c a 2") #'my/opencode2)
 
 (defun my/opencode-blueprofit ()

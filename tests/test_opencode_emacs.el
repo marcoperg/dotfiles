@@ -18,7 +18,7 @@
           (let ((form (read (current-buffer))))
             (when (and (eq (car-safe form) 'defun)
                        (memq (cadr form)
-                             '(my/opencode-start-direct my/opencode1 my/opencode2)))
+                              '(my/opencode-start-direct my/opencode my/opencode2)))
               (eval form t))))
       (end-of-file nil))))
 
@@ -45,7 +45,7 @@
                  (lambda () (push (current-buffer) configured))))
         (unwind-protect
             (progn
-              (dolist (entry '((my/opencode1 "1" "~/.opencode/bin/opencode")
+              (dolist (entry '((my/opencode "" "~/.local/bin/opencode")
                                (my/opencode2 "2" "~/.local/bin/opencode2")))
                 (pcase-let ((`(,command ,version ,executable) entry))
                   (let ((first (funcall command))

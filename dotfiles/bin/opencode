@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+# Keep the established V2 profile, including its credentials and sessions.
+exec "$HOME/.local/bin/opencode2" "$@"

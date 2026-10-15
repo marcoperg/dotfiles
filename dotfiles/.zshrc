@@ -73,3 +73,6 @@ if [ -x "$HOME/clip/Systems/ciao-devel/build/bin/ciao-env" ] ; then
   eval "$("$HOME/clip/Systems/ciao-devel/build/bin/ciao-env" --sh)"
 fi
 # @end(89126513)@ - End of automatically added lines.
+
+# Prefer the managed V2 launcher over legacy OpenCode installations.
+export PATH="$HOME/.local/bin:$PATH"
