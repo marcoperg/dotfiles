@@ -295,7 +295,19 @@ that share \\input fragments) each compile itself."
 )
 
 ; === PDF READER ===
+;; Use PDF Tools for PDFs rather than DocView's rasterized page cache.
+(use-package pdf-tools
+  :config
+  (pdf-tools-install))
+
 (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+
+(defun my/pdf-wheel-scroll-within-page ()
+  "Keep mouse and trackpad scrolling within the current PDF page."
+  (setq-local mwheel-scroll-up-function #'image-scroll-up
+              mwheel-scroll-down-function #'image-scroll-down))
+
+(add-hook 'pdf-view-mode-hook #'my/pdf-wheel-scroll-within-page)
 
 (customize-set-variable 'tramp-default-method "ssh")
 
