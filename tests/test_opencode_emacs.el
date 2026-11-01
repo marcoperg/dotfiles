@@ -18,7 +18,7 @@
           (let ((form (read (current-buffer))))
             (when (and (eq (car-safe form) 'defun)
                        (memq (cadr form)
-                              '(my/opencode-start-direct my/opencode my/opencode2)))
+                               '(my/opencode-start-direct my/opencode)))
               (eval form t))))
       (end-of-file nil))))
 
@@ -45,8 +45,7 @@
                  (lambda () (push (current-buffer) configured))))
         (unwind-protect
             (progn
-              (dolist (entry '((my/opencode "" "~/.local/bin/opencode")
-                               (my/opencode2 "2" "~/.local/bin/opencode2")))
+               (dolist (entry '((my/opencode "" "~/.local/bin/opencode")))
                 (pcase-let ((`(,command ,version ,executable) entry))
                   (let ((first (funcall command))
                         (second (funcall command)))
@@ -65,7 +64,7 @@
                                                 (list (expand-file-name executable)
                                                       root)
                                                 " ")))))))
-              (should (= (length calls) 4)))
+               (should (= (length calls) 2)))
           (mapc #'kill-buffer buffers))))))
 
 (ert-run-tests-batch-and-exit)

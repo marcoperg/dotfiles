@@ -28,19 +28,18 @@ leaving their runtime state directories intact and moving replaced files into
 
 - `~/.zshenv`
 - `~/.local/bin/opencode`
-- `~/.local/bin/opencode2`
 - `~/.claude/settings.json`
 - `~/.claude/keybindings.json`
 - `~/.config/opencode-v2/opencode/opencode.jsonc`
 - `~/.config/opencode-v2/opencode/cli.json`
 
-OpenCode V2 is the default. The `opencode` command delegates to the established
-`opencode2` launcher, preserving the working V2 profile without moving credentials
+OpenCode V2 is the default. The single `opencode` launcher
+preserves the working V2 profile without moving credentials
 or sessions. Retired V1 configuration and service definitions have been removed;
 bootstrap does not link V1 configuration, merge its state, or install its service.
 On Linux, bootstrap still installs and starts the Emacs daemon when available.
 Run `./create-links.sh --managed` to apply managed settings.
-Use `./create-links.sh --opencode` to apply only the OpenCode launchers and
+Use `./create-links.sh --opencode` to apply only the OpenCode launcher and
 configuration, without touching other managed files or services. Existing local
 CLI settings are backed up before linking the tracked file.
 
@@ -53,22 +52,31 @@ and is not copied into this public repository.
 
 ### OpenCode V2
 
-Install V2 with Homebrew; the managed launcher owns the default command:
+On Linux, install V2 with the standalone installer:
+
+```sh
+curl -fsSL https://opencode.ai/v2/install | bash
+./create-links.sh --opencode
+```
+
+For Homebrew installations:
 
 ```sh
 brew install anomalyco/tap/opencode-v2
 brew unlink opencode-v2
 ./create-links.sh --managed
 opencode --version
-opencode2 --version
-opencode2 debug paths
+opencode debug paths
 ```
 
-`opencode2` uses the Homebrew `opt/opencode-v2/bin/opencode` executable on
+On Linux, `opencode` prefers the standalone V2 binary at
+`~/.opencode/bin/opencode` (a leftover V1 binary is ignored). Otherwise it uses
+the Homebrew `opt/opencode-v2/bin/opencode` executable on
 Apple Silicon, Intel macOS, or Linuxbrew. It also discovers a manually installed
 binary at `~/.local/opt/opencode-v2/bin/opencode`. For another installation, set
-`OPENCODE2_BIN` to the absolute path of the v2 executable. Do not use the v2 curl
-installer: the managed launchers use the explicitly selected Homebrew binary.
+`OPENCODE_BIN` to the absolute path of the v2 executable. On Linux, the V2 curl
+installer manages the standalone binary; keep `~/.local/bin` first on PATH so
+the managed launcher continues to select the V2 profile.
 
 The launcher keeps all four XDG roots under directories named `opencode-v2`:
 configuration in `~/.config`, data in `~/.local/share`, state in `~/.local/state`,
@@ -84,8 +92,9 @@ used by the default entry points and may be retained separately.
 
 From Emacs, `M-x my/opencode` (`C-c a o`) opens V2 directly in a fresh vterm in
 the current project root, or the current directory outside a project, on every
-host. `M-x my/opencode2` (`C-c a 2`) remains an equivalent explicit entry point.
-The V1 command and `C-c a 1` binding are retired. Restart Emacs or evaluate the
+host. The redundant `opencode2` launcher and Emacs command are retired; bootstrap
+removes the old launcher symlink when it belongs to this checkout.
+The `C-c a 1` and `C-c a 2` bindings are retired. Restart Emacs or evaluate the
 updated definitions and keybindings to apply the change to a running instance.
 
 Disable any previously installed V1 server once on each existing host:
@@ -98,8 +107,8 @@ launchctl bootout "gui/$(id -u)/local.opencode.server"
 systemctl --user disable --now opencode.service
 ```
 
-After confirming no V1 work remains, remove the V1 binary at
-`~/.opencode/bin/opencode`, obsolete V1 config links, and the retired service
+After confirming no V1 work remains, remove `~/.opencode/bin/opencode` only if
+it reports a V1 version, plus obsolete V1 config links and the retired service
 definition. Do not remove credentials or session databases, or recursively
 delete `~/.opencode` or `~/.config/opencode`. Keep `~/.local/bin` on PATH for
 the managed V2 launcher. The Mac's V1 binary, managed config links, and legacy
@@ -116,7 +125,9 @@ markers. GPT-6 normally lowers these to `configuration_update` input items,
 which ChatGPT subscription sharing rejects. The selected reasoning level still
 applies to the request; stored history is preserved.
 
-V2's own update checks are disabled; update the binary explicitly with
+V2's own update checks are disabled. On Linux with the standalone installation,
+update with `opencode upgrade --method curl`, then restart V2.
+For Homebrew installations, update the binary explicitly with
 `brew upgrade anomalyco/tap/opencode-v2`, then `brew unlink opencode-v2` again
 and restart V2. To uninstall the binary, use `brew uninstall opencode-v2`.
 Runtime data and credentials remain local and are not tracked or backed up.

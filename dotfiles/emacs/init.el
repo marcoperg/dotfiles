@@ -1125,16 +1125,12 @@ elfeed will re-subscribe on the next fetch."
         (my/opencode-configure-vterm-buffer))
       buffer)))
 
-(defun my/opencode2 ()
-  "Start OpenCode V2 in a new project-local vterm."
-  (interactive)
-  (my/opencode-start-direct "~/.local/bin/opencode2" "2"))
-
-;; Clear the retired V1 shortcut when this section is re-evaluated.
-(when (fboundp 'my/opencode1)
-  (fmakunbound 'my/opencode1))
+;; Clear retired shortcuts when this section is re-evaluated.
+(dolist (command '(my/opencode1 my/opencode2))
+  (when (fboundp command)
+    (fmakunbound command)))
 (global-unset-key (kbd "C-c a 1"))
-(global-set-key (kbd "C-c a 2") #'my/opencode2)
+(global-unset-key (kbd "C-c a 2"))
 
 ;; gptel is the lightweight ChatGPT interface for conversations, selected
 ;; context, and in-place rewrites. It intentionally has no agentic tools.

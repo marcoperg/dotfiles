@@ -64,21 +64,34 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
         self.assertNotIn("install_opencode_state_defaults", bootstrap)
         self.assertFalse((ROOT / "dotfiles/opencode").exists())
 
-    def test_default_launcher_delegates_to_v2_without_changing_arguments(self):
+    @unittest.skipUnless(os.uname().sysname == "Linux", "Linux binary discovery")
+    def test_launcher_prefers_standalone_v2_and_ignores_v1(self):
         with tempfile.TemporaryDirectory() as home:
-            launcher = Path(home) / ".local/bin/opencode2"
+            launcher = Path(home) / ".opencode/bin/opencode"
             launcher.parent.mkdir(parents=True)
-            launcher.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
-            launcher.chmod(0o755)
+            fallback = Path(home) / ".local/opt/opencode-v2/bin/opencode"
+            fallback.parent.mkdir(parents=True)
+            fallback.write_text('#!/bin/sh\nprintf "fallback\\n"\n')
+            fallback.chmod(0o755)
             env = os.environ.copy()
             env["HOME"] = home
-            result = subprocess.run(
-                [str(ROOT / "dotfiles/bin/opencode"), "run", "hello world"],
-                capture_output=True, env=env, text=True, check=True,
-            )
-            self.assertEqual(result.stdout.splitlines(), ["run", "hello world"])
+            env.pop("OPENCODE_BIN", None)
+            for version in ("2.2.5", "1.0.0"):
+                launcher.write_text(
+                    '#!/bin/sh\nif [ "$1" = --version ]; then\n'
+                    f'  echo "opencode v{version}"\n'
+                    'else\n  printf "%s\\n" "$@"\nfi\n'
+                )
+                launcher.chmod(0o755)
+                result = subprocess.run(
+                    [str(ROOT / "dotfiles/bin/opencode"), "run", "hello world"],
+                    capture_output=True, env=env, text=True, check=True,
+                )
+                expected = (["run", "--standalone", "hello world"]
+                            if version.startswith("2.") else ["fallback"])
+                self.assertEqual(result.stdout.splitlines(), expected)
 
-    def test_opencode2_isolates_profile_and_preserves_command_arguments(self):
+    def test_opencode_isolates_profile_and_preserves_command_arguments(self):
         with tempfile.TemporaryDirectory() as home:
             executable = Path(home) / "v2 executable"
             executable.write_text(
@@ -91,7 +104,7 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             env = os.environ.copy()
             env.update({
                 "HOME": home,
-                "OPENCODE2_BIN": str(executable),
+                "OPENCODE_BIN": str(executable),
                 "OPENCODE_CONFIG": "/v1/config.json",
                 "OPENCODE_DB": "/v1/opencode.db",
                 "XDG_CONFIG_HOME": "/v1/config",
@@ -106,11 +119,12 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
                 (["mini"], ["mini", "--standalone"]),
                 (["debug", "paths"], ["debug", "paths"]),
                 (["mcp", "list"], ["mcp", "list"]),
+                (["upgrade", "--method", "curl"], ["upgrade", "--method", "curl"]),
             ]
             for arguments, forwarded in cases:
                 with self.subTest(arguments=arguments):
                     result = subprocess.run(
-                        [str(ROOT / "dotfiles/bin/opencode2"), *arguments],
+                        [str(ROOT / "dotfiles/bin/opencode"), *arguments],
                         capture_output=True, env=env, text=True, check=False,
                     )
                     self.assertEqual(result.returncode, 0, result.stderr)
@@ -151,7 +165,6 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             expected = [
                 ".local/bin/e",
                 ".local/bin/opencode",
-                ".local/bin/opencode2",
                 ".ssh/config",
                 ".config/opencode-v2/opencode/opencode.jsonc",
                 ".config/opencode-v2/opencode/cli.json",
@@ -165,6 +178,7 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
                 self.assertTrue((Path(home) / relative_path).is_symlink())
             self.assertTrue(os.access(Path(home) / ".local/bin/e", os.X_OK))
             self.assertTrue(os.access(Path(home) / ".local/bin/opencode", os.X_OK))
+            self.assertFalse((Path(home) / ".local/bin/opencode2").is_symlink())
             self.assertFalse((Path(home) / ".config/opencode").exists())
             self.assertFalse((Path(home) / ".local/state/opencode").exists())
 
@@ -188,6 +202,24 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             self.assertFalse((Path(home) / ".ssh").exists())
             self.assertFalse((Path(home) / ".config/systemd").exists())
             self.assertFalse((Path(home) / ".local/share").exists())
+
+    def test_bootstrap_removes_only_owned_retired_launcher(self):
+        with tempfile.TemporaryDirectory() as home:
+            retired = Path(home) / ".local/bin/opencode2"
+            retired.parent.mkdir(parents=True)
+            retired.symlink_to(ROOT / "dotfiles/bin/opencode2")
+            env = dict(os.environ, HOME=home)
+            subprocess.run(
+                ["bash", str(ROOT / "create-links.sh"), "--opencode"],
+                capture_output=True, env=env, check=True,
+            )
+            self.assertFalse(retired.is_symlink())
+            retired.write_text("user-owned launcher\n")
+            subprocess.run(
+                ["bash", str(ROOT / "create-links.sh"), "--opencode"],
+                capture_output=True, env=env, check=True,
+            )
+            self.assertEqual(retired.read_text(), "user-owned launcher\n")
 
 
 if __name__ == "__main__":

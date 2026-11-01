@@ -71,7 +71,10 @@ install_user_services() {
 
 link_opencode_configs() {
 	link_managed_file bin/opencode .local/bin/opencode
-	link_managed_file bin/opencode2 .local/bin/opencode2
+	# Remove only the retired launcher link owned by this checkout.
+	if [[ -L "$HOMEDIR/.local/bin/opencode2" ]] && [[ "$(readlink "$HOMEDIR/.local/bin/opencode2")" == "$DOTFILEDIR/bin/opencode2" ]]; then
+		rm "$HOMEDIR/.local/bin/opencode2"
+	fi
 	link_managed_file opencode-v2/opencode.jsonc .config/opencode-v2/opencode/opencode.jsonc
 	link_managed_file opencode-v2/cli.json .config/opencode-v2/opencode/cli.json
 	link_managed_file opencode-v2/plugins/chatgpt-compat.ts .config/opencode-v2/opencode/plugins/chatgpt-compat.ts
