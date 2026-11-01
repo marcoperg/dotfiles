@@ -71,7 +71,6 @@ install_user_services() {
 
 link_opencode_configs() {
 	link_managed_file bin/opencode .local/bin/opencode
-	link_managed_file bin/opencode-blueprofit .local/bin/opencode-blueprofit
 	link_managed_file bin/opencode2 .local/bin/opencode2
 	link_managed_file opencode-v2/opencode.jsonc .config/opencode-v2/opencode/opencode.jsonc
 	link_managed_file opencode-v2/cli.json .config/opencode-v2/opencode/cli.json

@@ -28,7 +28,6 @@ leaving their runtime state directories intact and moving replaced files into
 
 - `~/.zshenv`
 - `~/.local/bin/opencode`
-- `~/.local/bin/opencode-blueprofit`
 - `~/.local/bin/opencode2`
 - `~/.claude/settings.json`
 - `~/.claude/keybindings.json`
@@ -44,20 +43,6 @@ Run `./create-links.sh --managed` to apply managed settings.
 Use `./create-links.sh --opencode` to apply only the OpenCode launchers and
 configuration, without touching other managed files or services. Existing local
 CLI settings are backed up before linking the tracked file.
-
-`opencode-blueprofit` launches the same OpenCode executable with the same
-configuration, TUI settings, plugins, skills, and MCP servers as `opencode`, but
-with separate authentication, sessions, logs, repositories, and mutable state.
-Authenticate the account through OpenCode on first use. Its runtime files live
-under `~/.local/share/opencode-blueprofit-v2/opencode/` and
-`~/.local/state/opencode-blueprofit-v2/opencode/`, with a separate cache under
-`~/.cache/opencode-blueprofit-v2/`. This is a new V2 account profile: authenticate
-again with `/connect`; the old V1 BlueProfit data is not reused or modified.
-Neither profile is tracked or backed up.
-From Emacs, `M-x my/opencode-blueprofit` opens it in the current buffer's
-directory. Buffers include the directory name and Emacs adds numeric suffixes
-when more than one instance is open. The command intentionally has no global
-keybinding.
 
 The OpenCode configuration discovers reusable Ciao guidance from
 `~/clip/Systems/ciao-skills/skills` and the private `knowledge-ecosystem` skill
@@ -80,7 +65,8 @@ opencode2 debug paths
 ```
 
 `opencode2` uses the Homebrew `opt/opencode-v2/bin/opencode` executable on
-Apple Silicon, Intel macOS, or Linuxbrew. For another installation, set
+Apple Silicon, Intel macOS, or Linuxbrew. It also discovers a manually installed
+binary at `~/.local/opt/opencode-v2/bin/opencode`. For another installation, set
 `OPENCODE2_BIN` to the absolute path of the v2 executable. Do not use the v2 curl
 installer: the managed launchers use the explicitly selected Homebrew binary.
 
@@ -163,8 +149,8 @@ Do not add `~/.claude.json`, `~/.claude/` runtime state, or
 generated dependencies.
 
 Do not back up or track `~/.opencode`, `~/.local/share/opencode`,
-`~/.local/share/opencode-blueprofit`, or the corresponding directories under
-`~/.local/state`, or the `opencode-v2` and `opencode-blueprofit-v2` runtime/cache directories. They
+the corresponding directories under `~/.local/state`, or any current or retired
+OpenCode account profile's runtime/cache directories, including `opencode-v2`. They
 contain authentication, sessions, logs, and generated state. Reinstall OpenCode
 and authenticate again on a rebuilt host.
 

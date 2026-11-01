@@ -1,6 +1,0 @@
-#!/bin/sh
-set -eu
-
-export OPENCODE2_ACCOUNT=blueprofit
-
-exec "$HOME/.local/bin/opencode2" "$@"

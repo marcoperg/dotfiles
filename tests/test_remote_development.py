@@ -52,49 +52,6 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
         launcher = self.read("dotfiles/bin/e")
         self.assertIn('emacsclient -a "" -t "$@"', launcher)
 
-    def test_blueprofit_opencode_uses_isolated_account_state(self):
-        with tempfile.TemporaryDirectory() as home:
-            executable = Path(home) / "v2 executable"
-            executable.write_text(
-                "#!/bin/sh\n"
-                "printf '%s\\n' \"$XDG_DATA_HOME\" \"$XDG_STATE_HOME\" "
-                "\"$XDG_CONFIG_HOME\" \"$XDG_CACHE_HOME\" \"$@\"\n"
-            )
-            executable.chmod(0o755)
-            launcher = Path(home) / ".local/bin/opencode2"
-            launcher.parent.mkdir(parents=True)
-            launcher.symlink_to(ROOT / "dotfiles/bin/opencode2")
-
-            env = os.environ.copy()
-            env["HOME"] = home
-            env["XDG_CONFIG_HOME"] = "/shared/opencode-config"
-            env["OPENCODE2_BIN"] = str(executable)
-            result = subprocess.run(
-                [
-                    str(ROOT / "dotfiles/bin/opencode-blueprofit"),
-                    "run",
-                    "hello world",
-                ],
-                capture_output=True,
-                env=env,
-                text=True,
-                check=False,
-            )
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(
-                result.stdout.splitlines(),
-                [
-                    f"{home}/.local/share/opencode-blueprofit-v2",
-                    f"{home}/.local/state/opencode-blueprofit-v2",
-                    f"{home}/.config/opencode-v2",
-                    f"{home}/.cache/opencode-blueprofit-v2",
-                    "run",
-                    "--standalone",
-                    "hello world",
-                ],
-            )
-
     def test_default_opencode_is_v2_and_legacy_service_is_not_installed(self):
         init = self.read("dotfiles/emacs/init.el")
         bootstrap = self.read("create-links.sh")
@@ -165,17 +122,6 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
                         "unset", "unset", *forwarded,
                     ])
 
-    def test_emacs_opens_blueprofit_in_the_current_directory(self):
-        init = self.read("dotfiles/emacs/init.el")
-
-        self.assertIn("(defun my/opencode-blueprofit ()", init)
-        self.assertIn('"~/.local/bin/opencode-blueprofit"', init)
-        self.assertIn('"*opencode-blueprofit:%s*"', init)
-        self.assertIn("(expand-file-name default-directory)", init)
-        self.assertNotIn(
-            "(global-set-key (kbd \"C-c a b\") #'my/opencode-blueprofit)", init
-        )
-
     def test_opencode_discovers_private_knowledge_skill_portably(self):
         config = json.loads(self.read("dotfiles/opencode-v2/opencode.jsonc"))
 
@@ -205,7 +151,6 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
             expected = [
                 ".local/bin/e",
                 ".local/bin/opencode",
-                ".local/bin/opencode-blueprofit",
                 ".local/bin/opencode2",
                 ".ssh/config",
                 ".config/opencode-v2/opencode/opencode.jsonc",
