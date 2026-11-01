@@ -123,7 +123,7 @@ if [[ $dotfiles ]]; then
 
 	for dotfile in $dotfiles; do
 		if [[ "$dotfile" == "bin" ]] || [[ "$dotfile" == "claude" ]] \
-			|| [[ "$dotfile" == "ghostty" ]] || [[ "$dotfile" == "opencode" ]] \
+			|| [[ "$dotfile" == "ghostty" ]] \
 			|| [[ "$dotfile" == "opencode-v2" ]] || [[ "$dotfile" == "ssh" ]]; then
 			continue
 		fi

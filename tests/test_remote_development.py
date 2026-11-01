@@ -105,6 +105,7 @@ class RemoteDevelopmentConfigTests(unittest.TestCase):
         self.assertNotIn("(defun my/opencode1 ()", init)
         self.assertNotIn("opencode.service", bootstrap)
         self.assertNotIn("install_opencode_state_defaults", bootstrap)
+        self.assertFalse((ROOT / "dotfiles/opencode").exists())
 
     def test_default_launcher_delegates_to_v2_without_changing_arguments(self):
         with tempfile.TemporaryDirectory() as home:

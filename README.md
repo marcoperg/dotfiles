@@ -37,8 +37,8 @@ leaving their runtime state directories intact and moving replaced files into
 
 OpenCode V2 is the default. The `opencode` command delegates to the established
 `opencode2` launcher, preserving the working V2 profile without moving credentials
-or sessions. V1 configuration under `dotfiles/opencode/` is retained for reference
-only: bootstrap no longer links it, merges its state, or installs its service.
+or sessions. Retired V1 configuration and service definitions have been removed;
+bootstrap does not link V1 configuration, merge its state, or install its service.
 On Linux, bootstrap still installs and starts the Emacs daemon when available.
 Run `./create-links.sh --managed` to apply managed settings.
 Use `./create-links.sh --opencode` to apply only the OpenCode launchers and
@@ -82,7 +82,7 @@ opencode2 debug paths
 `opencode2` uses the Homebrew `opt/opencode-v2/bin/opencode` executable on
 Apple Silicon, Intel macOS, or Linuxbrew. For another installation, set
 `OPENCODE2_BIN` to the absolute path of the v2 executable. Do not use the v2 curl
-installer during side-by-side testing: it replaces `~/.opencode/bin/opencode`.
+installer: the managed launchers use the explicitly selected Homebrew binary.
 
 The launcher keeps all four XDG roots under directories named `opencode-v2`:
 configuration in `~/.config`, data in `~/.local/share`, state in `~/.local/state`,
@@ -93,8 +93,8 @@ is still loaded normally and must use a format compatible with v2.
 Interactive launches, `opencode run`, and `opencode mini` use private servers
 with `--standalone`. Management commands pass through normally; commands that
 start a shared server use the isolated v2 profile. Authenticate with `/connect`
-on first use. No legacy server is required. The old binary and V1 runtime data
-can remain on disk, but are not used by the default entry points.
+on first use. No legacy server or V1 binary is required. V1 runtime data is not
+used by the default entry points and may be retained separately.
 
 From Emacs, `M-x my/opencode` (`C-c a o`) opens V2 directly in a fresh vterm in
 the current project root, or the current directory outside a project, on every
@@ -112,15 +112,18 @@ launchctl bootout "gui/$(id -u)/local.opencode.server"
 systemctl --user disable --now opencode.service
 ```
 
-Do not remove credentials or session databases. Put `~/.local/bin` ahead of
-`~/.opencode/bin` in local shell customizations; the tracked shell configuration
-already prefers the managed launcher.
+After confirming no V1 work remains, remove the V1 binary at
+`~/.opencode/bin/opencode`, obsolete V1 config links, and the retired service
+definition. Do not remove credentials or session databases, or recursively
+delete `~/.opencode` or `~/.config/opencode`. Keep `~/.local/bin` on PATH for
+the managed V2 launcher. The Mac's V1 binary, managed config links, and legacy
+LaunchAgent were removed on 2026-11-01; other hosts require separate checks.
 
 `dotfiles/opencode-v2/` owns the active skills, skill permissions,
 Ciao MCP connection, and CLI settings. Ciao tools are exposed directly with
 `codemode: false`. `Alt+o` / leader-`o` cycle v2 transcript verbosity. The v1
-`shell-env.ts` plugin is not loaded by v2; v2 inherits the launcher's shell
-environment. Restart OpenCode after editing managed configuration.
+`shell-env.ts` plugin has been removed; v2 inherits the launcher's shell
+environment. Managed configuration changes reload automatically.
 
 The v2 `chatgpt-compat.ts` plugin removes outgoing OpenAI reasoning-effort update
 markers. GPT-6 normally lowers these to `configuration_update` input items,
