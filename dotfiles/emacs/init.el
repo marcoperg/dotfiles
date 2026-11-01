@@ -298,7 +298,8 @@ that share \\input fragments) each compile itself."
 ;; Use PDF Tools for PDFs rather than DocView's rasterized page cache.
 (use-package pdf-tools
   :config
-  (pdf-tools-install))
+  ;; Build epdfinfo without prompting; system dependencies are managed separately.
+  (pdf-tools-install t t))
 
 (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 
