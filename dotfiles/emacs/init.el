@@ -1177,6 +1177,25 @@ elfeed will re-subscribe on the next fetch."
   :commands run-maude
   :mode "\\.maude\\'")
 
+; Isabelle theory reading: highlighting and symbol display, without a prover.
+(unless (package-installed-p 'isar-mode)
+  (condition-case err
+      (progn
+        (require 'package-vc)
+        (package-vc-install
+         '(isar-mode :url "https://github.com/m-fleury/isar-mode")))
+    (error
+     (display-warning 'packages
+                      (format "Could not install isar-mode: %s"
+                              (error-message-string err))
+                      :warning))))
+
+(use-package isar-mode
+  :mode "\\.thy\\'"
+  :init
+  ;; Reading a theory should not rewrite Unicode symbols when it is saved.
+  (setq isar-mode-remove-utf8-when-saving nil))
+
 ; Javascript
 (add-hook 'js-mode-hook
           (lambda ()
