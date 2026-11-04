@@ -22,11 +22,13 @@ branch. MCP `main` targets a different development revision. Using the current
 | `emacs-lsp/lsp-mode` | `c6e3660d32813b02ba3de60045de734e680bbcc7` |
 
 Tested with Emacs 30.2 and OpenCode V2 2.2.5. The lsp-mode pin corresponds to
-the already-installed `20251221.1949` package; the separate source checkout
+the originally installed `20251221.1949` package; the separate source checkout
 keeps the Isabelle client pinned without upgrading unrelated Emacs packages.
 Existing package.el dependencies are retained. On a new machine, install them
 with `M-x package-install RET lsp-mode` when first using Isabelle; this optional
 integration does not install packages or check external paths at Emacs startup.
+Install the package, not just its dependency libraries: its generated autoloads
+are also needed. The integration still loads LSP sources from the pinned checkout.
 
 `pins.json` and the fork's `Admin/components/main` pin the source and components
 (including JDK 21.0.9, Scala 3.3.4, and Poly/ML 5.9.2). Identically versioned
@@ -54,6 +56,11 @@ disables obsolete global TRAMP hacks, removes hard-coded personal library
 paths, and makes caret tracking buffer-local. Synchronous output rendering
 avoids the otherwise unconditional session-async dependency and extra Emacs
 process. No new package manager or Emacs framework is introduced.
+
+`lsp-mode.patch` fixes a `nil`/`null` predicate typo in the pinned tree-sitter
+query client. LSP discovers bundled clients before starting Isabelle, so this
+otherwise unrelated client can prevent the prover from starting. The patch
+preserves normal client discovery and leaves the source revision unchanged.
 
 **Known limitation:** the server emits dedicated `PIDE/sledgehammer_output`
 and `PIDE/sledgehammer_status` notifications that this Emacs client does not
@@ -83,7 +90,7 @@ The remaining external state is reproducible, rather than hand-maintained:
 
 No additional hand-written code or secret configuration is required outside
 dotfiles. The source changes in the external checkouts are reproduced from the
-two tracked patch files. Do not copy heap caches or old absolute component
+tracked patch files. Do not copy heap caches or old absolute component
 registrations between machines; run the installer and build locally instead.
 
 Emacs autoloads the integration only when opening a `.thy` file or running
@@ -174,7 +181,7 @@ substitute for the independent build.
   preserved before/after theory mode, optional Isabelle input, standard keys,
   `\<times>` rendering, one-save disk/buffer equality, native file-notification
   delivery, external reload safety, the mode-local menu, and actionable missing
-  installation errors: **8 tests passed**.
+  installation errors, plus bundled LSP client initialization: **9 tests passed**.
 - `emacs --batch -Q -l tests/test_isabelle_lsp.el`: real LSP initialization,
   proof-state feedback, deliberately unknown proof method producing a diagnostic,
   and correction clearing the error diagnostics.
@@ -183,7 +190,15 @@ substitute for the independent build.
   proof of `True` (0 errors, bad commands, failures, or pending commands).
 - `isabelle-dev build -v`: fresh Pure/HOL and smoke-session build completed with
   `quick_and_dirty=false`; no skipped proofs in the smoke theory.
-- 25 downloaded component archives matched the pinned upstream SHA1 manifest.
+- Downloaded component archives matched the pinned upstream SHA1 manifest:
+  **25** on the original macOS installation, **45** on the Linux bootstrap.
+
+Linux bootstrap (2026-11-04) also passed the lazy-startup test, all 9 editor
+tests, the live LSP round-trip, direct MCP startup/read/theory-state checks,
+and a fresh Pure/HOL/smoke build. This used Emacs 31.1 and package.el
+`lsp-mode-20261020.1728` for autoloads/dependencies; the LSP implementation
+still loaded from the pinned source checkout. Emacs 31.1 reports upstream
+missing-lexical-binding warnings on first use, without preventing these checks.
 
 The LSP tests exercise a real Emacs process and server, but not manual GUI
 layout, clicking, mouse interaction, or the Sledgehammer UI. The interactive
@@ -230,6 +245,6 @@ have been made since that backup.
    unused. If removing them, first unregister MCP using this pinned prover's
    `components -x` command. Do not remove shared component files or the 2026 app.
 
-Reversing either tracked patch with `git apply --reverse` in its corresponding
+Reversing a tracked patch with `git apply --reverse` in its corresponding
 source checkout is safe only after checking for additional local source edits;
 never run the original buggy integration while it is still enabled in Emacs.

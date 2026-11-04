@@ -26,6 +26,12 @@
     (let ((error (should-error (my/isabelle-check-installation) :type 'user-error)))
       (should (string-match-p "setup.py.*--install" (error-message-string error))))))
 
+(ert-deftest my/isabelle-lsp-client-initialization ()
+  ;; LSP discovers this bundled client even when starting only Isabelle.
+  (require 'lsp-ts-query)
+  (should (vectorp lsp-ts-query-parser-install-directories))
+  (should (seq-every-p #'stringp lsp-ts-query-parser-install-directories)))
+
 (ert-deftest my/isabelle-spanish-input-isolation ()
   (with-temp-buffer
     (activate-input-method "spanish-prefix")
