@@ -1178,23 +1178,32 @@ elfeed will re-subscribe on the next fetch."
   :mode "\\.maude\\'")
 
 ; Isabelle theory reading: highlighting and symbol display, without a prover.
-(unless (package-installed-p 'isar-mode)
+(defun my/isar-mode ()
+  "Install the optional Isabelle reader if needed, then enable it."
+  (interactive)
   (condition-case err
       (progn
         (require 'package-vc)
-        (package-vc-install
-         '(isar-mode :url "https://github.com/m-fleury/isar-mode")))
+        ;; Preselect in memory so package-vc does not save into this file.
+        (add-to-list 'package-selected-packages 'isar-mode)
+        (add-to-list 'package-vc-selected-packages
+                     '(isar-mode :url "https://github.com/m-fleury/isar-mode"))
+        (unless (package-installed-p 'isar-mode)
+          (package-vc-install
+           (assq 'isar-mode package-vc-selected-packages)))
+        ;; Reading a theory should not rewrite Unicode symbols on save.
+        (setq isar-mode-remove-utf8-when-saving nil)
+        (require 'isar-mode)
+        (isar-mode))
     (error
+     (text-mode)
      (display-warning 'packages
-                      (format "Could not install isar-mode: %s"
+                      (format "Could not enable isar-mode; using text-mode: %s"
                               (error-message-string err))
                       :warning))))
 
-(use-package isar-mode
-  :mode "\\.thy\\'"
-  :init
-  ;; Reading a theory should not rewrite Unicode symbols when it is saved.
-  (setq isar-mode-remove-utf8-when-saving nil))
+;; No reader installation or package bookkeeping until a theory is opened.
+(add-to-list 'auto-mode-alist '("\\.thy\\'" . my/isar-mode))
 
 ; Javascript
 (add-hook 'js-mode-hook

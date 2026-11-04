@@ -199,6 +199,16 @@ script builds a pinned mu release under `~/.local` and verifies its checksum.
 It does not run from `create-links.sh`, so linking dotfiles never changes
 system packages unexpectedly.
 
+## Isabelle Theory Reading
+
+Opening a `.thy` file enables the optional `isar-mode` reader, installing it
+from Git on first use if needed. Normal startup neither installs the reader nor
+loads `package-vc` for it. The mode provides highlighting and symbol display,
+not prover integration, and saving preserves Unicode and Isabelle escapes.
+
+If installation or loading fails, the file opens in `text-mode` with a warning.
+Retry with `M-x my/isar-mode` when the dependency or network issue is resolved.
+
 ## Knowledge System Integration
 
 The Emacs configuration expects the sibling repositories under `~/knowledge`:
