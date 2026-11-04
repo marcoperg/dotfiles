@@ -1,0 +1,23 @@
+{
+  "isabelle_home": {
+    "url": "https://github.com/m-fleury/isabelle-emacs.git",
+    "revision": "db6537b08703478050cfb5046d677c1bf96859f9",
+    "branch": "Isabelle2025-2-vsce",
+    "patch": "lsp-isar.patch"
+  },
+  "isar_mode_home": {
+    "url": "https://github.com/m-fleury/isar-mode.git",
+    "revision": "354b881f6a9e1b570a44c5819852a6f1cb2a2ebf",
+    "patch": "isar-mode.patch"
+  },
+  "lsp_mode_home": {
+    "url": "https://github.com/emacs-lsp/lsp-mode.git",
+    "revision": "c6e3660d32813b02ba3de60045de734e680bbcc7",
+    "package_version": "20251221.1949"
+  },
+  "mcp_home": {
+    "url": "https://github.com/kappelmann/isabelle-pide-mcp.git",
+    "revision": "cd672ac6e31befcf4750835c43c29fa32b794152",
+    "branch": "Isabelle2025-2"
+  }
+}

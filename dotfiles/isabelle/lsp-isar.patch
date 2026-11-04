@@ -1,0 +1,110 @@
+diff --git a/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el b/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el
+index 4771c39..b3aa31b 100644
+--- a/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el
++++ b/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el
+@@ -41,7 +41,7 @@
+ (require 'dash)
+ 
+ (require 'dom)
+-(require 'session-async)
++;; session-async is needed only for optional asynchronous HTML rendering.
+ (require 'lsp-protocol)
+ (require 'lsp-isar-types)
+ 
+@@ -667,6 +667,8 @@ LSP-ISAR-OUTPUT-CURRENT-OUTPUT-NUMBER-RES."
+ ;; deactivate font-lock-mode because we to the fontification ourselves anyway.
+ (defun lsp-isar-output-initialize-output-buffer ()
+   "Initialize buffers."
++  (when lsp-isar-output-use-async
++    (require 'session-async)
+   (setq lsp-isar-output-session-name (session-async-new))
+   (session-async-start
+    `(lambda ()
+@@ -724,7 +726,7 @@ LSP-ISAR-OUTPUT-CURRENT-OUTPUT-NUMBER-RES."
+ 		(list lsp-isar-output-state lsp-isar-output lsp-isar-output-proof-cases-content
+ 		      lsp-isar-output-state-deco lsp-isar-output-output-deco)))))))
+    'ignore
+-   lsp-isar-output-session-name)
++   lsp-isar-output-session-name))
+   (setq lsp-isar-output-state-buffer (get-buffer-create "*lsp-isar-state*"))
+   (setq lsp-isar-output-buffer (get-buffer-create "*lsp-isar-output*"))
+   (save-excursion
+diff --git a/src/Tools/emacs-lsp/lsp-isar/lsp-isar.el b/src/Tools/emacs-lsp/lsp-isar/lsp-isar.el
+index fa84df2..1639a99 100644
+--- a/src/Tools/emacs-lsp/lsp-isar/lsp-isar.el
++++ b/src/Tools/emacs-lsp/lsp-isar/lsp-isar.el
+@@ -270,7 +270,13 @@ Return the process object for it. Similar to
+   (let ((command (mapconcat 'identity args " ")))
+     (funcall start-file-process-shell-command name buffer command)))
+ 
+-(when (>= emacs-major-version 28)
++(defcustom lsp-isar-enable-legacy-tramp-workarounds nil
++  "Enable obsolete, global TRAMP workarounds.  Leave nil on modern Emacs."
++  :type 'boolean
++  :group 'isabelle)
++
++(when (and lsp-isar-enable-legacy-tramp-workarounds
++           (>= emacs-major-version 28))
+   (advice-add 'start-file-process-shell-command :around #'start-file-process-shell-command@around)
+ 
+   ;; work-around to make sure no brace is lost during transmission
+@@ -345,7 +351,7 @@ the AFP and other options."
+       :priority 1
+       :path->uri-fn (lambda (path) (lsp--path-to-uri-1 (funcall lsp-isar-file-name-follow-links path)))
+       :uri->path-fn (lambda (path) (funcall lsp-isar-file-name-unfollow-links (lsp--uri-to-path-1 path)))
+-      :library-folders-fn (lambda (_workspace) (list "/local/home/salt/isabelle/afp-devel" "/local/home/salt/isabelle/emacs_isabelle/isabelle-release"))
++      :library-folders-fn (lambda (_workspace) (list lsp-isar-path-to-isabelle))
+       :notification-handlers
+       (lsp-ht
+        ("PIDE/decoration" #'lsp-isar-decorations-update-and-reprint)
+@@ -363,3 +369,4 @@
++  (interactive)
+   ;; starting lsp
+   (when (or (not lsp-isar-use-lsp) lsp-isar-parse-args-noisabelle)
+     (message "not starting the server! Set lsp-isar-use-lsp to t for that and do not pass '--noisabelle' as argument to Emacs."))
+@@ -531,7 +538,7 @@ choice for the given prover."
+    ("d" "delete sledgehammer call" lsp-isar-delete-sledgehammer-call)])
+ 
+ 
+-(define-key isar-mode-map (kbd "C-x s") 'lsp-isar-sledgehammer)
++(define-key isar-mode-map (kbd "C-c C-h") #'lsp-isar-sledgehammer-interface)
+ 
+ 
+ (defun lsp-isar-insert-command (command)
+diff --git a/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el b/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el
+--- a/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el
++++ b/src/Tools/emacs-lsp/lsp-isar/lsp-isar-output.el
+@@ -774,7 +774,8 @@
+ 
+ (defun lsp-isar-output-adapt-length ()
+   "Adapt the size of the buffer"
+-  (when lsp-isar-output-buffer
++  (when (and (eq major-mode 'isar-mode)
++             (lsp-workspaces) lsp-isar-output-buffer)
+     (save-excursion
+       (let
+ 	  ((cols (window-body-width (get-buffer-window lsp-isar-output-buffer))))
+@@ -783,7 +784,10 @@
+ (defun lsp-isar-output-adapt-to-change (&optional _frame)
+   (lsp-isar-output-adapt-length))
+ 
+-(add-hook 'window-configuration-change-hook 'lsp-isar-output-adapt-to-change)
++(add-hook 'isar-mode-hook
++          (lambda ()
++            (add-hook 'window-configuration-change-hook
++                      #'lsp-isar-output-adapt-to-change nil t)))
+ 
+ (modify-coding-system-alist 'file "*lsp-isar-output*" 'utf-8-auto)
+ 
+diff --git a/src/Tools/emacs-lsp/lsp-isar/lsp-isar-caret.el b/src/Tools/emacs-lsp/lsp-isar/lsp-isar-caret.el
+--- a/src/Tools/emacs-lsp/lsp-isar/lsp-isar-caret.el
++++ b/src/Tools/emacs-lsp/lsp-isar/lsp-isar-caret.el
+@@ -88,7 +88,7 @@
+ ;; https://stackoverflow.com/questions/26544696/an-emacs-cursor-movement-hook-like-the-javascript-mousemove-event
+ (defun lsp-isar-caret-activate-caret-update ()
+   "Initialize automatic update of caret position."
+-  (add-to-list 'post-command-hook #'lsp-isar-caret-update-caret-position)
++  (add-hook 'post-command-hook #'lsp-isar-caret-update-caret-position nil t)
+   (lsp-isar-caret--send-caret-update))
+ 
+ 

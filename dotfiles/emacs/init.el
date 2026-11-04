@@ -1177,33 +1177,15 @@ elfeed will re-subscribe on the next fetch."
   :commands run-maude
   :mode "\\.maude\\'")
 
-; Isabelle theory reading: highlighting and symbol display, without a prover.
-(defun my/isar-mode ()
-  "Install the optional Isabelle reader if needed, then enable it."
-  (interactive)
-  (condition-case err
-      (progn
-        (require 'package-vc)
-        ;; Preselect in memory so package-vc does not save into this file.
-        (add-to-list 'package-selected-packages 'isar-mode)
-        (add-to-list 'package-vc-selected-packages
-                     '(isar-mode :url "https://github.com/m-fleury/isar-mode"))
-        (unless (package-installed-p 'isar-mode)
-          (package-vc-install
-           (assq 'isar-mode package-vc-selected-packages)))
-        ;; Reading a theory should not rewrite Unicode symbols on save.
-        (setq isar-mode-remove-utf8-when-saving nil)
-        (require 'isar-mode)
-        (isar-mode))
-    (error
-     (text-mode)
-     (display-warning 'packages
-                      (format "Could not enable isar-mode; using text-mode: %s"
-                              (error-message-string err))
-                      :warning))))
-
-;; No reader installation or package bookkeeping until a theory is opened.
-(add-to-list 'auto-mode-alist '("\\.thy\\'" . my/isar-mode))
+; Load/check this optional installation only when opening a theory or invoking
+; M-x isar-mode.  Unused Isabelle support must not warn or install at startup.
+(let ((module (expand-file-name "my-isabelle.el"
+                               (file-name-directory
+                                (file-truename (or load-file-name buffer-file-name))))))
+  (autoload 'isar-mode module "Edit Isabelle theories with the pinned integration." t))
+(add-to-list 'auto-mode-alist '("\\.thy\\'" . isar-mode))
+;; Preserve the older reader entry point without its unpatched Git installer.
+(defalias 'my/isar-mode 'isar-mode)
 
 ; Javascript
 (add-hook 'js-mode-hook

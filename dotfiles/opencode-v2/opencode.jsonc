@@ -3,7 +3,9 @@
   "update": "disable",
   "skills": [
     "~/clip/Systems/ciao-skills/skills",
-    "~/knowledge/praxis/skills"
+    "~/knowledge/praxis/skills",
+    "~/.local/share/isabelle-dev/isabelle-pide-mcp/.opencode/skills",
+    "~/dotfiles/dotfiles/isabelle/skills"
   ],
   "permissions": [
     { "action": "skill", "resource": "*", "effect": "allow" },
@@ -11,6 +13,12 @@
   ],
   "mcp": {
     "servers": {
+      "isabelle": {
+        "type": "local",
+        "command": ["{env:HOME}/dotfiles/dotfiles/bin/isabelle-dev", "mcp"],
+        "codemode": false,
+        "timeout": { "startup": 120000 }
+      },
       "ciao": {
         "type": "local",
         "command": [

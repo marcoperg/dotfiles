@@ -199,15 +199,16 @@ script builds a pinned mu release under `~/.local` and verifies its checksum.
 It does not run from `create-links.sh`, so linking dotfiles never changes
 system packages unexpectedly.
 
-## Isabelle Theory Reading
+## Isabelle/HOL
 
-Opening a `.thy` file enables the optional `isar-mode` reader, installing it
-from Git on first use if needed. Normal startup neither installs the reader nor
-loads `package-vc` for it. The mode provides highlighting and symbol display,
-not prover integration, and saving preserves Unicode and Isabelle escapes.
+Opening a `.thy` file or running `M-x isar-mode` loads the optional pinned
+editing/LSP integration. Normal startup does not load it, install it, or warn
+about missing dependencies. Missing installations are reported on mode entry;
+`M-x my/isar-mode` remains a compatibility alias. Installation is explicit,
+not an automatic download of an unpatched reader.
 
-If installation or loading fails, the file opens in `text-mode` with a warning.
-Retry with `M-x my/isar-mode` when the dependency or network issue is resolved.
+See [`dotfiles/isabelle/README.md`](dotfiles/isabelle/README.md) for bootstrap,
+MCP integration, compatibility pins, source fixes, tests, and rollback.
 
 ## Knowledge System Integration
 

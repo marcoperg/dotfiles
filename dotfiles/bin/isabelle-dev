@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Pinned Isabelle commands; one profile shared by Emacs, MCP, and builds."""
+import json
+import os
+from pathlib import Path
+import shlex
+import sys
+
+profile_file = Path(__file__).resolve().parents[1] / "isabelle/profile.json"
+profile = json.loads(profile_file.read_text())
+home = Path(profile["isabelle_home"]).expanduser()
+binary = home / "bin/isabelle"
+action, *extra = sys.argv[1:] or ["version"]
+directories = [arg for directory in profile["session_directories"]
+               for arg in ("-d", str(Path(directory).expanduser()))]
+options = ["-o", "quick_and_dirty=false", "-o", "threads=2"]
+if action == "build":
+    args = ["build", *directories, *options, *extra,
+            profile["build_session"]]
+elif action == "mcp":
+    # No global eager prover session: agents start sessions on demand.
+    args = ["pide_mcp", *options, *extra]
+elif action == "check":
+    args = ["build", *directories, *options, *extra]
+elif action == "mcp-session-options":
+    print(json.dumps({
+        "logic": profile["logic"],
+        "dirs": [str(Path(d).expanduser()) for d in profile["session_directories"]],
+        "options": ["quick_and_dirty=false", "threads=2"],
+    }, indent=2))
+    sys.exit(0)
+else:
+    args = [action, *extra]
+
+# These sources/components are deliberately not bundled with dotfiles.
+install = shlex.join(["python3", str(profile_file.parent / "setup.py"), "--install"])
+if not os.access(binary, os.X_OK):
+    sys.exit(f"Isabelle is not installed/executable at {binary}.\nRun: {install}")
+settings = Path.home() / ".isabelle/Isabelle2025-2-vsce/etc"
+if not (settings / "settings").is_file():
+    sys.exit(f"Isabelle components have not been configured.\nRun: {install}")
+if action == "mcp":
+    mcp = Path(profile["mcp_home"]).expanduser()
+    registration = settings / "components"
+    if (not (mcp / "etc/settings").is_file() or not registration.is_file()
+            or str(mcp) not in registration.read_text().splitlines()):
+        sys.exit(f"Isabelle PIDE MCP is missing or not registered.\nRun: {install}")
+os.execv(str(binary), [str(binary), *args])

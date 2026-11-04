@@ -1,0 +1,158 @@
+diff --git a/isar-mode.el b/isar-mode.el
+index 37fb772..4ab0eb8 100644
+--- a/isar-mode.el
++++ b/isar-mode.el
+@@ -36,7 +36,10 @@
+ 
+ 
+ (defvar isar-mode-hook nil)
+-(defcustom isar-mode-remove-utf8-when-saving "Replace the '‹' by the Isabelle encoding." t)
++(defcustom isar-mode-remove-utf8-when-saving t
++  "Encode Unicode symbols before saving Isabelle sources."
++  :type 'boolean
++  :group 'languages)
+ 
+ (defvar isar-mode-map
+   (make-sparse-keymap)
+@@ -447,14 +450,13 @@
+ 	       (utf8-symbol (cadr symbolpair)))
+ 	  ;;(message "%s %s" utf8-symbol symbol)
+ 	  (goto-char (point-min))
+-	  (while (re-search-forward utf8-symbol nil t)
+-	    (replace-match (concat "\\\\<" symbol ">") nil nil)))))))
++	  (while (re-search-forward (regexp-quote utf8-symbol) nil t)
++	    (replace-match (concat "\\<" symbol ">") t t)))))))
+ 
+ 
+ ;;;###autoload
+ (define-derived-mode isar-mode prog-mode isar-name
+   "Major mode for editing isar files"
+-  (kill-all-local-variables)
+   (set-syntax-table isar-mode-syntax-table)
+   (set-keymap-parent isar-mode-map prog-mode-map)
+   (use-local-map isar-mode-map)
+@@ -468,8 +470,7 @@
+   (setq-local comment-start-skip "(\\*+[ \t]*")
+   (setq-local comment-style 'multi-line)
+   (isar-unicode-tokens-configure)
+-  (run-hooks 'isar-mode-hook)
+-  (add-hook 'after-save-hook #'isar-replace-all-utf8-by-encoding nil t)
++  (add-hook 'before-save-hook #'isar-replace-all-utf8-by-encoding nil t)
+   (unicode-tokens-mode 1))
+ 
+ ;;spacemacs specific function
+diff --git a/unicode-tokens.el b/unicode-tokens.el
+index e02f1ef..b003e49 100644
+--- a/unicode-tokens.el
++++ b/unicode-tokens.el
+@@ -189,12 +189,11 @@ and (match-string 2) has the display control applied.")
+   (intern (concat "unicode-tokens-" (symbol-name sym) "-variable")))
+ 
+ (dolist (sym unicode-tokens-configuration-variables)
+- (lambda (sym)
+    (eval `(defvar ,(unicode-tokens-config-var sym)
+            nil
+            ,(format
+              "Name of a variable used to configure %s.\nValue should be a symbol."
+-             (symbol-name (unicode-tokens-config sym)))))))
++              (symbol-name (unicode-tokens-config sym))))))
+ 
+ (defun unicode-tokens-copy-configuration-variables ()
+   "Initialise the configuration variables by copying from variable names.
+@@ -645,7 +644,7 @@ Optional argument FACENIL means set the face property to nil, unless 'face is in
+ ;; Shortcuts for typing, using quail
+ ;;
+ 
+-(defvar unicode-tokens-use-shortcuts t
++(defvar unicode-tokens-use-shortcuts nil
+   "Non-nil means use `unicode-tokens-shortcut-alist' if set.")
+ 
+ (defun unicode-tokens-use-shortcuts (&optional arg)
+@@ -658,11 +657,15 @@ Optional argument FACENIL means set the face property to nil, unless 'face is in
+     (set-input-method "Unicode tokens")
+     (set-input-method nil)))
+ 
+-(quail-define-package
+- "Unicode tokens" "UTF-8" "u" t
+- "Input method for tokens or unicode characters, application specific short-cuts"
+- nil t nil nil nil nil nil ; max shortest, could try t
+- nil nil nil t)
++(let ((current quail-current-package)
++      (default (default-value 'quail-current-package)))
++  (unwind-protect
++      (quail-define-package
++       "Unicode tokens" "UTF-8" "u" t
++       "Input method for Isabelle tokens; select explicitly when wanted."
++       nil t nil nil nil nil nil nil nil nil t)
++    (setq quail-current-package current)
++    (setq-default quail-current-package default)))
+ 
+ (defun unicode-tokens-map-ordering (s1 s2)
+   "Ordering on (car S1, car S2): order longer strings first."
+@@ -677,7 +680,8 @@ Optional argument FACENIL means set the face property to nil, unless 'face is in
+   "Define the token and shortcut input rules.
+ Calculated from `unicode-tokens-token-name-alist' and
+ `unicode-tokens-shortcut-alist'."
+-  (let ((unicode-tokens-quail-define-rules
++  (let ((quail-current-package (quail-package "Unicode tokens"))
++        (unicode-tokens-quail-define-rules
+          (list 'quail-define-rules)))
+     (let ((ulist (cl-copy-list unicode-tokens-shortcut-alist))
+           ustring shortcut)
+@@ -1160,7 +1164,8 @@ Commands available are:
+               (get 'font-lock-extra-managed-props major-mode))
+         (setq font-lock-set-defaults nil) ; force font-lock-set-defaults to reinit
+         (font-lock-ensure)
+-        (set-input-method nil))
++        (when (equal current-input-method "Unicode tokens")
++          (deactivate-input-method)))
+ 
+       ;; experimental: this may be rude for non-nil standard tables
+       (setq buffer-display-table nil)
+@@ -1187,7 +1192,7 @@ Commands available are:
+ 
+   (defvar unicode-tokens-respond-to-change-font nil)
+ 
+-  (defun ns-respond-to-change-font (&rest args)
++  (defun unicode-tokens-ns-respond-to-change-font (&rest args)
+     (interactive)
+     (cond
+      (unicode-tokens-respond-to-change-font
+@@ -1198,7 +1203,7 @@ Commands available are:
+      (t
+       (apply 'old-ns-respond-to-change-font args))))
+ 
+-  (defun ns-popup-font-panel (&rest args)
++  (defun unicode-tokens-ns-popup-font-panel (&rest args)
+     (setq unicode-tokens-respond-to-change-font nil)
+     (with-no-warnings
+       (apply 'old-ns-popup-font-panel args)))
+@@ -1323,10 +1328,10 @@ Commands available are:
+ (put 'unicode-tokens-delete-char 'delete-selection 'supersede)
+ 
+ (defvar unicode-tokens-quail-translation-keymap
+-  (let ((quail-current-package
+-         (assoc "Unicode tokens"
+-                quail-package-alist)))
+-    (quail-translation-keymap)))
++  (let* ((quail-current-package (quail-package "Unicode tokens"))
++         (map (copy-keymap (quail-translation-keymap))))
++    (setf (nth 5 quail-current-package) map)
++    map))
+ 
+ ;; FIXME: does this work?
+ (define-key unicode-tokens-quail-translation-keymap
+@@ -1491,11 +1496,9 @@ Commands available are:
+ ;;             :after #'isar-quail-deinhibit-evil-escape
+ ;;             )
+ 
+-(advice-add 'quail-input-string-to-events
+-            :after #'isar-quail-deinhibit-evil-escape
+-            )
++;; Do not advise shared Quail functions for an Isabelle-specific integration.
+ 
+-(defun quail-start-translation (key)
++(defun unicode-tokens-legacy-start-translation (key)
+   "Start translation of the typed character KEY by the current Quail package.
+ Return the input string."
+   ;; Check the possibility of translating KEY.

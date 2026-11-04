@@ -1,0 +1,9 @@
+{
+  "isabelle_home": "~/.local/share/isabelle-dev/isabelle-emacs-2025-2",
+  "isar_mode_home": "~/.local/share/isabelle-dev/isar-mode",
+  "lsp_mode_home": "~/.local/share/isabelle-dev/lsp-mode-isabelle",
+  "mcp_home": "~/.local/share/isabelle-dev/isabelle-pide-mcp",
+  "logic": "HOL",
+  "session_directories": ["~/dotfiles/tests/isabelle"],
+  "build_session": "Emacs_Isabelle_Smoke"
+}

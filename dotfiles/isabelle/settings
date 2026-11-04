@@ -1,0 +1,10 @@
+# -*- shell-script -*-
+# Headless Emacs/MCP installation: no VSCodium application or VSCode extension.
+while IFS= read -r component; do
+  case "$component" in
+    ""|\#*|vscodium-*|vscode_extension-*) ;;
+    *) init_component "$ISABELLE_COMPONENTS_BASE/$component" ;;
+  esac
+done < "$ISABELLE_HOME/Admin/components/main"
+
+ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms256m -Xmx2g -Xss16m"

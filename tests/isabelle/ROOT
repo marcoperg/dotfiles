@@ -1,0 +1,3 @@
+session Emacs_Isabelle_Smoke = HOL +
+  options [quick_and_dirty = false, document = false]
+  theories Smoke
