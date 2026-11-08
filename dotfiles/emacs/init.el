@@ -187,7 +187,7 @@
    '((claude-code-ide :url
                       "https://github.com/manzaltu/claude-code-ide.el")))
  '(warning-suppress-log-types '((native-compiler) (lsp-mode)))
- '(warning-suppress-types '((ox-latex))))
+ '(warning-suppress-types nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -524,32 +524,11 @@ that share \\input fragments) each compile itself."
                             "#+title: ${title}\n")
          :unnarrowed t)))
 
-(defun my/org-export-to-pdf-in-dotpdfs ()
-  "Export current Org file to PDF, move it to a '.pdfs' folder, delete the .tex file, and open the PDF unless already open."
-  (interactive)
-  (unless (eq major-mode 'org-mode)
-    (error "This command only works in Org mode"))
-  (let* ((org-file (buffer-file-name))
-         (base-name (file-name-base org-file))
-         (default-directory (file-name-directory org-file))
-         (pdfs-dir (expand-file-name ".pdfs" default-directory))
-         (tex-file (expand-file-name (concat base-name ".tex") default-directory)))
-    (unless (file-exists-p pdfs-dir)
-      (make-directory pdfs-dir))
-    ;; Export to PDF
-    (let ((pdf-file (org-latex-export-to-pdf)))
-      (when pdf-file
-        (let* ((pdf-filename (file-name-nondirectory pdf-file))
-               (target-file (expand-file-name pdf-filename pdfs-dir)))
-          ;; Move PDF
-          (rename-file pdf-file target-file t)
-          ;; Delete .tex file
-          (when (file-exists-p tex-file)
-            (delete-file tex-file))
-          (message "PDF exported to: %s" target-file))))))
-
-(with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c C-v") #'my/org-export-to-pdf-in-dotpdfs))
+;; Native Org rendering; all build files stay outside the source tree.
+(load (expand-file-name "my-org-pdf.el"
+                        (file-name-directory
+                         (file-truename (or load-file-name buffer-file-name user-init-file)))))
+(my/org-pdf-setup)
 
 (with-eval-after-load 'org
   (plist-put org-format-latex-options :scale 4))
@@ -568,21 +547,6 @@ that share \\input fragments) each compile itself."
                                              (list 'image :type (or (intern imagetype) 'png) :file image :ascent 'center :scale 0.25))))
         (overlays-at beg)))
 (advice-add 'org--make-preview-overlay :after #'my/overlay-scale-advice)
-
-(defun my/export-all-org-in-dir (&optional dir)
-  "Recursively export all .org files under DIR (default: `default-directory`)
-to PDF using `my/org-export-to-pdf-in-dotpdfs`."
-  (interactive "DDirectory: ")
-  (let* ((target-dir (or dir default-directory))
-         (org-files (directory-files-recursively target-dir "\\.org$")))
-    (dolist (file org-files)
-      (message "Exporting: %s" file)
-      (with-current-buffer (find-file-noselect file)
-        (setq org-confirm-babel-evaluate nil) ;; avoid prompts
-        (condition-case err
-            (my/org-export-to-pdf-in-dotpdfs)
-          (error (message "Error exporting %s: %s" file err)))
-        (kill-buffer)))))
 
 (defun my/current-weekly-note-file ()
   "Return the current ISO week's Praxis planning file."

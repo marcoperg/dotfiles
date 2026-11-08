@@ -236,3 +236,67 @@ Reverse navigation requires `python3`, `ciao-shell`, and an executable
 `~/knowledge/episteme/bin/query-relations`. The query wrapper rebuilds its
 ignored Ciao facts before use, so no generated relation database is tracked in
 dotfiles or Git.
+
+### Org PDF previews and study mirror
+
+`dotfiles/emacs/my-org-pdf.el` wraps native Org LaTeX export; it does not replace
+the renderer or require scripts/configuration in the notes directories.
+
+- **`C-c n p` / `M-x my/org-pdf-preview`** asks to save the current note, then
+  opens or refreshes its cached PDF in another Emacs window. An unchanged preview
+  is reused. Preview PDFs are separate from the study library.
+- **`C-c n P` / `M-x my/org-pdf-update-directory`** selects a source directory
+  and updates missing/stale PDFs recursively. The binding is also available in
+  Dired. It does not open a reader or export linked notes outside the selection.
+- **`C-u`** before either command forces rebuilding.
+- **`M-x my/org-pdf-show-log`** shows progress, warnings, failures, and retained
+  compiler-log locations. **`M-x my/org-pdf-cancel`** clears queued work and stops
+  after the active note's compiler finishes normally.
+
+By default, sources are under `~/knowledge/episteme/`; the study mirror is its
+Git-ignored `.pdfs/` directory. Source-relative paths and filenames are preserved:
+
+```text
+math/Cryptography/…/One-time Pad.org
+.pdfs/math/Cryptography/…/One-time Pad.pdf
+```
+
+Browse that mirror normally with Dired and PDF Tools. All work files, dependency
+records, diagnostics, and previews stay under `~/.cache/emacs/org-pdf/`. Inline
+LaTeX previews also use this cache instead of creating new `ltximg/` directories.
+Customize `my/org-pdf-source-root`, `my/org-pdf-mirror-directory`, or
+`my/org-pdf-cache-directory` if needed; work/cache must remain outside the source
+tree. No generated Org copies or catalogue are created.
+
+Updates track source contents, transitive local setup/include files,
+bibliography, images, TeX recorder inputs, rendering settings, and link mappings.
+A shared-setup change invalidates its dependants but only the selected directory
+is compiled now. Workers run serially in a clean background Emacs, with Babel
+execution and startup previews disabled. Sources and existing buffers are not
+modified or killed; known modified dependencies are offered for saving. A failed
+build never replaces that note's previous PDF. Ordinary native Org export remains
+available unchanged.
+
+Each compilation attempt has a fresh private work directory, so an earlier Biber
+failure cannot poison a later build. Emacs's native file lock serializes workers
+even across separate Emacs instances and handles stale owners after a crash.
+
+Study PDFs link to selected documents' final relative PDF paths; external
+headings and out-of-scope notes are labelled **(Org)** and open their source file.
+Same-document heading links remain native. A failed directory update is reported
+as incomplete; correct PDF navigation requires successful target exports. Preview
+links use source files, never overwrite study links, and do not create PDFs for
+neighbouring notes. Mirror names follow source filenames rather than titles or
+`EXPORT_FILE_NAME` overrides. Remote setup/include/bibliography inputs are not
+supported by this local dependency cache.
+
+The mirror and cache are disposable generated output, not annotation storage.
+Old scattered `.pdfs/` folders or authored `.tex` files are never deleted by these
+commands. The retired move-after-export helpers and their Babel-prefix override
+have been removed.
+
+Run the isolated regression tests without loading the workstation init:
+
+```sh
+emacs --batch -Q -l tests/test_org_pdf.el
+```
