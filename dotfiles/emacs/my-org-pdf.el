@@ -134,14 +134,25 @@
 (defmacro my/org-pdf--with-source (file &rest body)
   "Read FILE in an isolated Org buffer, without interactive startup hooks."
   (declare (indent 1))
-  `(with-temp-buffer
-     (let ((org-inhibit-startup t) (org-mode-hook nil)
-           (enable-local-variables nil) (enable-local-eval nil)
-           (create-lockfiles nil))
-       (insert-file-contents ,file)
-       (setq buffer-file-name ,file default-directory (file-name-directory ,file))
-       (delay-mode-hooks (org-mode))
-       ,@body)))
+  (let ((snapshot (make-symbol "snapshot")))
+    `(with-temp-buffer
+       (let ((,snapshot (current-buffer))
+             (org-inhibit-startup t) (org-mode-hook nil)
+             (enable-local-variables nil) (enable-local-eval nil)
+             (create-lockfiles nil))
+         (unwind-protect
+             (progn
+               (insert-file-contents ,file)
+               (setq buffer-file-name ,file default-directory (file-name-directory ,file))
+               (delay-mode-hooks (org-mode))
+               (set-buffer-modified-p nil)
+               ,@body)
+           ;; This is a disposable snapshot, never an edited visiting buffer.
+           ;; Detach even on errors/quits, without touching another buffer.
+           (when (buffer-live-p ,snapshot)
+             (with-current-buffer ,snapshot
+               (set-buffer-modified-p nil)
+               (setq buffer-file-name nil))))))))
 
 (defun my/org-pdf--make-index (files)
   "Index real Org IDs, excluding examples.  Duplicate IDs remain errors."
@@ -581,7 +592,11 @@
   (setq sources (mapcar #'file-truename sources))
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
-      (when (and buffer-file-name (buffer-modified-p)
+      ;; Emacs/Org's space-prefixed buffers are internal file copies.  Saving
+      ;; one would mistake a snapshot for user edits and overwrite its source.
+      (when (and buffer-file-name
+                 (not (string-prefix-p " " (buffer-name)))
+                 (buffer-modified-p)
                  (member (file-truename buffer-file-name) sources))
         (unless (y-or-n-p (format "Save %s before PDF export? " (buffer-name)))
           (user-error "Save relevant changes before exporting PDFs"))

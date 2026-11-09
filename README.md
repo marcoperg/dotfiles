@@ -273,9 +273,9 @@ bibliography, images, TeX recorder inputs, rendering settings, and link mappings
 A shared-setup change invalidates its dependants but only the selected directory
 is compiled now. Workers run serially in a clean background Emacs, with Babel
 execution and startup previews disabled. Sources and existing buffers are not
-modified or killed; known modified dependencies are offered for saving. A failed
-build never replaces that note's previous PDF. Ordinary native Org export remains
-available unchanged.
+modified or killed; known modified dependencies are offered for saving. Internal
+temporary file copies are never offered for saving. A failed build never replaces
+that note's previous PDF. Ordinary native Org export remains available unchanged.
 
 Each compilation attempt has a fresh private work directory, so an earlier Biber
 failure cannot poison a later build. Emacs's native file lock serializes workers

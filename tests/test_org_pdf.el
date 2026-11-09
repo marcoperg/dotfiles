@@ -597,4 +597,101 @@
       (should (eq (plist-get (car (my/org-pdf--run request)) :status) 'current))
       (should (= org-pdf-test--compiles 2)))))
 
+(ert-deftest org-pdf-source-snapshots-start-unmodified-and-are-cleaned-up ()
+  (org-pdf-test--fixture
+    (let (snapshot)
+      (should (equal
+               (my/org-pdf--with-source b
+                 (setq snapshot (current-buffer))
+                 (should (equal buffer-file-name b))
+                 (should-not (buffer-modified-p))
+                 'snapshot-result)
+               'snapshot-result))
+      (should-not (buffer-live-p snapshot)))))
+
+(ert-deftest org-pdf-snapshot-error-cleanup-never-detaches-a-user-buffer ()
+  (org-pdf-test--fixture
+    (let* ((org-inhibit-startup t)
+           (real-buffer (find-file-noselect a))
+           snapshot)
+      (with-current-buffer real-buffer
+        (goto-char (point-max))
+        (insert "Unsaved user work.\n"))
+      (should-error
+       (my/org-pdf--with-source b
+         (setq snapshot (current-buffer))
+         (insert "Temporary processing changes.\n")
+         (set-buffer real-buffer)
+         (error "Simulated processing failure")))
+      (should-not (buffer-live-p snapshot))
+      (with-current-buffer real-buffer
+        (should (equal buffer-file-name a))
+        (should (buffer-modified-p))
+        (should (string-suffix-p "Unsaved user work.\n" (buffer-string)))))))
+
+(ert-deftest org-pdf-directory-command-never-offers-to-save-internal-file-copies ()
+  (org-pdf-test--fixture
+    (let ((source-copy (generate-new-buffer " *org-pdf-source-copy*" t))
+          (setup-copy (generate-new-buffer " *org-pdf-setup-copy*" t))
+          (source-hash (my/org-pdf--hash-file a))
+          (setup-hash (my/org-pdf--hash-file setup))
+          queued)
+      (unwind-protect
+          (progn
+            (with-current-buffer source-copy
+              (setq buffer-file-name a)
+              (insert "Temporary source copy, not authored content"))
+            (with-current-buffer setup-copy
+              (setq buffer-file-name setup)
+              (insert "Temporary setup copy, not authored content"))
+            (cl-letf (((symbol-function 'y-or-n-p)
+                       (lambda (prompt) (error "Unexpected temporary-buffer save prompt: %s" prompt)))
+                      ((symbol-function 'save-buffer)
+                       (lambda (&rest _) (error "Must not save an internal buffer")))
+                      ((symbol-function 'my/org-pdf--enqueue)
+                       (lambda (request) (setq queued request))))
+              (let ((noninteractive nil))
+                (my/org-pdf-update-directory scope)))
+            (should (equal (plist-get queued :sources) (list a b)))
+            (should (equal source-hash (my/org-pdf--hash-file a)))
+            (should (equal setup-hash (my/org-pdf--hash-file setup)))
+            (should (buffer-modified-p source-copy))
+            (should (buffer-modified-p setup-copy)))
+        (dolist (buffer (list source-copy setup-copy))
+          (when (buffer-live-p buffer)
+            (with-current-buffer buffer
+              (setq buffer-file-name nil)
+              (set-buffer-modified-p nil))
+            (kill-buffer buffer)))))))
+
+(ert-deftest org-pdf-save-check-still-saves-real-edits-beside-an-internal-copy ()
+  (org-pdf-test--fixture
+    (let* ((org-inhibit-startup t)
+           (real-buffer (find-file-noselect b))
+           (copy (generate-new-buffer " *org-pdf-source-copy*" t))
+           prompts)
+      (unwind-protect
+          (progn
+            (with-current-buffer real-buffer
+              (goto-char (point-max))
+              (insert "Real authored changes.\n"))
+            (with-current-buffer copy
+              (setq buffer-file-name b)
+              (insert "An internal copy must never replace the source."))
+            (cl-letf (((symbol-function 'y-or-n-p)
+                       (lambda (prompt) (push prompt prompts) t)))
+              (my/org-pdf--prepare-sources (list b)))
+            (should (equal prompts (list (format "Save %s before PDF export? "
+                                                (buffer-name real-buffer)))))
+            (should-not (buffer-modified-p real-buffer))
+            (should (buffer-modified-p copy))
+            (with-temp-buffer
+              (insert-file-contents b)
+              (should (string-suffix-p "Real authored changes.\n" (buffer-string)))))
+        (when (buffer-live-p copy)
+          (with-current-buffer copy
+            (setq buffer-file-name nil)
+            (set-buffer-modified-p nil))
+          (kill-buffer copy))))))
+
 (ert-run-tests-batch-and-exit)
