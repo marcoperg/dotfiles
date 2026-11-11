@@ -1207,13 +1207,6 @@ elfeed will re-subscribe on the next fetch."
   (when (file-exists-p file)
     (load-file file)))
 
-; @begin(53614285)@ - Do not edit these lines - added automatically!
-(let ((file (expand-file-name "bndls/ciao_emacs/elisp/ciao-site-file.el"
-                               my/ciao-devel-directory)))
-  (when (file-exists-p file)
-    (load-file file)))
-; @end(53614285)@ - End of automatically added lines.
-
 ;; Ciao's legacy major mode bypasses globalized minor-mode activation.
 (defun my/ciao-enable-line-numbers ()
   "Enable the globally configured line-number style in Ciao buffers."
@@ -1611,3 +1604,8 @@ elfeed will re-subscribe on the next fetch."
 
 
 (global-display-line-numbers-mode)
+
+; @begin(92595889)@ - Do not edit these lines - added automatically!
+(if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el")
+  (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el"))
+; @end(92595889)@ - End of automatically added lines.
