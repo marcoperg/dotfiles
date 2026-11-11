@@ -22,11 +22,12 @@ Expunge Both
 Sync All
 SyncState *
 
-# --- Account 2: IMDEA ---
+# --- Account 2: IMDEA Software ---
 IMAPAccount imdea
-Host mail.imdea.org
-User marco.perez@imdea.org
-PassCmd "gpg --no-tty -qd ~/.authinfo.gpg | awk '/machine mail.imdea.org/ {print $6; exit}' | tr -d '\"'"
+Host mail.software.imdea.org
+Port 993
+User marco.perez@software.imdea.org
+PassCmd "gpg --no-tty -qd ~/.authinfo.gpg | awk '/machine mail[.]software[.]imdea[.]org/ {print $6; exit}' | tr -d '\"'"
 TLSType IMAPS
 
 IMAPStore imdea-remote
@@ -41,8 +42,12 @@ Channel imdea
 Far :imdea-remote:
 Near :imdea-local:
 Patterns *
+# Migration complete: synchronize messages and flags in both directions.
+# Keep permanent message deletion and mailbox removal disabled.
 Create Both
-Expunge Both
+Sync All
+Expunge None
+Remove None
 SyncState *
 
 # --- Account 3: UDC ---

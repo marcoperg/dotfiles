@@ -638,13 +638,13 @@ that share \\input fragments) each compile itself."
 
 (setq mu4e-bookmarks
       '((:name "Unread messages"
-               :query "flag:unread AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:\"/IMDEA/Deleted Messages\" AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
+               :query "flag:unread AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Trash AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
                :key ?u)
         (:name "Today's messages"
-               :query "date:today..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:\"/IMDEA/Deleted Messages\" AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
+               :query "date:today..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Trash AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
                :key ?t)
 	(:name "Last 7 days"
-	       :query "date:7d..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:\"/IMDEA/Deleted Messages\" AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
+	       :query "date:7d..now AND NOT flag:trashed AND NOT maildir:/UPM/Trash AND NOT maildir:/IMDEA/Trash AND NOT maildir:/UPM/Archive AND NOT maildir:/IMDEA/Archive"
 	       :hide-unread t
 	       :key ?w)
 	(:name "Inbox"
@@ -670,18 +670,19 @@ that share \\input fragments) each compile itself."
             (smtpmail-smtp-service  . 587)
             (smtpmail-stream-type   . starttls)))
 
-   ;; Work Account Context
+   ;; Work account
    (make-mu4e-context
     :name "IMDEA"
     :match-func (lambda (msg)
-                  (when msg (string-prefix-p "/IMDEA" (mu4e-message-field msg :maildir))))
-    :vars '((user-mail-address      . "marco.perez@imdea.org")
+                  (when msg (string-prefix-p "/IMDEA/" (mu4e-message-field msg :maildir))))
+    :vars '((user-mail-address      . "marco.perez@software.imdea.org")
             (user-full-name         . "Marco Pérez González")
-	    (mu4e-sent-folder       . "/IMDEA/Sent")
-	    (mu4e-drafts-folder     . "/IMDEA/Drafts")
-            (mu4e-trash-folder      . "/IMDEA/Deleted Messages")
-	    (mu4e-refile-folder     . "/IMDEA/Archive")
-            (smtpmail-smtp-server   . "mail.imdea.org")
+            ;; Folder names confirmed via IMAP on the new server.
+            (mu4e-sent-folder       . "/IMDEA/Sent")
+            (mu4e-drafts-folder     . "/IMDEA/Drafts")
+            (mu4e-trash-folder      . "/IMDEA/Trash")
+            (mu4e-refile-folder     . "/IMDEA/Archive")
+            (smtpmail-smtp-server   . "mail.software.imdea.org")
             (smtpmail-smtp-service  . 587)
             (smtpmail-stream-type   . starttls)))))
 
