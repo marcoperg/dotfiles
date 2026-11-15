@@ -120,9 +120,14 @@ Gatekeeper globally. No GUI approval was needed for the tested CLI processes.
 
 ## Use
 
-Opening a `.thy` file enables `isar-mode` and starts its LSP workspace. Accept
-the appropriate project root if lsp-mode asks. Offline editing is available
-with `my/isabelle-auto-start` set to nil before opening the theory.
+Opening a `.thy` file enables `isar-mode` and starts its LSP workspace. Isabelle
+buffers search upward from the theory's directory and automatically use the
+nearest directory containing a `ROOT` file as the workspace root, ahead of Git
+markers and previously remembered LSP folders. This does not select a session
+from `ROOT` or change the prover options in `profile.json`. If no `ROOT` is
+found, normal project detection and lsp-mode's root prompt remain unchanged.
+Other major modes are unaffected. Offline editing is available with
+`my/isabelle-auto-start` set to nil before opening the theory.
 
 The **Isabelle** menu exposes proof commands, symbols, input-method selection,
 keybinding help, and settings. In terminal Emacs, use `F10` to access menus.
@@ -181,7 +186,8 @@ substitute for the independent build.
   preserved before/after theory mode, optional Isabelle input, standard keys,
   `\<times>` rendering, one-save disk/buffer equality, native file-notification
   delivery, external reload safety, the mode-local menu, and actionable missing
-  installation errors, plus bundled LSP client initialization: **9 tests passed**.
+  installation errors, plus bundled LSP client initialization, nearest `ROOT`
+  discovery, mode-local root selection, and no-`ROOT` fallback: **12 tests passed**.
 - `emacs --batch -Q -l tests/test_isabelle_lsp.el`: real LSP initialization,
   proof-state feedback, deliberately unknown proof method producing a diagnostic,
   and correction clearing the error diagnostics.

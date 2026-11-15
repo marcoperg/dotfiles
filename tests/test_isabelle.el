@@ -32,6 +32,76 @@
   (should (vectorp lsp-ts-query-parser-install-directories))
   (should (seq-every-p #'stringp lsp-ts-query-parser-install-directories)))
 
+(ert-deftest my/isabelle-project-finds-nearest-root-file ()
+  (let* ((directory (file-name-as-directory (make-temp-file "isabelle-root-" t)))
+         (nested (expand-file-name "nested/" directory))
+         (child (expand-file-name "theories/" nested)))
+    (unwind-protect
+        (progn
+          ;; A directory named ROOT must not shadow an actual session file.
+          (make-directory (expand-file-name "ROOT" child) t)
+          (with-temp-file (expand-file-name "ROOT" directory))
+          (with-temp-file (expand-file-name "ROOT" nested))
+          (should (equal (project-root (my/isabelle-project-find child)) nested))
+          (should (equal (project-root (my/isabelle-project-find directory))
+                         directory)))
+      (delete-directory directory t))))
+
+(ert-deftest my/isabelle-root-is-local-and-precedes-saved-folder ()
+  (let* ((directory (file-name-as-directory (make-temp-file "isabelle-project-" t)))
+         (root (expand-file-name "session/" directory))
+         (child (expand-file-name "theories/" root))
+         (project-find-functions (list (lambda (_) (cons 'transient directory))))
+         (lsp-auto-guess-root nil)
+         (session (make-lsp-session :folders (list directory)))
+         (my/isabelle-auto-start t)
+         started-root)
+    (unwind-protect
+        (progn
+          (make-directory child t)
+          (with-temp-file (expand-file-name "ROOT" root))
+          (cl-letf (((symbol-function 'lsp-isar-define-client-and-start)
+                     (lambda ()
+                       (setq started-root
+                             (lsp--calculate-root session buffer-file-name))))
+                    ((symbol-function 'lsp--find-root-interactively)
+                     (lambda (&rest _) (ert-fail "Unexpected root prompt"))))
+            (with-temp-buffer
+              (setq default-directory child
+                    buffer-file-name (expand-file-name "Example.thy" child))
+              (isar-mode)
+              (should (equal started-root root))
+              (should (equal (project-root (project-current)) root))
+              (should (local-variable-p 'lsp-auto-guess-root))
+              (should lsp-auto-guess-root)))
+          (with-temp-buffer
+            (setq default-directory child)
+            (fundamental-mode)
+            (should-not lsp-auto-guess-root)
+            (should-not (memq #'my/isabelle-project-find project-find-functions))
+            (should (equal (project-root (project-current)) directory))))
+      (delete-directory directory t))))
+
+(ert-deftest my/isabelle-no-root-preserves-project-prompt ()
+  (let* ((directory (file-name-as-directory (make-temp-file "isabelle-no-root-" t)))
+         (project-find-functions (list (lambda (_) (cons 'transient directory))))
+         (lsp-auto-guess-root nil)
+         prompted)
+    (unwind-protect
+        (with-temp-buffer
+          (setq default-directory directory
+                buffer-file-name (expand-file-name "Standalone.thy" directory))
+          (isar-mode)
+          (should-not (my/isabelle-project-find directory))
+          (should-not (local-variable-p 'lsp-auto-guess-root))
+          (should (equal (project-root (project-current)) directory))
+          (cl-letf (((symbol-function 'lsp--find-root-interactively)
+                     (lambda (_session) (setq prompted t) directory)))
+            (should (equal (lsp--calculate-root (make-lsp-session) buffer-file-name)
+                           directory)))
+          (should prompted))
+      (delete-directory directory t))))
+
 (ert-deftest my/isabelle-spanish-input-isolation ()
   (with-temp-buffer
     (activate-input-method "spanish-prefix")

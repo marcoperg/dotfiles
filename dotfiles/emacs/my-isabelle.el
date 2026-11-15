@@ -2,6 +2,7 @@
 
 (require 'json)
 (require 'easymenu)
+(require 'project)
 (defconst my/isabelle-profile-file
   (expand-file-name "../isabelle/profile.json"
                     (file-name-directory (file-truename load-file-name))))
@@ -89,12 +90,27 @@
                                (file-name-directory my/isabelle-profile-file)))
             " build")))
 
+(defun my/isabelle-project-find (dir)
+  "Find the nearest ancestor of DIR containing a regular Isabelle ROOT file."
+  (when-let* ((root (locate-dominating-file
+                    dir (lambda (directory)
+                          (file-regular-p (expand-file-name "ROOT" directory))))))
+    (cons 'my/isabelle root)))
+
+(cl-defmethod project-root ((project (head my/isabelle)))
+  (cdr project))
+
 (defun my/isabelle-setup ()
   "Keep theory editing, disk synchronization, and input methods independent."
   ;; auto-revert never replaces buffers with unsaved edits.
   (auto-revert-mode 1)
   ;; Theories do not need snippets; avoid requiring an unrelated snippet package.
   (setq-local lsp-enable-snippet nil)
+  ;; Prefer the nearest ROOT over Git markers and previously saved LSP folders.
+  ;; Keep ordinary project detection and prompting when there is no ROOT.
+  (add-hook 'project-find-functions #'my/isabelle-project-find nil t)
+  (when (my/isabelle-project-find default-directory)
+    (setq-local lsp-auto-guess-root t))
   (when my/isabelle-auto-start
     (lsp-isar-define-client-and-start)))
 
