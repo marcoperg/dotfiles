@@ -21,6 +21,7 @@
     gptel
     kkp
     maude-mode
+    minizinc-ts-mode
     org-roam
     pdf-tools
     undo-fu
@@ -1141,6 +1142,11 @@ elfeed will re-subscribe on the next fetch."
 (use-package maude-mode
   :commands run-maude
   :mode "\\.maude\\'")
+
+; MiniZinc
+(load (expand-file-name "my-minizinc.el"
+                        (file-name-directory
+                         (file-truename (or load-file-name buffer-file-name user-init-file)))))
 
 ; Load/check this optional installation only when opening a theory or invoking
 ; M-x isar-mode.  Unused Isabelle support must not warn or install at startup.

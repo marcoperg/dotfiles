@@ -231,6 +231,41 @@ a warning and the remaining snippets still load.
 - Install any required system tools explicitly on each machine. Local snippets
   are not distributed by Git; copy them separately when setting up another host.
 
+## MiniZinc
+
+`dotfiles/emacs/my-minizinc.el` provides the MiniZinc menu and commands, loaded
+by `init.el`. The shared package list installs `minizinc-ts-mode` automatically.
+Editing requires Emacs 29.1 or newer with tree-sitter support.
+
+Install the MiniZinc tools and bundled solvers explicitly. On macOS:
+
+```sh
+HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --cask minizincide
+minizinc --solvers
+```
+
+On Linux, install the [official MiniZinc bundle](https://www.minizinc.org/downloads/)
+and make its `bin` directory available on Emacs's `exec-path` and `PATH`.
+On each machine, run `M-x minizinc-ts-install-treesit-grammar` once to install
+the grammar, then open a `.mzn` model or `.dzn` data file.
+
+The **MiniZinc** menu includes these commands, plus the manual and customization:
+
+| Action | Shortcut |
+|---|---|
+| Solve the current model | `C-c C-s` (also `C-c C-c`) |
+| Choose another solver and solve | `C-u C-c C-s` |
+| Save and check the model without solving | `C-c C-t` |
+| Stop the current compilation/solver | `C-c C-k` |
+| Next/previous error | `M-g n` / `M-g p` |
+
+Results appear in a compilation buffer. For a model with a separate data file,
+use `M-x compile` and enter, for example:
+
+```sh
+minizinc --solver gecode model.mzn instance.dzn
+```
+
 ## Isabelle/HOL
 
 Opening a `.thy` file or running `M-x isar-mode` loads the optional pinned
