@@ -16,6 +16,9 @@ eln-cache/
 tree-sitter/
 site-lisp/
 
+# Optional machine-local Emacs configuration
+/dotfiles/emacs/local.d/
+
 # Org-mode
 .org-id-locations
 *_archive

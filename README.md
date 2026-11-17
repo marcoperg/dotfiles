@@ -199,6 +199,38 @@ script builds a pinned mu release under `~/.local` and verifies its checksum.
 It does not run from `create-links.sh`, so linking dotfiles never changes
 system packages unexpectedly.
 
+## Local Emacs Configuration
+
+Put optional, machine-specific Emacs configuration in `~/.emacs.d/local.d/`.
+With the usual dotfiles links, this is `dotfiles/emacs/local.d/` in this
+checkout. The entire directory is ignored by Git.
+
+```sh
+mkdir -p ~/.emacs.d/local.d
+```
+
+For example, create `~/.emacs.d/local.d/10-preferences.el`:
+
+```elisp
+;;; 10-preferences.el --- Local preferences -*- lexical-binding: t; -*-
+(setq display-time-24hr-format t)
+```
+
+At the end of startup, `init.el` loads top-level `.el` files from that directory
+in alphabetical order, after the shared configuration. Numeric prefixes such
+as `10-` and `20-` make the order explicit. A missing directory is fine; hidden
+files, editor backups, and subdirectories are skipped. A broken snippet emits
+a warning and the remaining snippets still load.
+
+- Run `M-x my/load-local-config` to re-evaluate all local snippets.
+- Rename a snippet to end in `.el.disabled` to skip it on future loads.
+  Restart Emacs to clear settings already applied by that snippet.
+- Keep local package installation in the snippet, using
+  `(package-install 'some-package t)` when needed. The second argument prevents
+  package.el from saving the package selection into the tracked `init.el`.
+- Install any required system tools explicitly on each machine. Local snippets
+  are not distributed by Git; copy them separately when setting up another host.
+
 ## Isabelle/HOL
 
 Opening a `.thy` file or running `M-x isar-mode` loads the optional pinned

@@ -1609,3 +1609,31 @@ elfeed will re-subscribe on the next fetch."
 (if (file-exists-p "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el")
   (load-file "/Users/meu/clip/Systems/ciao-devel/bndls/ciao_emacs/elisp/ciao-site-file.el"))
 ; @end(92595889)@ - End of automatically added lines.
+
+;; Load optional machine-local settings after the shared configuration.
+(defvar my/local-config-directory
+  (expand-file-name "local.d/"
+                    (file-name-directory
+                     (file-truename (or load-file-name user-init-file))))
+  "Directory of untracked Emacs configuration snippets.
+Top-level .el files are loaded in alphabetical order.")
+
+(defun my/load-local-config ()
+  "Load or reload the .el snippets in `my/local-config-directory'.
+Skip hidden files, editor backups, and subdirectories.  Report an error in
+one snippet without preventing the remaining snippets from loading."
+  (interactive)
+  (when (file-directory-p my/local-config-directory)
+    (dolist (file (directory-files my/local-config-directory t
+                                   "\\`[^.#].*\\.el\\'"))
+      (when (file-regular-p file)
+        (condition-case err
+            ;; Load the source explicitly, even if an old .elc exists.
+            (load file nil 'nomessage 'nosuffix)
+          (error
+           (display-warning
+            'local-config
+            (format "Could not load %s: %s" file (error-message-string err))
+            :warning)))))))
+
+(my/load-local-config)
